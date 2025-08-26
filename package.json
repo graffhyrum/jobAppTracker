@@ -1,34 +1,38 @@
 {
-  "name": "jobapptracker",
-  "module": "src/index.ts",
-  "type": "module",
-  "private": true,
-  "scripts": {
-    "dev": "bun run src/index.ts",
-    "build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
-    "test": "bun test",
-    "test:unit": "bun test tests/unit/",
-    "test:integration": "bun test tests/integration/",
-    "test:coverage": "bun test --coverage",
-    "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
-  },
-  "devDependencies": {
-    "@playwright/test": "^1.55.0",
-    "@types/bun": "^1.2.21",
-    "htmx.org": "^2.0.6",
-    "lint-staged": "^16.1.5",
-    "neverthrow": "^8.2.0",
-    "oxlint": "^1.13.0",
-    "pdf-lib": "^1.17.1"
-  },
-  "peerDependencies": {
-    "typescript": "^5.9.2"
-  },
-  "dependencies": {
-    "arktype": "^2.1.20"
-  },
-  "lint-staged": {
-    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "oxlint"
-  }
+	"name": "jobapptracker",
+	"module": "src/index.ts",
+	"type": "module",
+	"private": true,
+	"scripts": {
+		"dev": "bun run src/index.ts",
+		"build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
+		"test": "bun test",
+		"test:unit": "bun test tests/unit/",
+		"test:integration": "bun test tests/integration/",
+		"test:coverage": "bun test --coverage",
+		"test:e2e": "playwright test",
+		"test:e2e:ui": "playwright test --ui",
+		"lint": "biome lint",
+		"format": "biome format",
+		"check": "biome check",
+		"fix": "biome check --fix"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.2",
+		"@playwright/test": "^1.55.0",
+		"@types/bun": "^1.2.21",
+		"htmx.org": "^2.0.6",
+		"lint-staged": "^16.1.5",
+		"neverthrow": "^8.2.0",
+		"pdf-lib": "^1.17.1"
+	},
+	"peerDependencies": {
+		"typescript": "^5.9.2"
+	},
+	"dependencies": {
+		"arktype": "^2.1.20"
+	},
+	"lint-staged": {
+		"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "biome check"
+	}
 }
