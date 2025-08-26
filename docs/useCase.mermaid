@@ -1,0 +1,43 @@
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+    class ApplicationRepository {
+        <<interface>>
+        +create(application: JobApplication) ResultAsync~JobApplication, Error~
+        +findById(id: string) ResultAsync~JobApplication, Error~
+        +findAll() ResultAsync~JobApplication[], Error~
+        +update(application: JobApplication) ResultAsync~JobApplication, Error~
+        +delete(id: string) ResultAsync~void, Error~
+        +findByStatus(status: ApplicationStatus) ResultAsync~JobApplication[], Error~
+        +findOverdue() ResultAsync~JobApplication[], Error~
+    }
+
+    class CreateApplicationUseCase {
+        -repo: ApplicationRepository
+        +execute(data: CreateApplicationData) ResultAsync~JobApplication, Error~
+    }
+
+    class UpdateApplicationStatusUseCase {
+        -repo: ApplicationRepository
+        +execute(id: string, status: ApplicationStatus) ResultAsync~JobApplication, Error~
+    }
+
+    class GeneratePDFUseCase {
+        -repo: ApplicationRepository
+        -pdfFiller: PDFFormFiller
+        +execute(applicationId: string, templateId: string) ResultAsync~Buffer, Error~
+    }
+
+    class GetDashboardDataUseCase {
+        -repo: ApplicationRepository
+        +execute() ResultAsync~DashboardData, Error~
+    }
+
+    CreateApplicationUseCase --> ApplicationRepository
+    UpdateApplicationStatusUseCase --> ApplicationRepository
+    GeneratePDFUseCase --> ApplicationRepository
+    GeneratePDFUseCase --> PDFFormFiller
+    GetDashboardDataUseCase --> ApplicationRepository

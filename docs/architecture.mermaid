@@ -1,0 +1,25 @@
+graph TD
+    A[Web UI / HTMX] --> B[Application Layer]
+    B --> C[Domain Layer]
+    B --> D[Infrastructure Layer]
+
+    C --> E[JobApplication Entity]
+    C --> F[Pipeline Entity]
+    C --> G[PDF Template Entity]
+
+    D --> H[SQLite Database]
+    D --> I[PDF Form Filler]
+    D --> J[File System]
+
+    subgraph "Domain Layer"
+        E
+        F
+        G
+        K[Use Cases]
+    end
+
+    subgraph "Infrastructure Layer"
+        H
+        I
+        J
+    end

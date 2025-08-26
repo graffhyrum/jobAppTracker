@@ -1,0 +1,29 @@
+{
+  "name": "jobapptracker",
+  "module": "src/index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
+    "test": "bun test",
+    "test:unit": "bun test tests/unit/",
+    "test:integration": "bun test tests/integration/",
+    "test:coverage": "bun test --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.21",
+    "htmx.org": "^2.0.6",
+    "@playwright/test": "^1.55.0",
+    "neverthrow": "^8.2.0",
+    "pdf-lib": "^1.17.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5.9.2"
+  },
+  "dependencies": {
+    "arktype": "^2.1.20"
+  }
+}

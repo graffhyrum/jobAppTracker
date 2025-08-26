@@ -1,0 +1,52 @@
+---
+config:
+  class:
+    hideEmptyMembersBox: true
+---
+classDiagram
+    class JobApplication {
+        +string id
+        +string company
+        +string position
+        +Date applicationDate
+        +StatusCategory statusCategory
+        +ApplicationStatus status
+        +1|2|3 interestRating
+        +Date nextEventDate?
+        +Date lastUpdated
+        +string jobPostingUrl?
+        +string jobDescription?
+        +Note[] notes
+        +updateStatus(status: ApplicationStatus)
+        +addNote(content: string)
+        +updateNote(noteId: string, content: string)
+    }
+
+    class Note {
+        +string id
+        +string content
+        +Date createdAt
+        +Date updatedAt
+        +update(content: string)
+    }
+
+    class PipelineConfig {
+        +string[] active
+        +string[] inactive
+        +addActiveStatus(status: string)
+        +addInactiveStatus(status: string)
+        +removeStatus(status: string)
+    }
+
+    class PDFTemplate {
+        +string id
+        +string name
+        +string filePath
+        +Record~string,string~ fieldMappings
+        +Date createdAt
+        +validateMappings()
+    }
+
+JobApplication *--  Note : contains
+JobApplication --> PipelineConfig : uses
+PDFTemplate --> JobApplication : fills from
