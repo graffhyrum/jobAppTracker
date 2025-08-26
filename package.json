@@ -14,10 +14,12 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.0",
     "@types/bun": "^1.2.21",
     "htmx.org": "^2.0.6",
-    "@playwright/test": "^1.55.0",
+    "lint-staged": "^16.1.5",
     "neverthrow": "^8.2.0",
+    "oxlint": "^1.13.0",
     "pdf-lib": "^1.17.1"
   },
   "peerDependencies": {
@@ -25,5 +27,8 @@
   },
   "dependencies": {
     "arktype": "^2.1.20"
+  },
+  "lint-staged": {
+    "**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "oxlint"
   }
 }
