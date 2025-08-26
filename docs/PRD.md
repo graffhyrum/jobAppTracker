@@ -49,7 +49,7 @@ A single-user, lightweight job application tracking system built with TypeScript
 ### Stack
 - **Runtime**: Bun
 - **Language**: TypeScript
-- **Database**: SQLite (bun:sqlite)
+- **Database**: SurrealDB (multi-model database)
 - **Web Framework**: Bun.serve with HTMX frontend
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
@@ -176,7 +176,8 @@ interface PDFFormFiller {
 
 - Single-user application (no authentication required)
 - Uses Bun runtime and built-in APIs where possible
-- Minimal external dependencies
+- SurrealDB for multi-model data storage with graph capabilities
+- Minimal external dependencies beyond core stack
 - Follows hexagonal architecture patterns
 - Uses ArkType for validation and NeverThrow for error handling
 - HTMX for dynamic frontend interactions
