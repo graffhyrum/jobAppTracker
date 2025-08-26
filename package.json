@@ -6,8 +6,8 @@
 	"scripts": {
 		"dev": "bun run src/index.ts",
 		"build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
-		"test": "bun test",
-		"test:unit": "bun test tests/unit/",
+		"test": "bun test:coverage && bun test:integration && bun test:e2e",
+		"test:unit": "bun test",
 		"test:integration": "bun test tests/integration/",
 		"test:coverage": "bun test --coverage",
 		"test:e2e": "playwright test",
