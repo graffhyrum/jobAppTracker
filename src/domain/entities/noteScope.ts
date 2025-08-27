@@ -1,10 +1,11 @@
 import { scope } from "arktype";
 import type { Result } from "neverthrow";
+import { NonEmptyString } from "./non-empty-string.ts";
 
 export const noteScope = scope({
 	NoteId: "string.uuid",
 	NoteProps: {
-		content: "string>0",
+		content: NonEmptyString,
 		createdAt: "string.date.iso",
 		updatedAt: "string.date.iso",
 	},

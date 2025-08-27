@@ -1,4 +1,5 @@
 import { type } from "arktype";
+import { NonEmptyString } from "./non-empty-string.ts";
 
 export interface PipelineConfig {
 	active: string[];
@@ -11,8 +12,6 @@ export interface PipelineConfig {
 		inactive: string[];
 	};
 }
-
-const NonEmptyString = type("string>0");
 
 function validateStatusName(status: string): string {
 	const validation = NonEmptyString(status.trim());
