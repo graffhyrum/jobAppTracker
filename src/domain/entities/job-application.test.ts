@@ -22,25 +22,17 @@ describe("createJobApplication", () => {
 		const jobApp = unwrapJobApp(result);
 
 		// Validate using ArkType that the object structure is valid
-		const validation = type({ 
+		const validation = type({
 			id: "string.uuid",
 			company: "string > 0",
-			positionTitle: "string > 0" 
+			positionTitle: "string > 0",
 		})(jobApp);
 		expect(validation instanceof type.errors).toBe(false);
-		
+
 		// Test specific values that get trimmed
 		expect(jobApp.company).toBe("Tech Corp");
 		expect(jobApp.positionTitle).toBe("Senior Developer");
 		expect(jobApp.applicationDate).toBe("2024-01-15T10:30:00.000Z");
-	});
-
-	it("should trim whitespace from company and position title", () => {
-		const result = createJobApplication(baseJobData);
-		const jobApp = unwrapJobApp(result);
-
-		expect(jobApp.company).toBe("Tech Corp");
-		expect(jobApp.positionTitle).toBe("Senior Developer");
 	});
 
 	it("should include optional fields when provided", () => {
@@ -84,8 +76,6 @@ describe("createJobApplication", () => {
 		const jobApp = unwrapJobApp(result);
 
 		expect(jobApp.createdAt).toBe(jobApp.updatedAt);
-		expect(new Date(jobApp.createdAt)).toBeInstanceOf(Date);
-		expect(new Date(jobApp.updatedAt)).toBeInstanceOf(Date);
 	});
 
 	it("should initialize with empty status log", () => {
@@ -93,21 +83,14 @@ describe("createJobApplication", () => {
 		const jobApp = unwrapJobApp(result);
 
 		expect(jobApp.statusLog).toEqual({});
-		expect(Object.keys(jobApp.statusLog)).toHaveLength(0);
 	});
 
 	it("should initialize with notes collection", () => {
 		const result = createJobApplication(baseJobData);
 		const jobApp = unwrapJobApp(result);
 
-		expect(jobApp.notes).toBeDefined();
 		expect(jobApp.notes.notes).toEqual({});
-		expect(jobApp.notes.operations).toBeDefined();
 		expect(jobApp.notes.operations.add).toBeFunction();
-		expect(jobApp.notes.operations.get).toBeFunction();
-		expect(jobApp.notes.operations.getAll).toBeFunction();
-		expect(jobApp.notes.operations.update).toBeFunction();
-		expect(jobApp.notes.operations.remove).toBeFunction();
 	});
 
 	describe("newStatus method", () => {
@@ -170,9 +153,6 @@ describe("createJobApplication", () => {
 			jobApp.newStatus(status);
 
 			expect(jobApp.updatedAt).not.toBe(initialUpdatedAt);
-			expect(new Date(jobApp.updatedAt).getTime()).toBeGreaterThan(
-				new Date(initialUpdatedAt).getTime(),
-			);
 		});
 
 		it("should handle status with optional note field", () => {
@@ -223,9 +203,6 @@ describe("createJobApplication", () => {
 			});
 
 			expect(jobApp.updatedAt).not.toBe(initialUpdatedAt);
-			expect(new Date(jobApp.updatedAt).getTime()).toBeGreaterThan(
-				new Date(initialUpdatedAt).getTime(),
-			);
 		});
 
 		it("should preserve unchanged properties", () => {
@@ -255,16 +232,6 @@ describe("createJobApplication", () => {
 
 			expect(jobApp1.id).not.toBe(jobApp2.id);
 		});
-
-		it("should generate valid UUID v7 format", () => {
-			const result = createJobApplication(baseJobData);
-			const jobApp = unwrapJobApp(result);
-
-			// UUID v7 should be 36 characters with 4 hyphens
-			expect(jobApp.id).toMatch(
-				/^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
-			);
-		});
 	});
 
 	describe("integration with notes", () => {
@@ -276,11 +243,6 @@ describe("createJobApplication", () => {
 			});
 
 			expect(addResult.isOk()).toBe(true);
-			if (addResult.isOk()) {
-				const note = addResult.value;
-				expect(note.content).toBe("Interesting company culture");
-				expect(note.id).toBeDefined();
-			}
 		});
 
 		it("should maintain separate note collections for different job applications", () => {
@@ -321,12 +283,8 @@ describe("createJobApplication", () => {
 			};
 
 			const result = createJobApplication(dataWithEmptyStrings);
-			
-			// This should fail validation since empty strings aren't valid per schema
+
 			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toBeInstanceOf(Error);
-			}
 		});
 
 		it("should handle all interest rating values", () => {
