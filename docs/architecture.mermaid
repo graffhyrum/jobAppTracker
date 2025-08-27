@@ -4,10 +4,12 @@ graph TD
     B --> D[Infrastructure Layer]
 
     C --> E[JobApplication Entity]
-    C --> F[Pipeline Entity]
+    C --> F[PipelineConfig Entity]
     C --> G[PDF Template Entity]
+    C --> L[Note Entity]
+    C --> M[NotesCollection Entity]
 
-    D --> H[SQLite Database]
+    D --> H[Storage]
     D --> I[PDF Form Filler]
     D --> J[File System]
 
@@ -15,6 +17,8 @@ graph TD
         E
         F
         G
+        L
+        M
         K[Use Cases]
     end
 

@@ -7,27 +7,44 @@ classDiagram
     class JobApplication {
         +string id
         +string company
-        +string position
-        +Date applicationDate
-        +StatusCategory statusCategory
-        +ApplicationStatus status
-        +1|2|3 interestRating
-        +Date nextEventDate?
-        +Date lastUpdated
+        +string positionTitle
+        +string applicationDate
+        +string createdAt
+        +string updatedAt
+        +1|2|3 interestRating?
+        +string nextEventDate?
         +string jobPostingUrl?
         +string jobDescription?
-        +Note[] notes
-        +updateStatus(status: ApplicationStatus)
-        +addNote(content: string)
-        +updateNote(noteId: string, content: string)
+        +Record~string,ApplicationStatus~ statusLog
+        +NotesCollection notes
+        +update(newVals)
+        +newStatus(status)
+    }
+
+    class ApplicationStatus {
+        +StatusCategory category
+        +string current
+        +string note?
     }
 
     class Note {
         +string id
         +string content
-        +Date createdAt
-        +Date updatedAt
-        +update(content: string)
+        +string createdAt
+        +string updatedAt
+    }
+
+    class NotesCollection {
+        +Record~string,NoteProps~ notes
+        +NoteCollectionOperations operations
+    }
+
+    class NoteCollectionOperations {
+        +get(id): Result~Note,Error~
+        +getAll(): Result~Note[],Error~
+        +add(data): Result~Note,Error~
+        +update(id, data): Result~Note,Error~
+        +remove(id): Result~void,Error~
     }
 
     class PipelineConfig {
@@ -36,6 +53,7 @@ classDiagram
         +addActiveStatus(status: string)
         +addInactiveStatus(status: string)
         +removeStatus(status: string)
+        +toJSON()
     }
 
     class PDFTemplate {
@@ -47,6 +65,9 @@ classDiagram
         +validateMappings()
     }
 
-JobApplication *--  Note : contains
+JobApplication *-- NotesCollection : contains
+JobApplication *-- ApplicationStatus : has many in statusLog
+NotesCollection *-- NoteCollectionOperations : has
+NotesCollection o-- Note : manages
 JobApplication --> PipelineConfig : uses
 PDFTemplate --> JobApplication : fills from

@@ -15,7 +15,7 @@ A single-user, lightweight job application tracking system built with TypeScript
   - Job description (text)
   - Timestamped, mutable notes list
   - Last updated timestamp (auto-calculated)
-- **Data Persistence**: Local SQLite database using `bun:sqlite`
+- **Data Persistence**: A local flat-file for now.
 
 ### 2. Customizable Pipeline Workflow
 - **Status Categories**: 
@@ -49,7 +49,7 @@ A single-user, lightweight job application tracking system built with TypeScript
 ### Stack
 - **Runtime**: Bun
 - **Language**: TypeScript
-- **Database**: SurrealDB (multi-model database)
+- **Storage**: Flat file and Bun file I/O
 - **Web Framework**: Bun.serve with HTMX frontend
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
@@ -64,8 +64,6 @@ A single-user, lightweight job application tracking system built with TypeScript
 ### [PDF Form System Architecture](pdfFiller.mermaid)
 
 
-### Use Cases Architecture
-
 
 ## Data Model Details
 
@@ -76,33 +74,55 @@ type StatusCategory = 'active' | 'inactive'
 type ActiveStatus = 'applied' | 'screening interview' | 'interview' | 'onsite' | 'online test' | 'take-home assignment' | 'offer'
 type InactiveStatus = 'rejected' | 'no response' | 'no longer interested' | 'hiring freeze'
 
-type ApplicationStatus = ActiveStatus | InactiveStatus
+type ApplicationStatus = {
+  category: StatusCategory
+  current: ActiveStatus | InactiveStatus
+  note?: string
+}
 
 type Note = {
   id: string
   content: string
-  createdAt: Date
-  updatedAt: Date
+  createdAt: string // ISO date string
+  updatedAt: string // ISO date string
+}
+
+type NotesCollection = {
+  notes: Record<string, Omit<Note, 'id'>>
+  operations: {
+    get(id: string): Result<Note, Error>
+    getAll(): Result<Note[], Error>
+    add(data: { content: string }): Result<Note, Error>
+    update(id: string, data: { content?: string }): Result<Note, Error>
+    remove(id: string): Result<void, Error>
+  }
 }
 
 type JobApplication = {
-  id: string
+  id: string // UUID v7
   company: string
-  position: string
-  applicationDate: Date
-  statusCategory: StatusCategory
-  status: ApplicationStatus
-  interestRating: 1 | 2 | 3
-  nextEventDate?: Date
-  lastUpdated: Date // auto-calculated
+  positionTitle: string
+  applicationDate: string // ISO date string
+  createdAt: string // ISO date string
+  updatedAt: string // ISO date string
+  interestRating?: 1 | 2 | 3
+  nextEventDate?: string // ISO date string
   jobPostingUrl?: string
   jobDescription?: string
-  notes: Note[]
+  statusLog: Record<string, ApplicationStatus> // timestamp -> status
+  notes: NotesCollection
+  // Operations
+  update(newVals: Partial<JobApplication>): void
+  newStatus(status: ApplicationStatus): void
 }
 
 type PipelineConfig = {
   active: string[]
   inactive: string[]
+  addActiveStatus: (status: string) => void
+  addInactiveStatus: (status: string) => void
+  removeStatus: (status: string) => void
+  toJSON: () => { active: string[], inactive: string[] }
 }
 
 type PDFTemplate = {
