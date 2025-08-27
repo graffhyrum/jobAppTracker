@@ -248,11 +248,16 @@ function logCurrentTime(clock: Clock) {
 }
 
 // In production
-const systemClock: Clock = { now: () => new Date() };
+const systemClock: Clock = { 
+  now() { return new Date() } 
+};
 logCurrentTime(systemClock);
 
 // In tests
-const fixedClock: Clock = { now: () => new Date('2000-01-01') };
+const fixedClock: Clock = { 
+  now() {
+    new Date('2000-01-01')
+  } };
 logCurrentTime(fixedClock);
 ```
 
@@ -446,7 +451,8 @@ Block type inference. Use to prevent unwanted type inference in generics.
 ```typescript  
 function createStreetLight<C extends string>(  
   colors: C[],  defaultColor?: NoInfer<C>) {  
-  // ...}  
+  // ...
+}  
 ```  
 
 ### `ThisParameterType<Type>`
