@@ -25,7 +25,7 @@ export const healthcheckPage = (): string => {
 			}
 		</style>
 		<div class="health-status">
-			<h1>System Health Check</h1>
+			<h1 data-testid="page-title">System Health Check</h1>
 			
 			<div class="service-check">
 				<h3>Application Status</h3>

@@ -3,7 +3,7 @@ import { layout } from "../components/layout";
 export const homepagePage = (): string => {
 	const content = `
 		<div>
-			<h1>Job App Tracker</h1>
+			<h1 data-testid="page-title">Job App Tracker</h1>
 			<p>Hi</p>
 		</div>
 	`;
