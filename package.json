@@ -15,7 +15,8 @@
 		"lint": "biome lint",
 		"format": "biome format",
 		"check": "biome check",
-		"fix": "biome check --fix"
+		"fix": "biome check --fix",
+		"fixx": "biome check --fix --unsafe"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.2",
