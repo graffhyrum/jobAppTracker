@@ -1,3 +1,6 @@
+import { healthcheckPage } from "./presentation/pages/healthcheck";
+import { homepagePage } from "./presentation/pages/homepage";
+
 main();
 
 function main() {
@@ -6,9 +9,28 @@ function main() {
 }
 
 function startBunServer() {
-	Bun.serve({
+	const server = Bun.serve({
+		port: 3000,
 		routes: {
-			"/health": new Response("OK"),
+			"/": () => {
+				return new Response(homepagePage(), {
+					headers: { "Content-Type": "text/html" },
+				});
+			},
+			"/health": () => {
+				return new Response(healthcheckPage(), {
+					headers: { "Content-Type": "text/html" },
+				});
+			},
+		},
+		fetch(_request) {
+			return new Response("Not Found", { status: 404 });
+		},
+		development: {
+			hmr: true, // Enable Hot Module Reloading
+			console: true, // Echo console logs from the browser to the terminal
 		},
 	});
+
+	console.log(`Listening on ${server.url}`);
 }
