@@ -7,6 +7,6 @@ export const homepagePage = (): string => {
 			<p>Hi</p>
 		</div>
 	`;
-	
+
 	return layout("Job App Tracker", content);
 };
