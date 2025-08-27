@@ -51,22 +51,12 @@ This test plan outlines the testing strategy for the Job Application Tracker, us
 src/
 ├── domain/
 │   ├── entities/
-│   │   ├── job-application.ts
-│   │   └── job-application.test.ts
 │   └── use-cases/
-│       ├── create-application.ts
-│       └── create-application.test.ts
 ├── infrastructure/
 │   ├── repositories/
-│   │   ├── application-repository.ts
-│   │   └── application-repository.test.ts
 │   └── pdf/
-│       ├── pdf-form-filler.ts
-│       └── pdf-form-filler.test.ts
 └── presentation/
     ├── routes/
-    │   ├── application-routes.ts
-    │   └── application-routes.test.ts
     └── templates/
 
 tests/
@@ -176,9 +166,6 @@ bun test tests/unit/
 
 # Run integration tests
 bun test tests/integration/
-
-# Run specific test file
-bun test tests/unit/domain/entities/job-application.test.ts
 
 # Run with coverage
 bun test --coverage
