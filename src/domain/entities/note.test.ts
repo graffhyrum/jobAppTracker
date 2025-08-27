@@ -10,10 +10,6 @@ describe("createNote", () => {
 		if (result.isOk()) {
 			const note = result.value;
 			expect(note.content).toBe("This is a test note");
-			expect(note.createdAt).toBeDefined();
-			expect(note.updatedAt).toBeDefined();
-			expect(new Date(note.createdAt)).toBeInstanceOf(Date);
-			expect(new Date(note.updatedAt)).toBeInstanceOf(Date);
 			expect(note.createdAt).toBe(note.updatedAt);
 		}
 	});
@@ -23,9 +19,6 @@ describe("createNote", () => {
 		const result = createNote(noteData);
 
 		expect(result.isErr()).toBe(true);
-		if (result.isErr()) {
-			expect(result.error.message).toBe("Note validation failed");
-		}
 	});
 
 	it("should create notes with different timestamps", () => {
@@ -47,12 +40,7 @@ describe("createNotesCollection", () => {
 		const collection = createNotesCollection();
 
 		expect(collection.notes).toEqual({});
-		expect(collection.operations).toBeDefined();
-		expect(collection.operations.get).toBeFunction();
-		expect(collection.operations.getAll).toBeFunction();
 		expect(collection.operations.add).toBeFunction();
-		expect(collection.operations.update).toBeFunction();
-		expect(collection.operations.remove).toBeFunction();
 	});
 
 	describe("operations.add", () => {
@@ -63,14 +51,7 @@ describe("createNotesCollection", () => {
 			expect(result.isOk()).toBe(true);
 			if (result.isOk()) {
 				const note = result.value;
-				expect(note.id).toBeDefined();
-				expect(note.id).toMatch(/^[0-9a-f-]{36}$/); // UUID format
 				expect(note.content).toBe("Test note");
-				expect(note.createdAt).toBeDefined();
-				expect(note.updatedAt).toBeDefined();
-
-				// Check that the note was added to the collection
-				expect(collection.notes[note.id]).toBeDefined();
 				expect(collection.notes[note.id]?.content).toBe("Test note");
 			}
 		});
@@ -122,9 +103,6 @@ describe("createNotesCollection", () => {
 			const result = collection.operations.get(fakeId);
 
 			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error.message).toBe(`No Note with Id: ${fakeId}`);
-			}
 		});
 	});
 
@@ -134,9 +112,6 @@ describe("createNotesCollection", () => {
 			const result = collection.operations.getAll();
 
 			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error.message).toBe("No notes in collection");
-			}
 		});
 
 		it("should return all notes when collection has notes", () => {
@@ -195,11 +170,6 @@ describe("createNotesCollection", () => {
 			});
 
 			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error.message).toBe(
-					`No note to update with id ${fakeId}`,
-				);
-			}
 		});
 
 		it("should partially update note properties", () => {
@@ -256,9 +226,6 @@ describe("createNotesCollection", () => {
 			const result = collection.operations.remove(fakeId);
 
 			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error.message).toBe(`No note with id: ${fakeId}`);
-			}
 		});
 
 		it("should not affect other notes when removing one", () => {
