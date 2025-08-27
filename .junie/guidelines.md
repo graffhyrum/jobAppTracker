@@ -258,7 +258,8 @@ Block type inference. Use to prevent unwanted type inference in generics.
 ```typescript  
 function createStreetLight<C extends string>(  
   colors: C[],  defaultColor?: NoInfer<C>) {  
-  // ...}  
+  // ...
+}  
 ```  
 
 ### `ThisParameterType<Type>`
