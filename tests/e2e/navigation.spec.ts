@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test.describe("Navigation", () => {
 	test("should display navbar on homepage", async ({ page }) => {
@@ -49,14 +49,18 @@ test.describe("Navigation", () => {
 		await page.goto("/");
 
 		// Verify we're on homepage
-		await expect(page.locator("[data-testid='page-title']")).toHaveText("Job App Tracker");
+		await expect(page.locator("[data-testid='page-title']")).toHaveText(
+			"Job App Tracker",
+		);
 
 		// Click health check link in navbar and wait for navigation
 		await page.click("[data-testid='nav-link-health']");
 		await page.waitForURL("/health");
 
 		// Verify we're on health check page
-		await expect(page.locator("[data-testid='page-title']")).toHaveText("System Health Check");
+		await expect(page.locator("[data-testid='page-title']")).toHaveText(
+			"System Health Check",
+		);
 		await expect(page).toHaveURL("/health");
 	});
 
@@ -64,14 +68,18 @@ test.describe("Navigation", () => {
 		await page.goto("/health");
 
 		// Verify we're on health check page
-		await expect(page.locator("[data-testid='page-title']")).toHaveText("System Health Check");
+		await expect(page.locator("[data-testid='page-title']")).toHaveText(
+			"System Health Check",
+		);
 
 		// Click home link in navbar and wait for navigation
 		await page.click("[data-testid='nav-link-home']");
 		await page.waitForURL("/");
 
 		// Verify we're on homepage
-		await expect(page.locator("[data-testid='page-title']")).toHaveText("Job App Tracker");
+		await expect(page.locator("[data-testid='page-title']")).toHaveText(
+			"Job App Tracker",
+		);
 		await expect(page).toHaveURL("/");
 	});
 
@@ -79,14 +87,18 @@ test.describe("Navigation", () => {
 		await page.goto("/health");
 
 		// Verify we're on health check page
-		await expect(page.locator("[data-testid='page-title']")).toHaveText("System Health Check");
+		await expect(page.locator("[data-testid='page-title']")).toHaveText(
+			"System Health Check",
+		);
 
 		// Click brand logo and wait for navigation
 		await page.click("[data-testid='navbar-brand']");
 		await page.waitForURL("/");
 
 		// Verify we're on homepage
-		await expect(page.locator("[data-testid='page-title']")).toHaveText("Job App Tracker");
+		await expect(page.locator("[data-testid='page-title']")).toHaveText(
+			"Job App Tracker",
+		);
 		await expect(page).toHaveURL("/");
 	});
 
@@ -94,10 +106,10 @@ test.describe("Navigation", () => {
 		await page.goto("/");
 
 		const navbar = page.locator("[data-testid='navbar']");
-		
+
 		// Check navbar has dark background
 		await expect(navbar).toHaveCSS("background-color", "rgb(52, 58, 64)");
-		
+
 		// Check navbar links are white
 		const navLinks = page.locator("[data-testid='nav-link-home']");
 		await expect(navLinks).toHaveCSS("color", "rgb(255, 255, 255)");
