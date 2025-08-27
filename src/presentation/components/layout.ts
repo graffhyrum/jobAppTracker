@@ -1,3 +1,5 @@
+import { navbar } from "./navbar";
+
 export const layout = (title: string, content: string): string => `
 <!DOCTYPE html>
 <html lang="en">
@@ -9,12 +11,18 @@ export const layout = (title: string, content: string): string => `
 	<style>
 		body {
 			font-family: Arial, sans-serif;
-			margin: 40px;
+			margin: 0;
 			background-color: #f5f5f5;
+		}
+		.main-content {
+			padding: 20px 40px;
 		}
 	</style>
 </head>
 <body>
-	${content}
+	${navbar()}
+	<div class="main-content">
+		${content}
+	</div>
 </body>
 </html>`;
