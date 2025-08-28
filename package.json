@@ -4,11 +4,10 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
-		"dev": "bun run src/index.ts",
+		"dev": "bun --watch run src/index.ts",
 		"build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
-		"test": "bun test:coverage && bun test:integration && bun test:e2e",
+		"test": "bun test:coverage && bun test:e2e",
 		"test:unit": "bun test",
-		"test:integration": "bun test tests/integration/",
 		"test:coverage": "bun test --coverage",
 		"test:e2e": "playwright test",
 		"test:e2e:ui": "playwright test --ui",
