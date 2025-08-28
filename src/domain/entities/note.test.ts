@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { expectDefined } from "../../helpers/expectDefined";
 import { createNote, createNotesCollection } from "./note";
 
 describe("createNote", () => {
@@ -157,7 +158,7 @@ describe("createNotesCollection", () => {
 					expect(updatedNote.content).toBe("Updated content");
 					expect(updatedNote.createdAt).toBe(originalCreatedAt);
 					// updatedAt should be changed, but we can't easily test the exact value
-					expect(updatedNote.updatedAt).toBeDefined();
+					expectDefined(updatedNote.updatedAt);
 				}
 			}
 		});
@@ -210,7 +211,7 @@ describe("createNotesCollection", () => {
 				const noteId = addResult.value.id;
 
 				// Verify note exists before removal
-				expect(collection.notes[noteId]).toBeDefined();
+				expectDefined(collection.notes[noteId]);
 
 				const removeResult = collection.operations.remove(noteId);
 				expect(removeResult.isOk()).toBe(true);
@@ -248,7 +249,7 @@ describe("createNotesCollection", () => {
 				expect(removeResult.isOk()).toBe(true);
 
 				// Verify the other note still exists
-				expect(collection.notes[keepId]).toBeDefined();
+				expectDefined(collection.notes[keepId]);
 				expect(collection.notes[removeId]).toBeUndefined();
 
 				const getResult = collection.operations.get(keepId);

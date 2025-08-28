@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test";
 import { type } from "arktype";
+import { expectDefined } from "../../helpers/expectDefined";
 import type { JobApplicationForCreate } from "./job-application";
 import { createJobApplication } from "./job-application";
 
@@ -109,8 +110,7 @@ describe("createJobApplication", () => {
 
 			const statusLogKeys = Object.keys(jobApp.statusLog);
 			expect(statusLogKeys).toHaveLength(1);
-			expect(statusLogKeys[0]).toBeDefined();
-			// @ts-expect-error
+			expectDefined(statusLogKeys[0]);
 			expect(jobApp.statusLog[statusLogKeys[0]]).toEqual(status);
 			expect(jobApp.updatedAt).not.toBe(initialUpdatedAt);
 		});

@@ -1,7 +1,7 @@
 import { scope } from "arktype";
 import { err, ok, type Result } from "neverthrow";
 import { createNotesCollection } from "./note";
-import type { NotesCollection } from "./noteScope.ts";
+import type { NoteProps, NotesCollection } from "./noteScope.ts";
 
 const jobApplicationScope = scope({
 	"#ActiveState": {
@@ -57,7 +57,8 @@ function assertIsJobApplicationForCreate(
 }
 type JobApplicationForUpdate = typeof jobApplicationModule.forUpdate.infer;
 type JobApplicationId = typeof jobApplicationModule.JobAppId.infer;
-type ApplicationStatus = typeof jobApplicationModule.ApplicationStatus.infer;
+export type ApplicationStatus =
+	typeof jobApplicationModule.ApplicationStatus.infer;
 
 function getJobApplicationId(): JobApplicationId {
 	return jobApplicationModule.JobAppId.assert(Bun.randomUUIDv7());
@@ -67,6 +68,16 @@ interface JobApplicationOperations {
 	update(newVals: JobApplicationForUpdate): void;
 
 	newStatus(status: ApplicationStatus): void;
+
+	/**
+	 * Check if the application has an overdue next event date
+	 */
+	isOverdue(): boolean;
+
+	/**
+	 * Get the current status from the status log
+	 */
+	getCurrentStatus(): ApplicationStatus | null;
 }
 
 export type JobApplication = JobApp & JobApplicationOperations;
@@ -74,10 +85,51 @@ export type JobApplication = JobApp & JobApplicationOperations;
 export function createJobApplication(
 	data: JobApplicationForCreate,
 ): Result<JobApplication, Error> {
+	return createJobApplicationWithState(data, {
+		id: getJobApplicationId(),
+		createdAt: new Date().toISOString(),
+		updatedAt: new Date().toISOString(),
+		statusLog: {},
+		notes: {},
+	});
+}
+
+export function jobApplicationFromData(
+	data: JobApplicationForCreate & {
+		id: string;
+		createdAt: string;
+		updatedAt: string;
+		statusLog: Record<string, ApplicationStatus>;
+		notes: Record<string, NoteProps>;
+	},
+): Result<JobApplication, Error> {
+	return createJobApplicationWithState(data, {
+		id: data.id,
+		createdAt: data.createdAt,
+		updatedAt: data.updatedAt,
+		statusLog: data.statusLog,
+		notes: data.notes,
+	});
+}
+
+function createJobApplicationWithState(
+	data: JobApplicationForCreate,
+	initialState: {
+		id: string;
+		createdAt: string;
+		updatedAt: string;
+		statusLog: Record<string, ApplicationStatus>;
+		notes: Record<string, NoteProps>;
+	},
+): Result<JobApplication, Error> {
 	try {
-		const nowIso = getNowIso();
 		const notes = createNotesCollection();
-		const statusLog: JobApplication["statusLog"] = {};
+		// Restore notes from the initial state
+		Object.assign(notes.notes, initialState.notes);
+
+		const statusLog: JobApplication["statusLog"] = {
+			...initialState.statusLog,
+		};
 
 		// Trim string properties
 		const trimmedData = Object.fromEntries(
@@ -89,9 +141,9 @@ export function createJobApplication(
 		assertIsJobApplicationForCreate(trimmedData);
 
 		let state: Omit<JobApp, "statusLog" | "notes"> = {
-			id: getJobApplicationId(),
-			createdAt: nowIso,
-			updatedAt: nowIso,
+			id: initialState.id,
+			createdAt: initialState.createdAt,
+			updatedAt: initialState.updatedAt,
 			...trimmedData,
 			// optional fields populated conditionally below
 		};
@@ -131,6 +183,8 @@ export function createJobApplication(
 			notes,
 			update,
 			newStatus,
+			isOverdue,
+			getCurrentStatus,
 		} satisfies JobApplication;
 
 		return ok(api);
@@ -152,10 +206,6 @@ export function createJobApplication(
 			state.updatedAt = nowIso;
 		}
 
-		function getNowIso() {
-			return new Date().toISOString();
-		}
-
 		function getNextIso(prevIso: string) {
 			const now = new Date();
 			const prev = new Date(prevIso);
@@ -163,6 +213,25 @@ export function createJobApplication(
 				return new Date(prev.getTime() + 1).toISOString();
 			}
 			return now.toISOString();
+		}
+
+		function isOverdue(): boolean {
+			if (!state.nextEventDate) return false;
+			const nextEventDate = new Date(state.nextEventDate);
+			const now = new Date();
+			return nextEventDate < now;
+		}
+
+		function getCurrentStatus(): ApplicationStatus | null {
+			const statusEntries = Object.entries(statusLog);
+			if (statusEntries.length === 0) return null;
+
+			// Sort by timestamp (ISO string) to get the latest status
+			const sortedEntries = statusEntries.toSorted(([a], [b]) =>
+				b.localeCompare(a),
+			);
+			const latestEntry = sortedEntries[0];
+			return latestEntry ? latestEntry[1] : null;
 		}
 	} catch (error) {
 		return err(error instanceof Error ? error : new Error(String(error)));
