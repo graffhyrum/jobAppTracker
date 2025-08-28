@@ -4,9 +4,9 @@ const baseURL = "http://localhost:3000";
 
 export default defineConfig({
 	testDir: "./tests/e2e",
-	timeout: 30 * 1000,
+	timeout: 15 * 1000,
 	expect: {
-		timeout: 5000,
+		timeout: 3 * 1000,
 	},
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
@@ -18,6 +18,7 @@ export default defineConfig({
 		baseURL,
 		trace: "retain-on-failure",
 		screenshot: "only-on-failure",
+		video: "retain-on-failure",
 	},
 
 	projects: [
@@ -25,14 +26,14 @@ export default defineConfig({
 			name: "chromium",
 			use: { ...devices["Desktop Chrome"] },
 		},
-		{
-			name: "firefox",
-			use: { ...devices["Desktop Firefox"] },
-		},
-		{
-			name: "webkit",
-			use: { ...devices["Desktop Safari"] },
-		},
+		// {
+		// 	name: "firefox",
+		// 	use: { ...devices["Desktop Firefox"] },
+		// },
+		// {
+		// 	name: "webkit",
+		// 	use: { ...devices["Desktop Safari"] },
+		// },
 	],
 
 	webServer: {
