@@ -1,19 +1,18 @@
 import type { ResultAsync } from "neverthrow";
 import type { JobApplication } from "../entities/job-application";
 
-export interface DatabaseError extends Error {
-	readonly name: "DatabaseError";
+export class DatabaseError extends Error {
+	constructor(message: string, options?: ErrorOptions) {
+		super(message, options);
+		this.name = "DatabaseError";
+	}
 }
 
 export function createDatabaseError(
 	message: string,
-	cause?: Error,
+	options?: ErrorOptions,
 ): DatabaseError {
-	const error = new Error(message, { cause }) as DatabaseError;
-	return {
-		...error,
-		name: "DatabaseError",
-	};
+	return new DatabaseError(message, options);
 }
 
 export interface JobApplicationRepository {

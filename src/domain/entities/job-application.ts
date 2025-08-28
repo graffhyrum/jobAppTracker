@@ -1,5 +1,6 @@
 import { scope } from "arktype";
 import { err, ok, type Result } from "neverthrow";
+import { getEntries } from "../../helpers/entries.ts";
 import { createNotesCollection } from "./note";
 import type { NoteProps, NotesCollection } from "./noteScope.ts";
 
@@ -133,7 +134,7 @@ function createJobApplicationWithState(
 
 		// Trim string properties
 		const trimmedData = Object.fromEntries(
-			Object.entries(data).map(([key, value]) => [
+			getEntries(data).map(([key, value]) => [
 				key,
 				typeof value === "string" ? value.trim() : value,
 			]),
@@ -223,7 +224,7 @@ function createJobApplicationWithState(
 		}
 
 		function getCurrentStatus(): ApplicationStatus | null {
-			const statusEntries = Object.entries(statusLog);
+			const statusEntries = getEntries(statusLog);
 			if (statusEntries.length === 0) return null;
 
 			// Sort by timestamp (ISO string) to get the latest status

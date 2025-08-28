@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, test } from "bun:test";
 import { createJobApplicationUseCases } from "../domain/use-cases/job-application-use-cases";
 import { createPipelineConfigUseCases } from "../domain/use-cases/pipeline-config-use-cases";
+import { getEntries } from "../helpers/entries.ts";
 import { expectDefined } from "../helpers/expectDefined";
 import { createJobApplicationMemoryRepository } from "../infrastructure/storage/job-application-memory-repository";
 import { createPipelineConfigMemoryRepository } from "../infrastructure/storage/pipeline-config-memory-repository";
@@ -183,7 +184,7 @@ describe("Pipeline Integration", () => {
 		jobApp.newStatus({ category: "active", current: "offer" });
 
 		// Check status log has all entries
-		const statusEntries = Object.entries(jobApp.statusLog);
+		const statusEntries = getEntries(jobApp.statusLog);
 		expect(statusEntries.length).toBe(4);
 
 		// Check current status is latest

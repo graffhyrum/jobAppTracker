@@ -1,10 +1,11 @@
-import { ResultAsync } from "neverthrow";
+import { errAsync, okAsync, ResultAsync } from "neverthrow";
 import type { JobApplication } from "../../domain/entities/job-application";
 import {
 	createDatabaseError,
 	type DatabaseError,
 	type JobApplicationRepository,
 } from "../../domain/ports/job-application-repository";
+import { getEntries } from "../../helpers/entries.ts";
 import { toDatabaseError, wrapPromise } from "./utils";
 
 /**
@@ -41,93 +42,64 @@ export function createJobApplicationMemoryRepository(): JobApplicationRepository
 		},
 
 		update: (application: JobApplication): ResultAsync<void, DatabaseError> => {
-			return ResultAsync.fromPromise(
-				Promise.resolve().then(() => {
-					if (!storage.has(application.id)) {
-						throw toDatabaseError(
-							`Application with ID ${application.id} not found`,
-							new Error("Application not found"),
-						);
-					}
-					storage.set(application.id, application);
-				}),
-				(error) =>
-					error instanceof Error && error.name === "DatabaseError"
-						? (error as DatabaseError)
-						: toDatabaseError("Failed to update application", error),
-			);
+			if (!storage.has(application.id)) {
+				return errAsync(
+					createDatabaseError(
+						`Application with ID ${application.id} not found`,
+					),
+				);
+			}
+			storage.set(application.id, application);
+			return okAsync(undefined);
 		},
 
 		deleteById: (id: string): ResultAsync<void, DatabaseError> => {
-			return ResultAsync.fromPromise(
-				Promise.resolve().then(() => {
-					if (!storage.has(id)) {
-						throw createDatabaseError(`Application with ID ${id} not found`);
-					}
-					storage.delete(id);
-				}),
-				(error) =>
-					error instanceof Error && error.name === "DatabaseError"
-						? (error as DatabaseError)
-						: toDatabaseError("Failed to delete application", error),
-			);
+			if (!storage.has(id)) {
+				return errAsync(
+					createDatabaseError(`Application with ID ${id} not found`),
+				);
+			}
+			storage.delete(id);
+			return okAsync(undefined);
 		},
 
 		findByStatusCategory: (
 			category: "active" | "inactive",
 		): ResultAsync<JobApplication[], DatabaseError> => {
-			return ResultAsync.fromPromise(
-				Promise.resolve().then(() => {
-					const applications: JobApplication[] = [];
+			const applications: JobApplication[] = [];
 
-					for (const app of storage.values()) {
-						// Get the latest status from statusLog
-						const statusEntries = Object.entries(app.statusLog);
-						if (statusEntries.length > 0) {
-							// Sort by timestamp (ISO string) to get the latest
-							const sortedEntries = statusEntries.toSorted(([a], [b]) =>
-								b.localeCompare(a),
-							);
-							const latestEntry = sortedEntries[0];
-							if (latestEntry && latestEntry[1].category === category) {
-								applications.push(app);
-							}
-						}
+			for (const app of storage.values()) {
+				// Get the latest status from statusLog
+				const statusEntries = getEntries(app.statusLog);
+				if (statusEntries.length > 0) {
+					// Sort by timestamp (ISO string) to get the latest
+					const sortedEntries = statusEntries.toSorted(([a], [b]) =>
+						b.localeCompare(a),
+					);
+					const latestEntry = sortedEntries[0];
+					if (latestEntry && latestEntry[1].category === category) {
+						applications.push(app);
 					}
+				}
+			}
 
-					return applications;
-				}),
-				(error) =>
-					createDatabaseError(
-						"Failed to find applications by status category",
-						error instanceof Error ? error : new Error(String(error)),
-					),
-			);
+			return okAsync(applications);
 		},
 
 		findOverdue: (): ResultAsync<JobApplication[], DatabaseError> => {
-			return ResultAsync.fromPromise(
-				Promise.resolve().then(() => {
-					const applications: JobApplication[] = [];
-					const now = new Date();
+			const applications: JobApplication[] = [];
+			const now = new Date();
 
-					for (const app of storage.values()) {
-						if (app.nextEventDate) {
-							const nextEventDate = new Date(app.nextEventDate);
-							if (nextEventDate < now) {
-								applications.push(app);
-							}
-						}
+			for (const app of storage.values()) {
+				if (app.nextEventDate) {
+					const nextEventDate = new Date(app.nextEventDate);
+					if (nextEventDate < now) {
+						applications.push(app);
 					}
+				}
+			}
 
-					return applications;
-				}),
-				(error) =>
-					createDatabaseError(
-						"Failed to find overdue applications",
-						error instanceof Error ? error : new Error(String(error)),
-					),
-			);
+			return okAsync(applications);
 		},
 	};
 }

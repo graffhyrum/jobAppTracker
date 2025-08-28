@@ -15,32 +15,6 @@ import { toDatabaseError, wrapAsyncOperation } from "./utils";
 export function createPipelineConfigJsonRepository(
 	filePath: string,
 ): PipelineConfigRepository {
-	const readData = async (): Promise<SerializablePipelineConfig | null> => {
-		try {
-			const file = Bun.file(filePath);
-			const exists = await file.exists();
-			if (!exists) {
-				return null;
-			}
-			const content = await file.text();
-			if (content.trim() === "") {
-				return null;
-			}
-			const parsed = JSON.parse(content);
-			return parsed;
-		} catch (error) {
-			throw toDatabaseError(`Failed to read from ${filePath}`, error);
-		}
-	};
-
-	const writeData = async (data: SerializablePipelineConfig): Promise<void> => {
-		try {
-			await Bun.write(filePath, JSON.stringify(data, null, 2));
-		} catch (error) {
-			throw toDatabaseError(`Failed to write to ${filePath}`, error);
-		}
-	};
-
 	return {
 		load: (): ResultAsync<PipelineConfig, DatabaseError> => {
 			return wrapAsyncOperation(async () => {
@@ -60,4 +34,30 @@ export function createPipelineConfigJsonRepository(
 			}, "Failed to save pipeline configuration");
 		},
 	};
+
+	async function readData(): Promise<SerializablePipelineConfig | null> {
+		try {
+			const file = Bun.file(filePath);
+			const exists = await file.exists();
+			if (!exists) {
+				return null;
+			}
+			const content = await file.text();
+			if (content.trim() === "") {
+				return null;
+			}
+			const parsed = JSON.parse(content);
+			return parsed;
+		} catch (error) {
+			throw toDatabaseError(`Failed to read from ${filePath}`, error);
+		}
+	}
+
+	async function writeData(data: SerializablePipelineConfig): Promise<void> {
+		try {
+			await Bun.write(filePath, JSON.stringify(data, null, 2));
+		} catch (error) {
+			throw toDatabaseError(`Failed to write to ${filePath}`, error);
+		}
+	}
 }

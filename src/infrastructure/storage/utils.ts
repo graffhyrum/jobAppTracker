@@ -38,9 +38,9 @@ export function wrapAsyncOperation<T>(
 	operation: () => Promise<T>,
 	errorMessage: string,
 ): ResultAsync<T, DatabaseError> {
-	return ResultAsync.fromPromise(operation(), (error) =>
-		error instanceof Error && error.name === "DatabaseError"
+	return ResultAsync.fromPromise(operation(), (error) => {
+		return error instanceof Error && error.name === "DatabaseError"
 			? (error as DatabaseError)
-			: toDatabaseError(errorMessage, error),
-	);
+			: toDatabaseError(errorMessage, error);
+	});
 }

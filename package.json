@@ -1,7 +1,26 @@
 {
 	"name": "jobapptracker",
 	"module": "src/index.ts",
-	"type": "module",
+	"dependencies": {
+		"@surrealdb/node": "^1.0.0-beta.3",
+		"@typescript/native-preview": "^7.0.0-dev.20250828.1",
+		"arktype": "^2.1.20",
+		"surrealdb": "^1.3.2"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "2.2.2",
+		"@playwright/test": "^1.55.0",
+		"@types/bun": "^1.2.21",
+		"htmx.org": "^2.0.6",
+		"husky": "^9.1.7",
+		"lint-staged": "^16.1.5",
+		"memfs": "^4.38.2",
+		"neverthrow": "^8.2.0",
+		"pdf-lib": "^1.17.1"
+	},
+	"lint-staged": {
+		"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "biome check --no-errors-on-unmatched --fix"
+	},
 	"private": true,
 	"scripts": {
 		"dev": "bun --watch run src/index.ts",
@@ -20,26 +39,5 @@
 		"vet": "bun fixx && bun typecheck && bun test:all",
 		"prepare": "husky"
 	},
-	"devDependencies": {
-		"@biomejs/biome": "2.2.2",
-		"@playwright/test": "^1.55.0",
-		"@types/bun": "^1.2.21",
-		"htmx.org": "^2.0.6",
-		"husky": "^9.1.7",
-		"lint-staged": "^16.1.5",
-		"memfs": "^4.38.2",
-		"neverthrow": "^8.2.0",
-		"pdf-lib": "^1.17.1"
-	},
-	"peerDependencies": {
-		"typescript": "^5.9.2"
-	},
-	"dependencies": {
-		"@surrealdb/node": "^1.0.0-beta.3",
-		"arktype": "^2.1.20",
-		"surrealdb": "^1.3.2"
-	},
-	"lint-staged": {
-		"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "biome check --no-errors-on-unmatched --fix"
-	}
+	"type": "module"
 }

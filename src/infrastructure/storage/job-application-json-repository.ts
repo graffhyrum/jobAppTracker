@@ -8,6 +8,7 @@ import type {
 	DatabaseError,
 	JobApplicationRepository,
 } from "../../domain/ports/job-application-repository";
+import { getEntries } from "../../helpers/entries.ts";
 import type { SerializableJobApplication } from "./types";
 import { toDatabaseError, wrapAsyncOperation } from "./utils";
 
@@ -217,7 +218,7 @@ export function createJobApplicationJsonRepository(
 					}
 					const app = result.value;
 					// Get the latest status from statusLog
-					const statusEntries = Object.entries(app.statusLog);
+					const statusEntries = getEntries(app.statusLog);
 					if (statusEntries.length > 0) {
 						// Sort by timestamp (ISO string) to get latest
 						const sortedEntries = statusEntries.toSorted(([a], [b]) =>

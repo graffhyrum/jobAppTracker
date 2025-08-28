@@ -1,5 +1,6 @@
 import { ArkErrors } from "arktype";
 import { err, ok, type Result } from "neverthrow";
+import { getEntries } from "../../helpers/entries.ts";
 import {
 	type Note,
 	type NoteCollection,
@@ -45,7 +46,7 @@ export function createNotesCollection(): NotesCollection {
 				}
 			},
 			getAll(): Result<Note[], Error> {
-				const maybeNotes = Array.from(Object.entries(collection));
+				const maybeNotes = Array.from(getEntries(collection));
 				if (maybeNotes.length > 0) {
 					return ok(
 						maybeNotes.map(([id, data]) => {

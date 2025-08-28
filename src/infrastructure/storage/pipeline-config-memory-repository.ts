@@ -1,12 +1,9 @@
-import { ResultAsync } from "neverthrow";
+import { okAsync, type ResultAsync } from "neverthrow";
 import {
 	createDefaultPipelineConfig,
 	type PipelineConfig,
 } from "../../domain/entities/pipeline-config";
-import {
-	createDatabaseError,
-	type DatabaseError,
-} from "../../domain/ports/job-application-repository";
+import type { DatabaseError } from "../../domain/ports/job-application-repository";
 import type { PipelineConfigRepository } from "../../domain/ports/pipeline-config-repository";
 
 /**
@@ -19,25 +16,12 @@ export function createPipelineConfigMemoryRepository(
 
 	return {
 		load: (): ResultAsync<PipelineConfig, DatabaseError> => {
-			return ResultAsync.fromPromise(Promise.resolve(storedConfig), (error) =>
-				createDatabaseError(
-					"Failed to load pipeline configuration",
-					error instanceof Error ? error : new Error(String(error)),
-				),
-			);
+			return okAsync(storedConfig);
 		},
 
 		save: (config: PipelineConfig): ResultAsync<void, DatabaseError> => {
-			return ResultAsync.fromPromise(
-				Promise.resolve().then(() => {
-					storedConfig = config;
-				}),
-				(error) =>
-					createDatabaseError(
-						"Failed to save pipeline configuration",
-						error instanceof Error ? error : new Error(String(error)),
-					),
-			);
+			storedConfig = config;
+			return okAsync(undefined);
 		},
 	};
 }

@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
-import { existsSync, unlinkSync } from "node:fs";
+import { existsSync, mkdirSync, unlinkSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { createJobApplication } from "../../domain/entities/job-application";
 import type { JobApplicationRepository } from "../../domain/ports/job-application-repository";
 import { expectDefined } from "../../helpers/expectDefined";
 import { createJobApplicationJsonRepository } from "./job-application-json-repository";
+import { createJobApplicationMemoryRepository } from "./job-application-memory-repository.ts";
 
 describe("JobApplicationJsonRepository", () => {
 	let repository: JobApplicationRepository;
@@ -355,5 +356,139 @@ describe("JobApplicationJsonRepository", () => {
 		expect(found.nextEventDate).toBe(app.nextEventDate);
 		expect(found.jobPostingUrl).toBe("https://example.com");
 		expect(found.jobDescription).toBe("Test description");
+	});
+});
+
+function tempFile(prefix: string) {
+	return `./test-results/${prefix}-${Date.now()}-${Math.random().toString(36).slice(2)}.json`;
+}
+
+describe("JobApplicationJsonRepository additional coverage", () => {
+	test("save handles update path when application exists", async () => {
+		const file = tempFile("jsonrepo-update");
+		const repo = createJobApplicationJsonRepository(file);
+		const app = createJobApplication({
+			company: "A",
+			positionTitle: "P",
+			applicationDate: new Date().toISOString(),
+		})._unsafeUnwrap();
+
+		{
+			const save1 = await repo.save(app);
+			expect(save1.isOk()).toBe(true);
+		}
+		app.update({ id: app.id, jobDescription: "desc" });
+		{
+			const save2 = await repo.save(app); // should hit existingIndex >= 0 path
+			expect(save2.isOk()).toBe(true);
+		}
+
+		const loadedRes = await repo.findById(app.id);
+		expect(loadedRes.isOk()).toBe(true);
+		if (!loadedRes.isOk()) return;
+		const loaded = loadedRes.value;
+		expect(loaded?.jobDescription).toBe("desc");
+	});
+
+	test("writeData error is mapped to DatabaseError", async () => {
+		// Create a directory and use it as file path to force Bun.write to fail
+		const dirPath = `./test-results/adir-${Date.now()}`;
+		mkdirSync(dirPath, { recursive: true });
+		const repo = createJobApplicationJsonRepository(dirPath); // wrong: path is a directory
+
+		const app = createJobApplication({
+			company: "B",
+			positionTitle: "Q",
+			applicationDate: new Date().toISOString(),
+		})._unsafeUnwrap();
+
+		const saveRes = await repo.save(app);
+		expect(saveRes.isErr()).toBe(true);
+		if (saveRes.isErr()) {
+			expect(saveRes.error.name).toBe("DatabaseError");
+		}
+	});
+
+	test("deserialize error path is handled in findAll", async () => {
+		const file = tempFile("jsonrepo-bad-deser");
+		// Write an invalid application entry (missing required fields or bad types)
+		const bad = [
+			{
+				id: "1",
+				company: "",
+				positionTitle: "",
+				applicationDate: "not-a-date",
+			},
+		];
+		await Bun.write(file, JSON.stringify(bad));
+		const repo = createJobApplicationJsonRepository(file);
+
+		const allRes = await repo.findAll();
+		expect(allRes.isErr()).toBe(true);
+		if (allRes.isErr()) {
+			expect(allRes.error.name).toBe("DatabaseError");
+			expect(String(allRes.error.message)).toContain(
+				"Failed to deserialize job application",
+			);
+		}
+	});
+
+	test("findByStatusCategory comparator chooses latest entry", async () => {
+		const file = tempFile("jsonrepo-status-sort");
+		const repo = createJobApplicationJsonRepository(file);
+
+		const app = createJobApplication({
+			company: "C",
+			positionTitle: "Dev",
+			applicationDate: new Date().toISOString(),
+		})._unsafeUnwrap();
+		app.newStatus({ current: "applied", category: "active" });
+		app.newStatus({ current: "rejected", category: "inactive" });
+
+		const saveOk = await repo.save(app);
+		expect(saveOk.isOk()).toBe(true);
+
+		const activeRes = await repo.findByStatusCategory("active");
+		expect(activeRes.isOk()).toBe(true);
+		if (!activeRes.isOk()) return;
+		const active = activeRes.value;
+		expect(active.find((a) => a.id === app.id)).toBeUndefined();
+		const inactiveRes = await repo.findByStatusCategory("inactive");
+		expect(inactiveRes.isOk()).toBe(true);
+		if (!inactiveRes.isOk()) return;
+		const inactive = inactiveRes.value;
+		expect(inactive.find((a) => a.id === app.id)).toBeDefined();
+	});
+});
+
+describe("JobApplicationMemoryRepository comparator coverage", () => {
+	test("findByStatusCategory sorts statusLog by ISO timestamp to pick latest", async () => {
+		const repo = createJobApplicationMemoryRepository();
+		const app = createJobApplication({
+			company: "Acme",
+			positionTitle: "Dev",
+			applicationDate: new Date("2020-01-01T00:00:00.000Z").toISOString(),
+		})._unsafeUnwrap();
+
+		// add two statuses to exercise toSorted comparator
+		app.newStatus({ current: "applied", category: "active" });
+		// advance time within entity logic
+		app.newStatus({ current: "rejected", category: "inactive" });
+
+		const saveRes = await repo.save(app);
+		expect(saveRes.isOk()).toBe(true);
+
+		const activeRes = await repo.findByStatusCategory("active");
+		expect(activeRes.isOk()).toBe(true);
+		if (!activeRes.isOk()) return;
+		const active = activeRes.value;
+		// latest status is inactive, so app should not be in active list
+		expect(active.find((a) => a.id === app.id)).toBeUndefined();
+
+		const inactiveRes = await repo.findByStatusCategory("inactive");
+		expect(inactiveRes.isOk()).toBe(true);
+		if (!inactiveRes.isOk()) return;
+		const inactive = inactiveRes.value;
+		expect(inactive.find((a) => a.id === app.id)).toBeDefined();
 	});
 });
