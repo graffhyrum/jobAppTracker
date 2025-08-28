@@ -5,6 +5,45 @@ import { healthcheckPage } from "./presentation/pages/healthcheck";
 import { homepagePage } from "./presentation/pages/homepage";
 import { createApplicationsRoutes } from "./presentation/routes/applications";
 
+// Helper function to serve CSS files with proper error handling
+const serveCSSFile = (filePath: string, fileName: string) => {
+	return async (): Promise<Response> => {
+		try {
+			const file = Bun.file(filePath);
+			const exists = await file.exists();
+			if (!exists) {
+				return new Response("CSS file not found", {
+					status: 404,
+					headers: { "Content-Type": "text/plain" },
+				});
+			}
+			return new Response(file, {
+				headers: {
+					"Content-Type": "text/css",
+					"Cache-Control": "public, max-age=3600",
+				},
+			});
+		} catch (error) {
+			console.error(`Error serving ${fileName}:`, error);
+			return new Response("Internal server error", {
+				status: 500,
+				headers: { "Content-Type": "text/plain" },
+			});
+		}
+	};
+};
+
+// Generate CSS routes dynamically
+const createCSSRoutes = (cssFiles: string[]) => {
+	const routes: Record<string, () => Promise<Response>> = {};
+	for (const fileName of cssFiles) {
+		const route = `/styles/${fileName}`;
+		const filePath = `./src/presentation/styles/${fileName}`;
+		routes[route] = serveCSSFile(filePath, fileName);
+	}
+	return routes;
+};
+
 main();
 
 function main() {
@@ -21,6 +60,16 @@ function startBunServer() {
 		jobApplicationRepository,
 	);
 	const applicationRoutes = createApplicationsRoutes(jobApplicationUseCases);
+
+	// Define CSS files to serve
+	const cssFiles = [
+		"base.css",
+		"navbar.css",
+		"forms.css",
+		"pages.css",
+		"pipeline.css",
+	];
+	const cssRoutes = createCSSRoutes(cssFiles);
 
 	const server = Bun.serve({
 		port: 3000,
@@ -50,6 +99,8 @@ function startBunServer() {
 			"/applications": {
 				POST: applicationRoutes.handleCreateApplication,
 			},
+			// Dynamically generated CSS routes
+			...cssRoutes,
 		},
 		fetch(_request) {
 			return new Response("Not Found", { status: 404 });

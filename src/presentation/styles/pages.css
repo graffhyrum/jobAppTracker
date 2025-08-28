@@ -1,0 +1,134 @@
+/* Page-specific styles */
+
+/* Homepage specific styles */
+.homepage .page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 24px;
+	gap: 24px;
+}
+
+.homepage .header-content {
+	flex: 1;
+}
+
+.homepage .header-content h1 {
+	margin: 0 0 8px 0;
+	color: #333;
+}
+
+.homepage .header-content p {
+	margin: 0;
+	color: #666;
+	font-size: 16px;
+}
+
+.homepage .add-button {
+	display: inline-flex;
+	align-items: center;
+	padding: 14px 24px;
+	background-color: #4caf50;
+	color: white;
+	text-decoration: none;
+	border-radius: 6px;
+	font-weight: 600;
+	font-size: 16px;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+	box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3);
+}
+
+.homepage .add-button:hover {
+	background-color: #45a049;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(76, 175, 80, 0.4);
+}
+
+/* Health check page specific styles */
+.health-status {
+	background-color: white;
+	padding: 20px;
+	border-radius: 8px;
+	box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.health-status .status-ok {
+	color: #28a745;
+	font-weight: bold;
+}
+
+.health-status .status-error {
+	color: #dc3545;
+	font-weight: bold;
+}
+
+.health-status .service-check {
+	margin: 10px 0;
+	padding: 10px;
+	border-left: 4px solid #007bff;
+	background-color: #f8f9fa;
+}
+
+/* Add application page specific styles */
+.add-application-page .page-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 24px;
+	padding-bottom: 16px;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+.add-application-page .page-header h1 {
+	margin: 0;
+	color: #333;
+}
+
+.add-application-page .back-button {
+	display: inline-flex;
+	align-items: center;
+	padding: 10px 16px;
+	background-color: #f5f5f5;
+	color: #666;
+	text-decoration: none;
+	border-radius: 6px;
+	border: 2px solid #e0e0e0;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.add-application-page .back-button:hover {
+	background-color: #eeeeee;
+	border-color: #d0d0d0;
+	color: #333;
+}
+
+.add-application-page .page-content {
+	max-width: 800px;
+}
+
+/* Mobile responsiveness for pages */
+@media (max-width: 768px) {
+	.homepage .page-header {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 16px;
+	}
+
+	.homepage .add-button {
+		align-self: flex-start;
+		font-size: 14px;
+		padding: 12px 20px;
+	}
+
+	.add-application-page .page-header {
+		flex-direction: column;
+		gap: 12px;
+		align-items: flex-start;
+	}
+
+	.add-application-page .back-button {
+		align-self: flex-start;
+	}
+}

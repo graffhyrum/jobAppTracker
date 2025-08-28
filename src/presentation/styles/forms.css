@@ -1,0 +1,105 @@
+/* Form-specific styles for add application form */
+
+.add-application-container {
+	background: white;
+	border-radius: 8px;
+	padding: 24px;
+	margin: 20px 0;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add-application-container h3 {
+	margin-top: 0;
+	margin-bottom: 20px;
+	color: #333;
+	border-bottom: 2px solid #e0e0e0;
+	padding-bottom: 8px;
+}
+
+.add-application-form {
+	display: grid;
+	gap: 16px;
+}
+
+/* Enhanced form input styles for add application */
+.add-application-form .form-group {
+	display: flex;
+	flex-direction: column;
+}
+
+.add-application-form .form-group label {
+	font-weight: 600;
+	margin-bottom: 6px;
+	color: #333;
+}
+
+.add-application-form .form-group input,
+.add-application-form .form-group select,
+.add-application-form .form-group textarea {
+	padding: 10px 12px;
+	border: 2px solid #e0e0e0;
+	border-radius: 4px;
+	font-size: 14px;
+	transition: border-color 0.2s ease;
+}
+
+.add-application-form .form-group input:focus,
+.add-application-form .form-group select:focus,
+.add-application-form .form-group textarea:focus {
+	outline: none;
+	border-color: #4caf50;
+	box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.1);
+}
+
+/* Required field styling for add application form */
+.add-application-form .form-group input[required] + label::after,
+.add-application-form .form-group label[for="company"]::after,
+.add-application-form .form-group label[for="positionTitle"]::after,
+.add-application-form .form-group label[for="applicationDate"]::after {
+	content: " *";
+	color: #f44336;
+}
+
+.add-application-form .form-actions {
+	display: flex;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+.add-application-form .btn-primary,
+.add-application-form .btn-secondary {
+	padding: 12px 24px;
+	border-radius: 4px;
+	font-weight: 600;
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+}
+
+.add-application-form .btn-primary {
+	background-color: #4caf50;
+	color: white;
+}
+
+.add-application-form .btn-primary:hover {
+	background-color: #45a049;
+	transform: translateY(-1px);
+	box-shadow: 0 4px 8px rgba(76, 175, 80, 0.3);
+}
+
+.add-application-form .btn-secondary {
+	background-color: #f5f5f5;
+	color: #666;
+	border: 2px solid #e0e0e0;
+}
+
+.add-application-form .btn-secondary:hover {
+	background-color: #eeeeee;
+	border-color: #d0d0d0;
+}
+
+@media (max-width: 768px) {
+	.add-application-form .form-actions {
+		flex-direction: column;
+	}
+}
