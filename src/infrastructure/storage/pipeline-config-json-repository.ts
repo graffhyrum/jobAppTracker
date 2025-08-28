@@ -46,8 +46,7 @@ export function createPipelineConfigJsonRepository(
 			if (content.trim() === "") {
 				return null;
 			}
-			const parsed = JSON.parse(content);
-			return parsed;
+			return JSON.parse(content);
 		} catch (error) {
 			throw toDatabaseError(`Failed to read from ${filePath}`, error);
 		}

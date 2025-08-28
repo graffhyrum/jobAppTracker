@@ -41,8 +41,7 @@ export function createPDFLibFormFiller(): PDFFormFiller {
 					}
 
 					form.updateFieldAppearances();
-					const filled = await pdfDoc.save();
-					return filled;
+					return await pdfDoc.save();
 				})(),
 				(e) =>
 					createPDFError(
