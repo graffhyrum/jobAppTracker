@@ -16,6 +16,8 @@
 		"check": "biome check",
 		"fix": "biome check --fix",
 		"fixx": "biome check --fix --unsafe",
+		"typecheck": "tsc --noEmit",
+		"vet": "bun fixx && bun typecheck && bun test:all",
 		"prepare": "husky"
 	},
 	"devDependencies": {

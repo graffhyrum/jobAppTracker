@@ -27,10 +27,13 @@ playwright test               # E2E tests with Playwright
 playwright test --ui          # E2E tests with UI
 
 # Code Quality
-biome lint                    # Lint code
-biome format                  # Format code
-biome check                   # Check code (lint + format)
-biome check --fix             # Fix issues automatically
+bun vet                     # An all-inclusive check for linting, styling, compiling, and tests
+bun lint                    # Lint code with biome
+bun format                  # Format code
+bun check                   # Check code (lint + format)
+bun fix                     # Fix issues automatically
+bun typecheck               # use Tsc to check for type errors
+
 ```
 
 ## Architecture
