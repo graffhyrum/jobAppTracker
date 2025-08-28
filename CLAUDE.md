@@ -2,29 +2,25 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+# Project Overview
 
 A single-user job application tracking system built with TypeScript and Bun, following hexagonal architecture principles. The system tracks job applications through customizable pipelines, supports PDF form filling, and includes integrated task management.
 
-## Development Commands
+# Development Commands
 
 ```bash
 # Development (requires SurrealDB running)
-surreal start --log trace memory     # Start SurrealDB in memory mode
-bun run dev                          # Start development server
+bun run dev                          # Start development server in watch mode
 bun run src/index.ts                 # Direct run
 
 # Building
-bun build src/index.ts --target bun --outfile dist/jobapptracker
+bun run build
 
 # Testing
-bun test                      # Run all tests
-bun test tests/unit/          # Unit tests only
-bun test tests/integration/   # Integration tests only
-bun test --coverage           # With coverage
-bun test tests/e2e/          # E2E tests (Playwright)
-playwright test               # E2E tests with Playwright
-playwright test --ui          # E2E tests with UI
+bun test:all                  # Run all tests
+bun test:coverage             # Unit tests with coverage
+bun test:e2e                  # Headless E2E tests (Playwright)
+bun test:e2e:ui               # Headed E2E tests (Playwright)
 
 # Code Quality
 bun vet                     # An all-inclusive check for linting, styling, compiling, and tests
@@ -36,9 +32,9 @@ bun typecheck               # use Tsc to check for type errors
 
 ```
 
-## Architecture
+# Architecture
 
-### Hexagonal Architecture Layers
+## Hexagonal Architecture Layers
 
 - **Domain** (`src/domain/`): Core business logic, entities, and types
   - Entities: JobApplication, Note, PipelineConfig with rich behavior methods
@@ -58,13 +54,13 @@ bun typecheck               # use Tsc to check for type errors
   - HTMX-powered frontend with server-rendered templates
   - RESTful routes served via Bun.serve
 
-### Hexagonal Architecture & Dependency Inversion
+## Hexagonal Architecture & Dependency Inversion
 
 This project strictly follows hexagonal architecture (ports & adapters) with typed holes for dependency inversion:
 
 **Core Principle**: Domain layer defines interfaces (ports/typed holes), infrastructure implements them (adapters).
 
-#### Creating New Abstractions
+### Creating New Abstractions
 
 When adding functionality that requires external dependencies:
 
@@ -150,7 +146,7 @@ Pipeline is customizable through admin interface.
 ## Technology Stack Specifics
 
 - **Runtime**: Bun (use `bun` commands, not `node` or `npm`)
-- **Database**: SurrealDB (multi-model database with graph capabilities)
+- **Database**: JSON flat file using Bun FS I/O
 - **Web**: `Bun.serve` with HTMX (not Express)
 - **Validation**: ArkType for schemas and type inference
 - **Error Handling**: NeverThrow Result types
@@ -175,11 +171,12 @@ src/
 
 - Server runs on `http://localhost:3000` by default
 - SurrealDB runs on `http://localhost:8000` by default
-- Uses tab indentation (configured in biome.json)
+- Uses indentation configured in `biome.json`
 - Follows SOLID principles with dependency inversion
 - Entity methods automatically update `lastUpdated` timestamps
 - Status changes trigger category recalculation
 - PDF templates use field mapping configuration for extensibility
+- Always check work at the end with `bun vet`
 
 ## Error Handling Patterns
 
@@ -232,6 +229,7 @@ const validateInput = (input: unknown) => {
     : Result.ok(result)
 }
 ```
+
 # Code Style
 
 ## Typed Holes for Dependency Inversion
@@ -312,6 +310,14 @@ function listOpenPRs(repo: string, prRepo: PRRepository) {
 -
 - Always use const or let for variables, never 'var'.
 - Prefer using nullish coalescing operator (`??`) instead of logical or (`||`), as it is a safer operator.
+
+# Unit Test Guidelines
+- Create unit test files 'next to' the files they test. EG: for `someFeature.ts`, create `someFeature.test.ts`
+- Only test the API contract of a module, never the implementation.
+- Create as few tests as possible to reach the coverage target (95%)
+- Before adding tests, always check if the system under test could be refactored to improve testability without changing functionality. If you think it can, propose the changes to the user but *DO NOT* apply them. 
+
+# Utility Types
 
 ## Core Utility Types
 
@@ -502,7 +508,7 @@ Uncapitalize first character of string literal.
 
 Use these with template literal types for compile-time string transformations.
 
-## Application Rules
+# Application Rules
 
 1. **Prefer composition**: Chain utility types for complex transformations
 2. **Type safety first**: Use utility types to maintain type correctness during transformations
@@ -511,4 +517,5 @@ Use these with template literal types for compile-time string transformations.
 5. **Constraints**: Respect TypeScript version requirements for each utility type
 6. **Error handling**: Use conditional types with utility types for robust type definitions
 
+# Memories
 - If there are linter errors in unit tests where `expect(something).toBeDefined()` is called, but TS has `TS2532: Object is possibly undefined` errors because `expect()` doesn't narrow the type, for each place in the tests where `expect(x).toBeDefined()` is used, instead use `expectDefined` as a type-narrowing wrapper around bun's `expect`.
