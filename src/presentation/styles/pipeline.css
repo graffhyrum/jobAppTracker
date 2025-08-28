@@ -81,7 +81,9 @@
 	align-items: center;
 }
 
-.search-input, .filter-select, .page-size-select {
+.search-input,
+.filter-select,
+.page-size-select {
 	padding: 8px 12px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
@@ -93,11 +95,14 @@
 	min-width: 200px;
 }
 
-.filter-select, .page-size-select {
+.filter-select,
+.page-size-select {
 	min-width: 120px;
 }
 
-.search-input:focus, .filter-select:focus, .page-size-select:focus {
+.search-input:focus,
+.filter-select:focus,
+.page-size-select:focus {
 	outline: none;
 	border-color: #4caf50;
 	box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
@@ -143,11 +148,11 @@
 }
 
 .sortable.sort-asc .sort-indicator::after {
-	content: '🔼';
+	content: "🔼";
 }
 
 .sortable.sort-desc .sort-indicator::after {
-	content: '🔽';
+	content: "🔽";
 }
 
 .applications-table td {
@@ -309,7 +314,8 @@
 		align-items: stretch;
 	}
 
-	.search-input, .filter-select {
+	.search-input,
+	.filter-select {
 		min-width: auto;
 	}
 
@@ -332,7 +338,7 @@
 	.company-cell {
 		min-width: 100px;
 	}
-	
+
 	.position-cell {
 		min-width: 120px;
 	}
@@ -347,7 +353,7 @@
 	.application-date-cell {
 		display: none;
 	}
-	
+
 	.next-event-cell {
 		display: none;
 	}
@@ -360,4 +366,91 @@
 		padding: 6px 12px;
 		font-size: 0.8em;
 	}
+}
+
+/* Click-to-Edit Styles */
+.editable-cell {
+	cursor: pointer;
+	position: relative;
+	transition: background-color 0.2s ease;
+}
+
+.editable-cell:hover {
+	background-color: #f8f9fa;
+}
+
+.editable-cell::after {
+	content: "✏️";
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	font-size: 0.7em;
+}
+
+.editable-cell:hover::after {
+	opacity: 0.5;
+}
+
+.editing {
+	background-color: #fff3cd;
+	padding: 4px;
+}
+
+.edit-input,
+.edit-select {
+	width: 100%;
+	border: 1px solid #ced4da;
+	border-radius: 4px;
+	padding: 4px 8px;
+	font-size: inherit;
+	font-family: inherit;
+}
+
+.edit-input:focus,
+.edit-select:focus {
+	outline: none;
+	border-color: #80bdff;
+	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+.edit-buttons {
+	display: flex;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+.save-btn,
+.cancel-btn {
+	padding: 2px 8px;
+	border: none;
+	border-radius: 3px;
+	font-size: 0.8em;
+	cursor: pointer;
+	transition: background-color 0.2s ease;
+}
+
+.save-btn {
+	background-color: #28a745;
+	color: white;
+}
+
+.save-btn:hover {
+	background-color: #218838;
+}
+
+.cancel-btn {
+	background-color: #6c757d;
+	color: white;
+}
+
+.cancel-btn:hover {
+	background-color: #5a6268;
+}
+
+.no-date {
+	color: #6c757d;
+	font-style: italic;
 }

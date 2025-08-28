@@ -61,23 +61,42 @@ export const pipelineComponent = (
 
 		return `
 			<tr class="application-row ${statusCategory} ${isOverdue ? "overdue" : ""}">
-				<td class="company-cell">${app.company}</td>
-				<td class="position-cell">${app.positionTitle}</td>
-				<td class="status-cell">
+				<td class="company-cell editable-cell" 
+					hx-get="/applications/${app.id}/edit/company" 
+					hx-target="this" 
+					hx-swap="outerHTML"
+					title="Click to edit company">${app.company}</td>
+				<td class="position-cell editable-cell" 
+					hx-get="/applications/${app.id}/edit/position" 
+					hx-target="this" 
+					hx-swap="outerHTML"
+					title="Click to edit position">${app.positionTitle}</td>
+				<td class="status-cell editable-cell" 
+					hx-get="/applications/${app.id}/edit/status" 
+					hx-target="this" 
+					hx-swap="outerHTML"
+					title="Click to edit status">
 					<span class="status-badge ${statusCategory}">${statusText}</span>
 				</td>
 				<td class="application-date-cell">${formatDate(app.applicationDate)}</td>
 				<td class="updated-date-cell">${formatDate(app.updatedAt)}</td>
-				<td class="interest-cell">${formatInterestRating(app.interestRating)}</td>
-				<td class="next-event-cell">
+				<td class="interest-cell editable-cell" 
+					hx-get="/applications/${app.id}/edit/interest" 
+					hx-target="this" 
+					hx-swap="outerHTML"
+					title="Click to edit interest rating">${formatInterestRating(app.interestRating)}</td>
+				<td class="next-event-cell editable-cell" 
+					hx-get="/applications/${app.id}/edit/nextEvent" 
+					hx-target="this" 
+					hx-swap="outerHTML"
+					title="Click to edit next event date">
 					${
 						app.nextEventDate
 							? `<span class="${isOverdue ? "overdue-date" : ""}">${formatDate(app.nextEventDate)}</span>`
-							: ""
+							: '<span class="no-date">No date set</span>'
 					}
 				</td>
 				<td class="actions-cell">
-					<button class="action-btn edit" title="Edit">✏️</button>
 					<button class="action-btn view" title="View Details">👁️</button>
 				</td>
 			</tr>
@@ -389,22 +408,41 @@ export const pipelineComponent = (
 					tbody.innerHTML = pageData.map(app => {
 						return \`
 							<tr class="application-row \${app.statusCategory} \${app.isOverdue ? 'overdue' : ''}">
-								<td class="company-cell">\${app.company}</td>
-								<td class="position-cell">\${app.positionTitle}</td>
-								<td class="status-cell">
+								<td class="company-cell editable-cell" 
+									hx-get="/applications/\${app.id}/edit/company" 
+									hx-target="this" 
+									hx-swap="outerHTML"
+									title="Click to edit company">\${app.company}</td>
+								<td class="position-cell editable-cell" 
+									hx-get="/applications/\${app.id}/edit/position" 
+									hx-target="this" 
+									hx-swap="outerHTML"
+									title="Click to edit position">\${app.positionTitle}</td>
+								<td class="status-cell editable-cell" 
+									hx-get="/applications/\${app.id}/edit/status" 
+									hx-target="this" 
+									hx-swap="outerHTML"
+									title="Click to edit status">
 									<span class="status-badge \${app.statusCategory}">\${app.status}</span>
 								</td>
 								<td class="application-date-cell">\${formatDate(app.applicationDate)}</td>
 								<td class="updated-date-cell">\${formatDate(app.updatedAt)}</td>
-								<td class="interest-cell">\${formatInterestRating(app.interestRating)}</td>
-								<td class="next-event-cell">
+								<td class="interest-cell editable-cell" 
+									hx-get="/applications/\${app.id}/edit/interest" 
+									hx-target="this" 
+									hx-swap="outerHTML"
+									title="Click to edit interest rating">\${formatInterestRating(app.interestRating)}</td>
+								<td class="next-event-cell editable-cell" 
+									hx-get="/applications/\${app.id}/edit/nextEvent" 
+									hx-target="this" 
+									hx-swap="outerHTML"
+									title="Click to edit next event date">
 									\${app.nextEventDate 
 										? \`<span class="\${app.isOverdue ? 'overdue-date' : ''}">\${formatDate(app.nextEventDate)}</span>\`
-										: ""
+										: '<span class="no-date">No date set</span>'
 									}
 								</td>
 								<td class="actions-cell">
-									<button class="action-btn edit" title="Edit">✏️</button>
 									<button class="action-btn view" title="View Details">👁️</button>
 								</td>
 							</tr>

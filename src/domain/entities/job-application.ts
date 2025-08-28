@@ -49,6 +49,7 @@ export const jobApplicationModule = jobApplicationScope.export();
 type JobApp = typeof jobApplicationModule.JobApp.infer & {
 	notes: NotesCollection;
 };
+
 export type JobApplicationForCreate =
 	typeof jobApplicationModule.forCreate.infer;
 function assertIsJobApplicationForCreate(
@@ -56,6 +57,7 @@ function assertIsJobApplicationForCreate(
 ): asserts x is JobApplicationForCreate {
 	jobApplicationModule.forCreate.assert(x);
 }
+
 type JobApplicationForUpdate = typeof jobApplicationModule.forUpdate.infer;
 type JobApplicationId = typeof jobApplicationModule.JobAppId.infer;
 export type ApplicationStatus =

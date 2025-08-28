@@ -102,7 +102,43 @@ function startBunServer() {
 			// Dynamically generated CSS routes
 			...cssRoutes,
 		},
-		fetch(_request) {
+		fetch(request) {
+			const url = new URL(request.url);
+			const pathname = url.pathname;
+
+			// Handle parameterized application routes
+			const applicationEditMatch = pathname.match(
+				/^\/applications\/([^/]+)\/edit\/([^/]+)$/,
+			);
+			if (applicationEditMatch) {
+				const [, applicationId, field] = applicationEditMatch;
+				if (applicationId && field) {
+					return applicationRoutes.handleGetEditField(
+						request,
+						applicationId,
+						field,
+					);
+				}
+			}
+
+			const applicationMatch = pathname.match(/^\/applications\/([^/]+)$/);
+			if (applicationMatch) {
+				const [, applicationId] = applicationMatch;
+				if (applicationId) {
+					if (request.method === "GET") {
+						return applicationRoutes.handleGetApplication(
+							request,
+							applicationId,
+						);
+					} else if (request.method === "PUT") {
+						return applicationRoutes.handleUpdateApplication(
+							request,
+							applicationId,
+						);
+					}
+				}
+			}
+
 			return new Response("Not Found", { status: 404 });
 		},
 		development: {
