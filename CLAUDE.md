@@ -507,3 +507,5 @@ Use these with template literal types for compile-time string transformations.
 4. **Performance**: Utility types are compile-time only and have no runtime cost
 5. **Constraints**: Respect TypeScript version requirements for each utility type
 6. **Error handling**: Use conditional types with utility types for robust type definitions
+
+- If there are linter errors in unit tests where `expect(something).toBeDefined()` is called, but TS has `TS2532: Object is possibly undefined` errors because `expect()` doesn't narrow the type, for each place in the tests where `expect(x).toBeDefined()` is used, instead use `expectDefined` as a type-narrowing wrapper around bun's `expect`.
