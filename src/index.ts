@@ -1,5 +1,9 @@
+import { createJobApplicationUseCases } from "./domain/use-cases/job-application-use-cases";
+import { createJobApplicationJsonRepository } from "./infrastructure/storage/job-application-json-repository";
+import { addApplicationPage } from "./presentation/pages/add-application";
 import { healthcheckPage } from "./presentation/pages/healthcheck";
 import { homepagePage } from "./presentation/pages/homepage";
+import { createApplicationsRoutes } from "./presentation/routes/applications";
 
 main();
 
@@ -9,11 +13,27 @@ function main() {
 }
 
 function startBunServer() {
+	// Set up dependencies following hexagonal architecture
+	const jobApplicationRepository = createJobApplicationJsonRepository(
+		"./data/job-applications.json",
+	);
+	const jobApplicationUseCases = createJobApplicationUseCases(
+		jobApplicationRepository,
+	);
+	const applicationRoutes = createApplicationsRoutes(jobApplicationUseCases);
+
 	const server = Bun.serve({
 		port: 3000,
 		routes: {
-			"/": () => {
-				return new Response(homepagePage(), {
+			"/": async () => {
+				// Fetch applications to show in the pipeline
+				const applicationsResult =
+					await jobApplicationUseCases.getAllJobApplications();
+				const applications = applicationsResult.isOk()
+					? applicationsResult.value
+					: [];
+
+				return new Response(homepagePage(applications), {
 					headers: { "Content-Type": "text/html" },
 				});
 			},
@@ -21,6 +41,14 @@ function startBunServer() {
 				return new Response(healthcheckPage(), {
 					headers: { "Content-Type": "text/html" },
 				});
+			},
+			"/add": () => {
+				return new Response(addApplicationPage(), {
+					headers: { "Content-Type": "text/html" },
+				});
+			},
+			"/applications": {
+				POST: applicationRoutes.handleCreateApplication,
 			},
 		},
 		fetch(_request) {
