@@ -1,9 +1,9 @@
 # Project Guidelines
+# Project Overview
 
-## Project Overview
-JobAppTracker is a TypeScript project for tracking job applications, their stages in a pipeline, and related notes, built with TypeScript and Bun, following hexagonal architecture principles. The system tracks job applications through customizable pipelines, supports PDF form filling, and includes integrated task management.
+A single-user job application tracking system built with TypeScript and Bun, following hexagonal architecture principles. The system tracks job applications through customizable pipelines, supports PDF form filling, and includes integrated task management.
 
-## Development Commands
+# Development Commands
 
 ```bash
 # Development (requires SurrealDB running)
@@ -34,22 +34,22 @@ bun typecheck               # use Tsc to check for type errors
 ## Hexagonal Architecture Layers
 
 - **Domain** (`src/domain/`): Core business logic, entities, and types
-  - Entities: JobApplication, Note, PipelineConfig with rich behavior methods
-  - Types: StatusCategory, ApplicationStatus, InterestRating
-  - Pure functions and domain logic, no external dependencies
+    - Entities: JobApplication, Note, PipelineConfig with rich behavior methods
+    - Types: StatusCategory, ApplicationStatus, InterestRating
+    - Pure functions and domain logic, no external dependencies
 
 - **Application** (`src/application/`): Use cases and application services
-  - Orchestrates domain entities and infrastructure adapters
-  - Contains business workflows and validation logic
+    - Orchestrates domain entities and infrastructure adapters
+    - Contains business workflows and validation logic
 
 - **Infrastructure** (`src/infrastructure/`): External adapters
-  - Database: SurrealDB operations with native JavaScript SDK
-  - PDF: Form filling using PDF-lib
-  - File system operations
+    - Database: SurrealDB operations with native JavaScript SDK
+    - PDF: Form filling using PDF-lib
+    - File system operations
 
 - **Presentation** (`src/presentation/`): Web interface
-  - HTMX-powered frontend with server-rendered templates
-  - RESTful routes served via Bun.serve
+    - HTMX-powered frontend with server-rendered templates
+    - RESTful routes served via Bun.serve
 
 ## Hexagonal Architecture & Dependency Inversion
 
@@ -100,7 +100,7 @@ When adding functionality that requires external dependencies:
 #### Why This Matters
 
 - **Testability**: Every external dependency has a test double
-- **Flexibility**: Switch implementations without changing business logic  
+- **Flexibility**: Switch implementations without changing business logic
 - **Isolation**: Domain layer remains pure, infrastructure changes don't cascade
 - **Interface Evolution**: When changing an interface, you must update both real and test implementations
 
@@ -118,8 +118,8 @@ When adding functionality that requires external dependencies:
 Two-tier status system:
 - **Status Categories**: `active` | `inactive`
 - **Statuses**: Auto-categorized based on predefined lists
-  - Active: applied, screening interview, interview, onsite, online test, take-home assignment, offer
-  - Inactive: rejected, no response, no longer interested, hiring freeze
+    - Active: applied, screening interview, interview, onsite, online test, take-home assignment, offer
+    - Inactive: rejected, no response, no longer interested, hiring freeze
 
 Pipeline is customizable through admin interface.
 
@@ -151,8 +151,8 @@ Pipeline is customizable through admin interface.
 - **Testing**: Built-in Bun test runner + Playwright for E2E
 - **Linting**: Biome (replaces ESLint/Prettier)
 
-## Repository Structure
-### [src/](src/)
+## File Structure Conventions
+
 ```
 src/
 ├── domain/           # Pure business logic, no external deps
@@ -163,48 +163,17 @@ src/
 ├── infrastructure/   # External system adapters
 └── presentation/     # HTMX web interface
 ```
-- [/tests](/test)
-  - helpers/ — test utilities (e.g., test database helpers)
-  - integration/ — integration tests
-  - e2e/ — Playwright end-to-end tests
-- docs/ — documentation (e.g., RCA.md)
-- .junie/guidelines.md — these guidelines
 
 ## Development Notes
 
 - Server runs on `http://localhost:3000` by default
+- SurrealDB runs on `http://localhost:8000` by default
 - Uses indentation configured in `biome.json`
 - Follows SOLID principles with dependency inversion
 - Entity methods automatically update `lastUpdated` timestamps
 - Status changes trigger category recalculation
 - PDF templates use field mapping configuration for extensibility
 - Always check work at the end with `bun vet`
-
-## Setup
-- Node runtime: project uses Bun (bun.lock present). 
-- Install dependencies: `bun install`
-
-## Running Tests
-- Unit/Integration tests: if using Bun test runner, run `bun test`. If using a different runner, check package.json scripts.
-- Playwright e2e tests: `bunx playwright test` (ensure browsers are installed: `bunx playwright install`).
-- Some tests rely on helpers in tests/helpers; no special DB service should be required beyond in-memory/test helpers.
-
-## Linting/Formatting
-- Biome is configured (biome.json). To lint/format:
-  - If a script exists: `bun run lint`
-  - Otherwise, run Biome directly (e.g., `bunx @biomejs/biome check .`)
-- TypeScript: ensure `tsc --noEmit` passes if type-check scripts exist.
-
-## How Junie Should Work on This Repo
-1. Make minimal changes necessary to satisfy issues.
-2. Before submitting:
-   - Run tests: unit/integration via `bun test` and e2e if relevant changes affect UI/flows.
-   - Run linter/formatter if scripts exist.
-3. Do not introduce new external dependencies unless required by the issue.
-4. Keep the code style consistent with existing patterns; favor explicit typing in the domain layer.
-5. Update docs when behavior or public APIs change.
-
-# Code Style
 
 ## Error Handling Patterns
 
@@ -335,7 +304,7 @@ function listOpenPRs(repo: string, prRepo: PRRepository) {
 - Use named functions unless infeasible.
 - Prefer 'unknown' over 'any' for vague types.
 - No type casting or ES6 classes without explicit permission.
-- 
+-
 - Always use const or let for variables, never 'var'.
 - Prefer using nullish coalescing operator (`??`) instead of logical or (`||`), as it is a safer operator.
 
@@ -343,7 +312,7 @@ function listOpenPRs(repo: string, prRepo: PRRepository) {
 - Create unit test files 'next to' the files they test. EG: for `someFeature.ts`, create `someFeature.test.ts`
 - Only test the API contract of a module, never the implementation.
 - Create as few tests as possible to reach the coverage target (95%)
-- Before adding tests, always check if the system under test could be refactored to improve testability without changing functionality. If you think it can, propose the changes to the user but *DO NOT* apply them. 
+- Before adding tests, always check if the system under test could be refactored to improve testability without changing functionality. If you think it can, propose the changes to the user but *DO NOT* apply them.
 
 # Utility Types
 
@@ -536,7 +505,7 @@ Uncapitalize first character of string literal.
 
 Use these with template literal types for compile-time string transformations.
 
-## Application Rules
+# Application Rules
 
 1. **Prefer composition**: Chain utility types for complex transformations
 2. **Type safety first**: Use utility types to maintain type correctness during transformations
@@ -545,6 +514,6 @@ Use these with template literal types for compile-time string transformations.
 5. **Constraints**: Respect TypeScript version requirements for each utility type
 6. **Error handling**: Use conditional types with utility types for robust type definitions
 
-## Notes
-- keep entities pure and side-effect free.
+# Memories
 - If there are linter errors in unit tests where `expect(something).toBeDefined()` is called, but TS has `TS2532: Object is possibly undefined` errors because `expect()` doesn't narrow the type, for each place in the tests where `expect(x).toBeDefined()` is used, instead use `expectDefined` as a type-narrowing wrapper around bun's `expect`.
+- When working with HTML, reference [THIS GUIDE FILE](docs/ai/HTML_GUIDE.md) for instructions on HTML conventions for the project.
