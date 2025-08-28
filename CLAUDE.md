@@ -519,4 +519,4 @@ Use these with template literal types for compile-time string transformations.
 
 # Memories
 - If there are linter errors in unit tests where `expect(something).toBeDefined()` is called, but TS has `TS2532: Object is possibly undefined` errors because `expect()` doesn't narrow the type, for each place in the tests where `expect(x).toBeDefined()` is used, instead use `expectDefined` as a type-narrowing wrapper around bun's `expect`.
-- When working with HTML, reference [THIS GUIDE FILE](HTML_GUIDE.md) for instructions on HTML conventions for the project.
+- When working with HTML, reference [THIS GUIDE FILE](docs/ai/HTML_GUIDE.md) for instructions on HTML conventions for the project.

@@ -187,6 +187,7 @@ Use modern input types for better user experience and validation:
 ```
 
 ### Don't Use Divs for Everything
+
 ```html
 <!-- Bad: Generic containers -->
 <div class="header">
