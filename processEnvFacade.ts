@@ -1,31 +1,29 @@
+import { type } from "arktype";
+import "dotenv/config";
+
+const processEnvSchema = type({
+	BASE_URL: "string.url",
+	PORT: type("string")
+		.pipe((s) => Number(s))
+		.to("number"),
+});
+
+// console.dir(
+// 	Object.entries(process.env).filter(([k, _v]) =>
+// 		["BASE_URL", "PORT"].includes(k),
+// 	),
+// );
+
 /**
- * ProcessEnvFacade is an object that provides methods to interact with environment variables.
- * It provides methods to get, set, and validate environment variables.
+ * The `processEnv` variable represents the validated and schema-checked
+ * environment variables of the current Node.js process. It ensures that
+ * the environment variables conform to the defined structure and types
+ * specified in the `processEnvSchema`.
+ *
+ * This variable is typically used to access configuration values or settings
+ * that are injected through environment variables during application runtime.
+ *
+ * The environment variables are validated using the `processEnvSchema`, and any
+ * invalid or missing variables will trigger a validation error.
  */
-const ProcessEnvFacade = {
-	getValueOrThrow: (key: keyof NodeJS.ProcessEnv): string => {
-		const maybeKey = process.env[key];
-		if (!maybeKey) {
-			throw new Error(`Environment variable ${key} is not set`);
-		}
-		return maybeKey;
-	},
-
-	getValueOrExit: (key: keyof NodeJS.ProcessEnv): string => {
-		const maybeKey = process.env[key];
-		if (!maybeKey) {
-			console.error(`Environment variable ${key} is not set`);
-			process.exit(1);
-		}
-		return maybeKey;
-	},
-
-	getValue: (key: keyof NodeJS.ProcessEnv): string | undefined =>
-		process.env[key],
-
-	setValue: (key: keyof NodeJS.ProcessEnv, value: string) => {
-		process.env[key] = value;
-	},
-};
-
-export default ProcessEnvFacade;
+export const processEnv = processEnvSchema.assert(process.env);

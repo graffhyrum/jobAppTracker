@@ -1,6 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import { processEnv } from "./processEnvFacade.ts";
 
-const baseURL = "http://localhost:3000";
+const baseURL = `${processEnv.BASE_URL}:${processEnv.PORT}`;
 
 export default defineConfig({
 	testDir: "./tests/e2e",

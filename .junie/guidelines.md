@@ -6,7 +6,7 @@ A single-user job application tracking system built with TypeScript and Bun, fol
 # Development Commands
 
 ```bash
-# Development (requires SurrealDB running)
+# Development
 bun run dev                          # Start development server in watch mode
 bun run src/index.ts                 # Direct run
 
@@ -43,7 +43,6 @@ bun typecheck               # use Tsc to check for type errors
     - Contains business workflows and validation logic
 
 - **Infrastructure** (`src/infrastructure/`): External adapters
-    - Database: SurrealDB operations with native JavaScript SDK
     - PDF: Form filling using PDF-lib
     - File system operations
 
@@ -166,8 +165,7 @@ src/
 
 ## Development Notes
 
-- Server runs on `http://localhost:3000` by default
-- SurrealDB runs on `http://localhost:8000` by default
+- Server runs on the host and port defined in `.env` by default
 - Uses indentation configured in `biome.json`
 - Follows SOLID principles with dependency inversion
 - Entity methods automatically update `lastUpdated` timestamps

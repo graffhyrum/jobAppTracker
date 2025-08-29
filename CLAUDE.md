@@ -46,7 +46,6 @@ bun typecheck               # use Tsc to check for type errors
   - Contains business workflows and validation logic
 
 - **Infrastructure** (`src/infrastructure/`): External adapters
-  - Database: SurrealDB operations with native JavaScript SDK
   - PDF: Form filling using PDF-lib
   - File system operations
 
@@ -170,7 +169,6 @@ src/
 ## Development Notes
 
 - Server runs on `http://localhost:3000` by default
-- SurrealDB runs on `http://localhost:8000` by default
 - Uses indentation configured in `biome.json`
 - Follows SOLID principles with dependency inversion
 - Entity methods automatically update `lastUpdated` timestamps

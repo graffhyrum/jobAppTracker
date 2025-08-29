@@ -24,7 +24,6 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 
 - **Runtime**: Bun
 - **Language**: TypeScript
-- **Database**: SurrealDB (multi-model database)
 - **Web Framework**: Bun.serve with HTMX
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
@@ -34,7 +33,6 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 
 ### Prerequisites
 - [Bun](https://bun.sh/) v1.2.21 or later
-- [SurrealDB](https://surrealdb.com/) v2.0 or later
 
 ### Installation
 
@@ -50,25 +48,21 @@ bun install
 ### Development
 
 ```bash
-# Start SurrealDB (in a separate terminal)
-surreal start --log trace memory
-
 # Run in development mode
-bun run src/index.ts
+bun dev
 
 # Run tests
 bun test
 
 # Build for production
-bun build src/index.ts --target bun --outfile dist/jobapptracker
+bun build
 ```
 
 ### Usage
 
-1. Start SurrealDB: `surreal start --log trace memory`
-2. Start the application: `bun run src/index.ts`
-3. Open your browser to `http://localhost:3000`
-4. Begin tracking your job applications!
+1. Start the application: `bun run src/index.ts`
+2. Open your browser to the host and port defined in `.env`
+3. Begin tracking your job applications!
 
 ## Project Structure
 
@@ -76,7 +70,6 @@ bun build src/index.ts --target bun --outfile dist/jobapptracker
 src/
 ├── domain/           # Core business logic
 ├── application/      # Use cases and application services  
-├── infrastructure/   # SurrealDB, PDF, file system adapters
 ├── presentation/     # Web routes and HTMX templates
 └── index.ts         # Application entry point
 
