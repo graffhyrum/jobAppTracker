@@ -515,6 +515,58 @@ Use these with template literal types for compile-time string transformations.
 5. **Constraints**: Respect TypeScript version requirements for each utility type
 6. **Error handling**: Use conditional types with utility types for robust type definitions
 
+# GitHub CLI Integration
+
+This project uses the GitHub CLI (`gh`) tool for all GitHub-related operations. Always use `gh` commands instead of direct API calls or web interface actions.
+
+## Available Commands
+
+Use `gh --help` or `gh <command> --help` to explore available commands and their usage. Key command categories include:
+
+- **Repository operations**: `gh repo` - create, clone, fork, view repositories
+- **Pull requests**: `gh pr` - create, list, view, merge, review pull requests  
+- **Issues**: `gh issue` - create, list, view, close issues
+- **Authentication**: `gh auth` - login, logout, status, token management
+- **Releases**: `gh release` - create, list, view, download releases
+- **Workflows**: `gh workflow` - run, list, view GitHub Actions workflows
+- **SSH keys**: `gh ssh-key` - add, list, delete SSH keys
+
+## Common Usage Patterns
+
+```bash
+# Get help for any command
+gh --help
+gh pr --help
+gh issue --help
+
+# Repository operations
+gh repo view                    # View current repository
+gh repo create                  # Create new repository
+gh repo clone owner/repo        # Clone repository
+
+# Pull requests
+gh pr create                    # Create new pull request
+gh pr list                      # List pull requests
+gh pr view 123                  # View specific PR
+gh pr merge 123                 # Merge pull request
+
+# Issues
+gh issue create                 # Create new issue
+gh issue list                   # List issues
+gh issue close 456             # Close issue
+
+# Authentication
+gh auth status                  # Check authentication status
+gh auth login                   # Login to GitHub
+```
+
+## Integration Rules
+
+- Always use `gh` for GitHub operations rather than manual web interface actions
+- Use `gh --help` to discover available commands before implementing GitHub functionality
+- Prefer `gh` over direct GitHub API calls when CLI functionality exists
+- Include proper error handling for GitHub CLI operations
+
 # Memories
 - If there are linter errors in unit tests where `expect(something).toBeDefined()` is called, but TS has `TS2532: Object is possibly undefined` errors because `expect()` doesn't narrow the type, for each place in the tests where `expect(x).toBeDefined()` is used, instead use `expectDefined` as a type-narrowing wrapper around bun's `expect`.
 - When working with HTML, reference [THIS GUIDE FILE](docs/ai/HTML_GUIDE.md) for instructions on HTML conventions for the project.
