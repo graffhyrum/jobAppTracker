@@ -1,0 +1,4 @@
+- [ ] Complete table implementation
+- [ ] Notes flow
+- [ ] bulk edit
+- [ ] pdf integraton
