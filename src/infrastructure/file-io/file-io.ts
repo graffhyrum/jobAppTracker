@@ -58,12 +58,10 @@ export function createFileIOError(
 		cause ? `: ${cause}` : ""
 	}`;
 
-	const error = Object.assign(new Error(message), {
+	return Object.assign(new Error(message), {
 		name: "FileIOError" as const,
 		operation,
 		path,
 		cause,
 	});
-
-	return error;
 }

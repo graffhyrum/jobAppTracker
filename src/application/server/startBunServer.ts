@@ -8,9 +8,8 @@ import { serveCSSFile } from "./serveCSSFile.ts";
 
 export function startBunServer() {
 	// Set up dependencies following hexagonal architecture using DI
-	const jobApplicationRepository = jobApplicationRepositoryProvider;
 	const jobApplicationUseCases = createJobApplicationUseCases(
-		jobApplicationRepository,
+		jobApplicationRepositoryProvider,
 	);
 	const applicationRoutes = createApplicationsRoutes(jobApplicationUseCases);
 
