@@ -3,18 +3,6 @@
 		"playwright": {
 			"command": "bunx",
 			"args": ["@playwright/mcp@latest"]
-		},
-		"jetbrains": {
-			"type": "stdio",
-			"env": {
-				"IJ_MCP_SERVER_PORT": "64342"
-			},
-			"command": "/home/graff/.local/share/JetBrains/Toolbox/apps/webstorm-2/jbr/bin/java",
-			"args": [
-				"-classpath",
-				"/home/graff/.local/share/JetBrains/Toolbox/apps/webstorm-2/plugins/mcpserver/lib/mcpserver-frontend.jar:/home/graff/.local/share/JetBrains/Toolbox/apps/webstorm-2/lib/util-8.jar",
-				"com.intellij.mcpserver.stdio.McpStdioRunnerKt"
-			]
 		}
 	}
 }

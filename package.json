@@ -11,18 +11,21 @@
 		"@playwright/test": "^1.55.0",
 		"@types/bun": "^1.2.21",
 		"@types/node": "^24.3.1",
+		"find-process": "^2.0.0",
 		"htmx.org": "^2.0.6",
 		"husky": "^9.1.7",
 		"lint-staged": "^16.1.6",
 		"memfs": "^4.38.2",
 		"neverthrow": "^8.2.0",
-		"pdf-lib": "^1.17.1"
+		"pdf-lib": "^1.17.1",
+		"tree-kill": "^1.2.2"
 	},
 	"lint-staged": {
 		"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "biome check --no-errors-on-unmatched --fix"
 	},
 	"private": true,
 	"scripts": {
+		"start": "bun run src/index.ts",
 		"dev": "bun --watch run src/index.ts",
 		"build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
 		"test:all": "bun test:unit && bun test:e2e",
@@ -30,14 +33,14 @@
 		"test:unit:ai": "CLAUDECODE=1 bun test",
 		"test:coverage": "bun test --coverage",
 		"test:coverage:ai": "CLAUDECODE=1 bun test --coverage",
-		"test:e2e": "playwright test",
+		"test:e2e": "bun scripts/end-to-end.ts",
 		"test:e2e:ui": "playwright test --ui",
 		"lint": "biome lint",
 		"format": "biome format",
 		"check": "biome check",
 		"fix": "biome check --fix",
 		"fixx": "biome check --fix --unsafe",
-		"typecheck": "tsc --noEmit",
+		"typecheck": "tsgo --noEmit",
 		"vet": "bun fixx && bun typecheck && bun test:all",
 		"prepare": "husky"
 	},

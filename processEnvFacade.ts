@@ -1,16 +1,18 @@
 import { type } from "arktype";
 import "dotenv/config";
 
-const processEnvSchema = type({
+const schemaConfig = {
 	BASE_URL: "string.url",
 	PORT: type("string")
 		.pipe((s) => Number(s))
 		.to("number"),
-});
+} as const satisfies Parameters<typeof type>[0];
+
+const processEnvSchema = type(schemaConfig);
 
 // console.dir(
 // 	Object.entries(process.env).filter(([k, _v]) =>
-// 		["BASE_URL", "PORT"].includes(k),
+// 		Object.keys(schemaConfig).includes(k),
 // 	),
 // );
 

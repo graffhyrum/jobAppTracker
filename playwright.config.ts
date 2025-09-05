@@ -13,7 +13,7 @@ export default defineConfig({
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 1 : undefined,
-	reporter: [["html", { open: "never" }]],
+	reporter: [["dot"], ["html", { open: "never" }]],
 
 	use: {
 		baseURL,
@@ -36,11 +36,4 @@ export default defineConfig({
 		// 	use: { ...devices["Desktop Safari"] },
 		// },
 	],
-
-	webServer: {
-		command: "bun dev",
-		url: baseURL,
-		reuseExistingServer: !process.env.CI,
-		timeout: 120 * 1000,
-	},
 });
