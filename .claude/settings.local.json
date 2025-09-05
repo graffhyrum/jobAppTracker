@@ -1,4 +1,13 @@
 {
-	"enabledMcpjsonServers": ["playwright"],
-	"enableAllProjectMcpServers": true
+	"permissions": {
+		"allow": [
+			"Bash(bun test:e2e:*)",
+			"mcp__playwright__browser_*",
+			"mcp__playwright__browser_navigate",
+			"mcp__playwright__browser_console_messages",
+			"mcp__playwright__browser_close"
+		]
+	},
+	"enableAllProjectMcpServers": true,
+	"enabledMcpjsonServers": ["playwright"]
 }
