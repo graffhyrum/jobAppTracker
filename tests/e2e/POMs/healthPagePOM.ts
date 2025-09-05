@@ -1,8 +1,8 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import type { PageObject, PomFactory } from "../config/PomInterface.ts";
+import type { PageObject, PomFactory } from "../config/ScreenplayTypes.ts";
 import { createNavBar } from "./navBarPOM.ts";
 
-function createHealthPagePOM(page: Page): PageObject {
+function createHealthPagePOM(page: Page) {
 	const locators = {
 		pageTitle: page.locator("[data-testid='page-title']"),
 	} as const satisfies Record<string, Locator>;
@@ -11,6 +11,7 @@ function createHealthPagePOM(page: Page): PageObject {
 
 	return {
 		page,
+		components: {},
 		async goto() {
 			await page.goto("/health");
 		},
@@ -60,8 +61,8 @@ function createHealthPagePOM(page: Page): PageObject {
 				await navBar.assertions.linksAreWhite();
 			},
 		},
-	};
+	} as const satisfies PageObject;
 }
 
-export const createHealthPage: PomFactory = createHealthPagePOM;
+export const createHealthPage = createHealthPagePOM satisfies PomFactory;
 export type HealthPageObject = ReturnType<typeof createHealthPage>;

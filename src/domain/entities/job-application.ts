@@ -1,6 +1,7 @@
 import { scope } from "arktype";
 import { err, ok, type Result } from "neverthrow";
 import { getEntries } from "../../helpers/entries.ts";
+import { uuidGenerationProvider } from "../../infrastructure/di/uuid-generation-provider.ts";
 import { createNotesCollection } from "./note";
 import type { NoteProps, NotesCollection } from "./noteScope.ts";
 
@@ -64,7 +65,9 @@ export type ApplicationStatus =
 	typeof jobApplicationModule.ApplicationStatus.infer;
 
 function getJobApplicationId(): JobApplicationId {
-	return jobApplicationModule.JobAppId.assert(Bun.randomUUIDv7());
+	return jobApplicationModule.JobAppId.assert(
+		uuidGenerationProvider.generateUUID(),
+	);
 }
 
 interface JobApplicationOperations {

@@ -9,6 +9,7 @@ import type {
 	JobApplicationRepository,
 } from "../../domain/ports/job-application-repository";
 import { getEntries } from "../../helpers/entries.ts";
+import { fileIOProvider } from "../di/file-io-provider.ts";
 import type { SerializableJobApplication } from "./types";
 import { toDatabaseError, wrapAsyncOperation } from "./utils";
 
@@ -16,19 +17,31 @@ import { toDatabaseError, wrapAsyncOperation } from "./utils";
  * JSON file-based implementation of JobApplicationRepository using Bun.file
  */
 export function createJobApplicationJsonRepository(
-	filePath: string,
+	filePath: string = "./data/job-applications.json",
 ): JobApplicationRepository {
 	const readData = async (): Promise<SerializableJobApplication[]> => {
 		try {
-			const file = Bun.file(filePath);
-			const exists = await file.exists();
-			if (!exists) {
+			const fileIO = fileIOProvider;
+
+			const existsResult = await fileIO.exists(filePath);
+			if (existsResult.isErr()) {
+				throw existsResult.error;
+			}
+
+			if (!existsResult.value) {
 				return [];
 			}
-			const content = await file.text();
+
+			const contentResult = await fileIO.readText(filePath);
+			if (contentResult.isErr()) {
+				throw contentResult.error;
+			}
+
+			const content = contentResult.value;
 			if (content.trim() === "") {
 				return [];
 			}
+
 			const parsed = JSON.parse(content);
 			return Array.isArray(parsed) ? parsed : [];
 		} catch (error) {
@@ -40,7 +53,13 @@ export function createJobApplicationJsonRepository(
 		data: SerializableJobApplication[],
 	): Promise<void> => {
 		try {
-			await Bun.write(filePath, JSON.stringify(data, null, 2));
+			const fileIO = fileIOProvider;
+			const content = JSON.stringify(data, null, 2);
+
+			const writeResult = await fileIO.writeText(filePath, content);
+			if (writeResult.isErr()) {
+				throw writeResult.error;
+			}
 		} catch (error) {
 			throw toDatabaseError(`Failed to write to ${filePath}`, error);
 		}

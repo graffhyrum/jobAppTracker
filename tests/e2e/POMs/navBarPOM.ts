@@ -1,7 +1,10 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import type { PageObject, PomFactory } from "../config/PomInterface.ts";
+import type {
+	ComponentFactory,
+	ComponentObject,
+} from "../config/ScreenplayTypes.ts";
 
-function createNavBarPOM(page: Page): PageObject {
+function createNavBarPOM(page: Page) {
 	const locators = {
 		navbar: page.getByTestId("navbar"),
 		brand: page.getByTestId("navbar-brand"),
@@ -12,9 +15,7 @@ function createNavBarPOM(page: Page): PageObject {
 
 	return {
 		page,
-		async goto() {
-			// NavBar itself doesn't own navigation; noop
-		},
+		components: {},
 		actions: {
 			async clickHome() {
 				await locators.homeLink.click();
@@ -68,8 +69,8 @@ function createNavBarPOM(page: Page): PageObject {
 				await expect(locators.pageTitle).toHaveText(text);
 			},
 		},
-	} as const;
+	} as const satisfies ComponentObject;
 }
 
-export const createNavBar: PomFactory = createNavBarPOM;
+export const createNavBar = createNavBarPOM satisfies ComponentFactory;
 export type NavBarObject = ReturnType<typeof createNavBar>;

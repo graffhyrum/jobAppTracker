@@ -6,6 +6,7 @@ const schemaConfig = {
 	PORT: type("string")
 		.pipe((s) => Number(s))
 		.to("number"),
+	JOB_APP_REPOSITORY_TYPE: ' "json" | "memory"',
 } as const satisfies Parameters<typeof type>[0];
 
 const processEnvSchema = type(schemaConfig);

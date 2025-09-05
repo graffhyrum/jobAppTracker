@@ -2,7 +2,7 @@ import type { JobApplication } from "../../domain/entities/job-application";
 import type { PipelineConfig } from "../../domain/entities/pipeline-config";
 
 const formatDate = (dateString: string) => {
-	return new Date(dateString).toLocaleDateString();
+	return new Date(dateString).toLocaleDateString("en-US");
 };
 
 const formatInterestRating = (rating?: number) => {
@@ -60,51 +60,56 @@ export const pipelineComponent = (
 		const isOverdue = app.isOverdue();
 
 		return `
-			<tr class="application-row ${statusCategory} ${isOverdue ? "overdue" : ""}">
+			<tr class="application-row ${statusCategory} ${isOverdue ? "overdue" : ""}" data-testid="application-row-${app.id}">
 				<td class="company-cell editable-cell" 
+					data-testid="company-cell-${app.id}"
 					hx-get="/applications/${app.id}/edit/company" 
 					hx-target="this" 
 					hx-swap="outerHTML"
 					title="Click to edit company">${app.company}</td>
 				<td class="position-cell editable-cell" 
+					data-testid="position-cell-${app.id}"
 					hx-get="/applications/${app.id}/edit/position" 
 					hx-target="this" 
 					hx-swap="outerHTML"
 					title="Click to edit position">${app.positionTitle}</td>
 				<td class="status-cell editable-cell" 
+					data-testid="status-cell-${app.id}"
 					hx-get="/applications/${app.id}/edit/status" 
 					hx-target="this" 
 					hx-swap="outerHTML"
 					title="Click to edit status">
-					<span class="status-badge ${statusCategory}">${statusText}</span>
+					<span class="status-badge ${statusCategory}" data-testid="status-badge-${app.id}">${statusText}</span>
 				</td>
-				<td class="application-date-cell">${formatDate(app.applicationDate)}</td>
-				<td class="updated-date-cell">${formatDate(app.updatedAt)}</td>
+				<td class="application-date-cell" data-testid="application-date-cell-${app.id}">${formatDate(app.applicationDate)}</td>
+				<td class="updated-date-cell" data-testid="updated-date-cell-${app.id}">${formatDate(app.updatedAt)}</td>
 				<td class="interest-cell editable-cell" 
+					data-testid="interest-cell-${app.id}"
 					hx-get="/applications/${app.id}/edit/interest" 
 					hx-target="this" 
 					hx-swap="outerHTML"
 					title="Click to edit interest rating">${formatInterestRating(app.interestRating)}</td>
 				<td class="next-event-cell editable-cell" 
+					data-testid="next-event-cell-${app.id}"
 					hx-get="/applications/${app.id}/edit/nextEvent" 
 					hx-target="this" 
 					hx-swap="outerHTML"
 					title="Click to edit next event date">
 					${
 						app.nextEventDate
-							? `<span class="${isOverdue ? "overdue-date" : ""}">${formatDate(app.nextEventDate)}</span>`
-							: '<span class="no-date">No date set</span>'
+							? `<span class="${isOverdue ? "overdue-date" : ""}" data-testid="next-event-date-${app.id}">${formatDate(app.nextEventDate)}</span>`
+							: '<span class="no-date" data-testid="no-next-event-${app.id}">No date set</span>'
 					}
 				</td>
-				<td class="actions-cell">
-					<button class="action-btn view" title="View Details">👁️</button>
+				<td class="actions-cell" data-testid="actions-cell-${app.id}">
+					<button class="action-btn view" data-testid="view-btn-${app.id}" title="View Details">👁️</button>
 				</td>
 			</tr>
 		`;
 	};
 
 	return `
-		<div id="pipeline-container" class="pipeline-container">
+		<div id="pipeline-container" class="pipeline-container" data-testid="pipeline-container">
 			<div class="pipeline-header">
 				<h2>Job Applications</h2>
 				<div class="summary-stats">
@@ -136,12 +141,13 @@ export const pipelineComponent = (
 					<input 
 						type="text" 
 						id="search-filter" 
+						data-testid="search-filter"
 						placeholder="Search company or position..." 
 						class="search-input"
 						aria-label="Search company or position"
 					>
 					<label for="status-filter" class="sr-only">Filter by status</label>
-					<select id="status-filter" class="filter-select" aria-label="Filter by status">
+					<select id="status-filter" data-testid="status-filter" class="filter-select" aria-label="Filter by status">
 						<option value="">All Statuses</option>
 						<option value="active">Active</option>
 						<option value="inactive">Inactive</option>
@@ -153,14 +159,14 @@ export const pipelineComponent = (
 							.join("")}
 					</select>
 					<label for="interest-filter" class="sr-only">Filter by interest level</label>
-					<select id="interest-filter" class="filter-select" aria-label="Filter by interest level">
+					<select id="interest-filter" data-testid="interest-filter" class="filter-select" aria-label="Filter by interest level">
 						<option value="">All Interest Levels</option>
 						<option value="3">High Interest (★★★)</option>
 						<option value="2">Medium Interest (★★☆)</option>
 						<option value="1">Low Interest (★☆☆)</option>
 					</select>
 					<label for="overdue-filter" class="sr-only">Filter by overdue status</label>
-					<select id="overdue-filter" class="filter-select" aria-label="Filter by overdue status">
+					<select id="overdue-filter" data-testid="overdue-filter" class="filter-select" aria-label="Filter by overdue status">
 						<option value="">All Applications</option>
 						<option value="overdue">Overdue Only</option>
 						<option value="upcoming">Upcoming Events</option>
@@ -178,7 +184,7 @@ export const pipelineComponent = (
 			</div>
 			
 			<div class="table-container">
-				<table class="applications-table" id="applications-table" role="table" aria-label="Job applications">
+				<table class="applications-table" id="applications-table" data-testid="applications-table" role="table" aria-label="Job applications">
 					<thead>
 						<tr role="row">
 							<th class="sortable" data-column="company">
@@ -205,7 +211,7 @@ export const pipelineComponent = (
 							<th>Actions</th>
 						</tr>
 					</thead>
-					<tbody id="applications-tbody">
+					<tbody id="applications-tbody" data-testid="applications-tbody">
 						${
 							sortedApplications.length > 0
 								? sortedApplications.map(renderTableRow).join("")
@@ -296,7 +302,7 @@ export const pipelineComponent = (
 
 			// Utility functions
 			function formatDate(dateString) {
-				return new Date(dateString).toLocaleDateString();
+				return new Date(dateString).toLocaleDateString('en-US');
 			}
 
 			function formatInterestRating(rating) {
@@ -407,47 +413,57 @@ export const pipelineComponent = (
 				} else {
 					tbody.innerHTML = pageData.map(app => {
 						return \`
-							<tr class="application-row \${app.statusCategory} \${app.isOverdue ? 'overdue' : ''}">
+							<tr class="application-row \${app.statusCategory} \${app.isOverdue ? 'overdue' : ''}" data-testid="application-row-\${app.id}">
 								<td class="company-cell editable-cell" 
+									data-testid="company-cell-\${app.id}"
 									hx-get="/applications/\${app.id}/edit/company" 
 									hx-target="this" 
 									hx-swap="outerHTML"
 									title="Click to edit company">\${app.company}</td>
 								<td class="position-cell editable-cell" 
+									data-testid="position-cell-\${app.id}"
 									hx-get="/applications/\${app.id}/edit/position" 
 									hx-target="this" 
 									hx-swap="outerHTML"
 									title="Click to edit position">\${app.positionTitle}</td>
 								<td class="status-cell editable-cell" 
+									data-testid="status-cell-\${app.id}"
 									hx-get="/applications/\${app.id}/edit/status" 
 									hx-target="this" 
 									hx-swap="outerHTML"
 									title="Click to edit status">
-									<span class="status-badge \${app.statusCategory}">\${app.status}</span>
+									<span class="status-badge \${app.statusCategory}" data-testid="status-badge-\${app.id}">\${app.status}</span>
 								</td>
-								<td class="application-date-cell">\${formatDate(app.applicationDate)}</td>
-								<td class="updated-date-cell">\${formatDate(app.updatedAt)}</td>
+								<td class="application-date-cell" data-testid="application-date-cell-\${app.id}">\${formatDate(app.applicationDate)}</td>
+								<td class="updated-date-cell" data-testid="updated-date-cell-\${app.id}">\${formatDate(app.updatedAt)}</td>
 								<td class="interest-cell editable-cell" 
+									data-testid="interest-cell-\${app.id}"
 									hx-get="/applications/\${app.id}/edit/interest" 
 									hx-target="this" 
 									hx-swap="outerHTML"
 									title="Click to edit interest rating">\${formatInterestRating(app.interestRating)}</td>
 								<td class="next-event-cell editable-cell" 
+									data-testid="next-event-cell-\${app.id}"
 									hx-get="/applications/\${app.id}/edit/nextEvent" 
 									hx-target="this" 
 									hx-swap="outerHTML"
 									title="Click to edit next event date">
 									\${app.nextEventDate 
-										? \`<span class="\${app.isOverdue ? 'overdue-date' : ''}">\${formatDate(app.nextEventDate)}</span>\`
-										: '<span class="no-date">No date set</span>'
+										? \`<span class="\${app.isOverdue ? 'overdue-date' : ''}" data-testid="next-event-date-\${app.id}">\${formatDate(app.nextEventDate)}</span>\`
+										: '<span class="no-date" data-testid="no-next-event-\${app.id}">No date set</span>'
 									}
 								</td>
-								<td class="actions-cell">
-									<button class="action-btn view" title="View Details">👁️</button>
+								<td class="actions-cell" data-testid="actions-cell-\${app.id}">
+									<button class="action-btn view" data-testid="view-btn-\${app.id}" title="View Details">👁️</button>
 								</td>
 							</tr>
 						\`;
 					}).join('');
+					
+					// Re-process HTMX attributes for dynamically generated content
+					if (typeof htmx !== 'undefined') {
+						htmx.process(tbody);
+					}
 				}
 
 				// Update pagination info
@@ -520,6 +536,41 @@ export const pipelineComponent = (
 						}
 						updateDisplay();
 					});
+				});
+
+				// HTMX event listeners for debugging and error handling
+				document.body.addEventListener('htmx:beforeRequest', function(evt) {
+					console.log('HTMX: Starting request to', evt.detail.requestConfig.url);
+				});
+
+				document.body.addEventListener('htmx:afterRequest', function(evt) {
+					if (evt.detail.successful) {
+						console.log('HTMX: Request successful to', evt.detail.requestConfig.url);
+					} else {
+						console.error('HTMX: Request failed to', evt.detail.requestConfig.url, 'Status:', evt.detail.xhr.status);
+					}
+				});
+
+				document.body.addEventListener('htmx:responseError', function(evt) {
+					console.error('HTMX: Response error for', evt.detail.requestConfig.url, evt.detail.xhr.responseText);
+					// Show user-friendly error message
+					const errorDiv = document.createElement('div');
+					errorDiv.className = 'error-message';
+					errorDiv.textContent = 'Error updating application. Please try again.';
+					errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 12px; border-radius: 4px; z-index: 1000;';
+					document.body.appendChild(errorDiv);
+					setTimeout(() => errorDiv.remove(), 5000);
+				});
+
+				document.body.addEventListener('htmx:sendError', function(evt) {
+					console.error('HTMX: Network error for', evt.detail.requestConfig.url);
+					// Show network error message
+					const errorDiv = document.createElement('div');
+					errorDiv.className = 'error-message';
+					errorDiv.textContent = 'Network error. Please check your connection and try again.';
+					errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 12px; border-radius: 4px; z-index: 1000;';
+					document.body.appendChild(errorDiv);
+					setTimeout(() => errorDiv.remove(), 5000);
 				});
 
 				// Initial display update

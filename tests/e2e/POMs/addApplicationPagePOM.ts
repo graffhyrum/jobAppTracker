@@ -1,17 +1,22 @@
-import { expect, type Locator, type Page } from "@playwright/test";
-import type { PageObject, PomFactory } from "../config/PomInterface.ts";
+import { expect, type Page } from "@playwright/test";
+import type {
+	LocatorConfigMap,
+	PageObject,
+	PomFactory,
+} from "../config/ScreenplayTypes.ts";
 import { createNavBar } from "./navBarPOM.ts";
 
-function createAddApplicationPagePOM(page: Page): PageObject {
+function createAddApplicationPagePOM(page: Page) {
 	const _locators = {
 		// Assuming the page title is present and meaningful for add page
 		pageTitle: page.locator("[data-testid='page-title']"),
-	} as const satisfies Record<string, Locator>;
+	} as const satisfies LocatorConfigMap;
 
 	const navBar = createNavBar(page);
 
 	return {
 		page,
+		components: {},
 		async goto() {
 			await page.goto("/applications/add");
 		},
@@ -61,10 +66,11 @@ function createAddApplicationPagePOM(page: Page): PageObject {
 				await navBar.assertions.linksAreWhite();
 			},
 		},
-	};
+	} as const satisfies PageObject;
 }
 
-export const createAddApplicationPage: PomFactory = createAddApplicationPagePOM;
+export const createAddApplicationPage =
+	createAddApplicationPagePOM satisfies PomFactory;
 export type AddApplicationPageObject = ReturnType<
 	typeof createAddApplicationPage
 >;

@@ -1,6 +1,7 @@
 import { ArkErrors } from "arktype";
 import { err, ok, type Result } from "neverthrow";
 import { getEntries } from "../../helpers/entries.ts";
+import { uuidGenerationProvider } from "../../infrastructure/di/uuid-generation-provider.ts";
 import {
 	type Note,
 	type NoteCollection,
@@ -12,7 +13,7 @@ import {
 } from "./noteScope.ts";
 
 function getNewNoteId(): NoteId {
-	return noteModule.NoteId.assert(Bun.randomUUIDv7());
+	return noteModule.NoteId.assert(uuidGenerationProvider.generateUUID());
 }
 
 export function createNote({

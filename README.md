@@ -43,7 +43,21 @@ cd jobAppTracker
 
 # Install dependencies
 bun install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration (see Environment Variables section)
 ```
+
+### Environment Variables
+
+The following environment variables are required:
+
+| Variable | Type | Description | Example |
+|----------|------|-------------|---------|
+| `BASE_URL` | string | Base URL for the application | `http://localhost` |
+| `PORT` | number | Port number for the server | `3000` |
+| `JOB_APP_REPOSITORY_TYPE` | `"json" \| "memory"` | **Required**. Storage backend type:<br/>- `"json"`: File-based storage (production)<br/>- `"memory"`: In-memory storage (testing) | `"json"` |
 
 ### Development
 

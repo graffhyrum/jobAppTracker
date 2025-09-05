@@ -1,8 +1,8 @@
 import { expect, type Locator, type Page } from "@playwright/test";
-import type { PageObject, PomFactory } from "../config/PomInterface.ts";
+import type { PageObject, PomFactory } from "../config/ScreenplayTypes.ts";
 import { createNavBar } from "./navBarPOM.ts";
 
-function createHomePagePOM(page: Page): PageObject {
+function createHomePagePOM(page: Page) {
 	const locators = {
 		addApplicationBtn: page.getByRole("link", {
 			name: "+ Add New Application",
@@ -14,6 +14,7 @@ function createHomePagePOM(page: Page): PageObject {
 
 	return {
 		page,
+		components: {},
 		async goto() {
 			await page.goto("/");
 		},
@@ -66,8 +67,8 @@ function createHomePagePOM(page: Page): PageObject {
 				await navBar.assertions.linksAreWhite();
 			},
 		},
-	};
+	} as const satisfies PageObject;
 }
 
-export const createHomePage: PomFactory = createHomePagePOM;
+export const createHomePage = createHomePagePOM satisfies PomFactory;
 export type HomePageObject = ReturnType<typeof createHomePage>;

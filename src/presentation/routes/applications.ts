@@ -257,6 +257,7 @@ export function createApplicationsRoutes(useCases: JobApplicationUseCases) {
 					headers: {
 						Location: "/",
 						"HX-Redirect": "/",
+						"X-Application-ID": newApplication.id,
 					},
 				});
 			} catch (error) {
@@ -330,7 +331,7 @@ function renderApplicationDisplayRow(
 	const isOverdue = app.isOverdue();
 
 	const formatDate = (dateString: string) => {
-		return new Date(dateString).toLocaleDateString();
+		return new Date(dateString).toLocaleDateString("en-US");
 	};
 
 	const formatInterestRating = (rating?: number) => {
@@ -392,36 +393,38 @@ function renderEditField(
 	switch (field) {
 		case "company":
 			return `
-				<td class="company-cell editing">
-					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML">
+				<td class="company-cell editing" data-testid="company-cell-editing-${app.id}">
+					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML" 
+						hx-headers='{"X-Application-ID": "${app.id}"}' data-testid="edit-form-${app.id}">
 						<input type="hidden" name="field" value="company">
 						<input type="text" name="value" value="${app.company}" 
-							   class="edit-input" autofocus>
-						<div class="edit-buttons">
-							<button type="submit" class="save-btn">Save</button>
+							   class="edit-input" data-testid="edit-input-${app.id}" autofocus>
+						<div class="edit-buttons" data-testid="edit-buttons-${app.id}">
+							<button type="submit" class="save-btn" data-testid="save-btn-${app.id}">Save</button>
 							<button type="button" 
 								hx-get="/applications/${app.id}" 
 								hx-target="closest tr" 
 								hx-swap="outerHTML" 
-								class="cancel-btn">Cancel</button>
+								class="cancel-btn" data-testid="cancel-btn-${app.id}">Cancel</button>
 						</div>
 					</form>
 				</td>
 			`;
 		case "position":
 			return `
-				<td class="position-cell editing">
-					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML">
+				<td class="position-cell editing" data-testid="position-cell-editing-${app.id}">
+					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML" 
+						hx-headers='{"X-Application-ID": "${app.id}"}' data-testid="edit-form-${app.id}">
 						<input type="hidden" name="field" value="position">
 						<input type="text" name="value" value="${app.positionTitle}" 
-							   class="edit-input" autofocus>
-						<div class="edit-buttons">
-							<button type="submit" class="save-btn">Save</button>
+							   class="edit-input" data-testid="edit-input-${app.id}" autofocus>
+						<div class="edit-buttons" data-testid="edit-buttons-${app.id}">
+							<button type="submit" class="save-btn" data-testid="save-btn-${app.id}">Save</button>
 							<button type="button" 
 								hx-get="/applications/${app.id}" 
 								hx-target="closest tr" 
 								hx-swap="outerHTML" 
-								class="cancel-btn">Cancel</button>
+								class="cancel-btn" data-testid="cancel-btn-${app.id}">Cancel</button>
 						</div>
 					</form>
 				</td>
@@ -432,10 +435,11 @@ function renderEditField(
 				...pipelineConfig.inactive,
 			];
 			return `
-				<td class="status-cell editing">
-					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML">
+				<td class="status-cell editing" data-testid="status-cell-editing-${app.id}">
+					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML" 
+						hx-headers='{"X-Application-ID": "${app.id}"}' data-testid="edit-form-${app.id}">
 						<input type="hidden" name="field" value="status">
-						<select name="value" class="edit-select" autofocus>
+						<select name="value" class="edit-select" data-testid="edit-select-${app.id}" autofocus>
 							${statusOptions
 								.map(
 									(status) =>
@@ -443,13 +447,13 @@ function renderEditField(
 								)
 								.join("")}
 						</select>
-						<div class="edit-buttons">
-							<button type="submit" class="save-btn">Save</button>
+						<div class="edit-buttons" data-testid="edit-buttons-${app.id}">
+							<button type="submit" class="save-btn" data-testid="save-btn-${app.id}">Save</button>
 							<button type="button" 
 								hx-get="/applications/${app.id}" 
 								hx-target="closest tr" 
 								hx-swap="outerHTML" 
-								class="cancel-btn">Cancel</button>
+								class="cancel-btn" data-testid="cancel-btn-${app.id}">Cancel</button>
 						</div>
 					</form>
 				</td>
@@ -457,21 +461,22 @@ function renderEditField(
 		}
 		case "interest":
 			return `
-				<td class="interest-cell editing">
-					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML">
+				<td class="interest-cell editing" data-testid="interest-cell-editing-${app.id}">
+					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML" 
+						hx-headers='{"X-Application-ID": "${app.id}"}' data-testid="edit-form-${app.id}">
 						<input type="hidden" name="field" value="interest">
-						<select name="value" class="edit-select" autofocus>
+						<select name="value" class="edit-select" data-testid="edit-select-${app.id}" autofocus>
 							<option value="1" ${app.interestRating === 1 ? "selected" : ""}>★☆☆</option>
 							<option value="2" ${app.interestRating === 2 ? "selected" : ""}>★★☆</option>
 							<option value="3" ${app.interestRating === 3 ? "selected" : ""}>★★★</option>
 						</select>
-						<div class="edit-buttons">
-							<button type="submit" class="save-btn">Save</button>
+						<div class="edit-buttons" data-testid="edit-buttons-${app.id}">
+							<button type="submit" class="save-btn" data-testid="save-btn-${app.id}">Save</button>
 							<button type="button" 
 								hx-get="/applications/${app.id}" 
 								hx-target="closest tr" 
 								hx-swap="outerHTML" 
-								class="cancel-btn">Cancel</button>
+								class="cancel-btn" data-testid="cancel-btn-${app.id}">Cancel</button>
 						</div>
 					</form>
 				</td>
@@ -481,18 +486,19 @@ function renderEditField(
 				? app.nextEventDate.split("T")[0]
 				: "";
 			return `
-				<td class="next-event-cell editing">
-					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML">
+				<td class="next-event-cell editing" data-testid="next-event-cell-editing-${app.id}">
+					<form hx-put="/applications/${app.id}" hx-target="closest tr" hx-swap="outerHTML" 
+						hx-headers='{"X-Application-ID": "${app.id}"}' data-testid="edit-form-${app.id}">
 						<input type="hidden" name="field" value="nextEvent">
 						<input type="date" name="value" value="${nextEventValue}" 
-							   class="edit-input" autofocus>
-						<div class="edit-buttons">
-							<button type="submit" class="save-btn">Save</button>
+							   class="edit-input" data-testid="edit-input-${app.id}" autofocus>
+						<div class="edit-buttons" data-testid="edit-buttons-${app.id}">
+							<button type="submit" class="save-btn" data-testid="save-btn-${app.id}">Save</button>
 							<button type="button" 
 								hx-get="/applications/${app.id}" 
 								hx-target="closest tr" 
 								hx-swap="outerHTML" 
-								class="cancel-btn">Cancel</button>
+								class="cancel-btn" data-testid="cancel-btn-${app.id}">Cancel</button>
 						</div>
 					</form>
 				</td>

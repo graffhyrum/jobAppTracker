@@ -8,11 +8,16 @@ const baseURL = `${processEnv.BASE_URL}:${processEnv.PORT}`;
 await main();
 
 async function main() {
+	prepareEnvironment();
 	const devServerProc = await findOrStartDevServer();
 	console.time("pollDevServer");
 	await pollDevServer();
 	console.timeEnd("pollDevServer");
-	const e2e = Bun.spawnSync(["playwright", "test"], {
+
+	// Pass through all command line arguments to Playwright
+	const playwrightArgs = ["test", ...process.argv.slice(2)];
+
+	const e2e = Bun.spawnSync(["playwright", ...playwrightArgs], {
 		stdout: "inherit",
 		stderr: "inherit",
 		onExit(_proc, _exitCode, _signalCode, _error): void | Promise<void> {
@@ -24,6 +29,11 @@ async function main() {
 		},
 	});
 	process.exit(e2e.exitCode);
+}
+
+function prepareEnvironment() {
+	Bun.spawnSync(["bun", "install"]);
+	Bun.spawnSync(["bunx", "playwright", "install", "--with-deps"]);
 }
 
 function findOrStartDevServer() {

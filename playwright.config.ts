@@ -15,6 +15,10 @@ export default defineConfig({
 	workers: process.env.CI ? 1 : undefined,
 	reporter: [["dot"], ["html", { open: "never" }]],
 
+	// Global setup and teardown for data isolation
+	globalSetup: "./tests/e2e/global-setup.ts",
+	globalTeardown: "./tests/e2e/global-teardown.ts",
+
 	use: {
 		baseURL,
 		trace: "retain-on-failure",
