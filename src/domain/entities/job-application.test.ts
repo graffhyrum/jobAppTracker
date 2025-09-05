@@ -1,4 +1,4 @@
-import { describe, expect, it } from "bun:test";
+import { describe, expect, test } from "bun:test";
 import { type } from "arktype";
 import { expectDefined } from "../../helpers/expectDefined";
 import type { JobApplicationForCreate } from "./job-application";
@@ -18,7 +18,7 @@ describe("createJobApplication", () => {
 		return result.value;
 	};
 
-	it("should create a job application with required fields", () => {
+	test("should create a job application with required fields", () => {
 		const result = createJobApplication(baseJobData);
 		const jobApp = unwrapJobApp(result);
 
@@ -36,7 +36,7 @@ describe("createJobApplication", () => {
 		expect(jobApp.applicationDate).toBe("2024-01-15T10:30:00.000Z");
 	});
 
-	it("should include optional fields when provided", () => {
+	test("should include optional fields when provided", () => {
 		const dataWithOptionals: JobApplicationForCreate = {
 			...baseJobData,
 			interestRating: 3,
@@ -59,7 +59,7 @@ describe("createJobApplication", () => {
 		}
 	});
 
-	it("should not include optional fields when not provided", () => {
+	test("should not include optional fields when not provided", () => {
 		const result = createJobApplication(baseJobData);
 
 		expect(result.isOk()).toBe(true);
@@ -72,21 +72,21 @@ describe("createJobApplication", () => {
 		}
 	});
 
-	it("should set createdAt and updatedAt to the same timestamp initially", () => {
+	test("should set createdAt and updatedAt to the same timestamp initially", () => {
 		const result = createJobApplication(baseJobData);
 		const jobApp = unwrapJobApp(result);
 
 		expect(jobApp.createdAt).toBe(jobApp.updatedAt);
 	});
 
-	it("should initialize with empty status log", () => {
+	test("should initialize with empty status log", () => {
 		const result = createJobApplication(baseJobData);
 		const jobApp = unwrapJobApp(result);
 
 		expect(jobApp.statusLog).toEqual({});
 	});
 
-	it("should initialize with notes collection", () => {
+	test("should initialize with notes collection", () => {
 		const result = createJobApplication(baseJobData);
 		const jobApp = unwrapJobApp(result);
 
@@ -95,7 +95,7 @@ describe("createJobApplication", () => {
 	});
 
 	describe("newStatus method", () => {
-		it("should add new status to status log", () => {
+		test("should add new status to status log", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 			const initialUpdatedAt = jobApp.updatedAt;
@@ -115,7 +115,7 @@ describe("createJobApplication", () => {
 			expect(jobApp.updatedAt).not.toBe(initialUpdatedAt);
 		});
 
-		it("should add multiple status updates to the log", () => {
+		test("should add multiple status updates to the log", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 
@@ -140,7 +140,7 @@ describe("createJobApplication", () => {
 			expect(jobApp.statusLog[statusLogKeys[1]]).toEqual(status2);
 		});
 
-		it("should update updatedAt timestamp when status is added", () => {
+		test("should update updatedAt timestamp when status is added", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 			const initialUpdatedAt = jobApp.updatedAt;
@@ -155,7 +155,7 @@ describe("createJobApplication", () => {
 			expect(jobApp.updatedAt).not.toBe(initialUpdatedAt);
 		});
 
-		it("should handle status with optional note field", () => {
+		test("should handle status with optional note field", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 
@@ -175,7 +175,7 @@ describe("createJobApplication", () => {
 	});
 
 	describe("update method", () => {
-		it("should update job application properties", () => {
+		test("should update job application properties", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 			const initialUpdatedAt = jobApp.updatedAt;
@@ -192,7 +192,7 @@ describe("createJobApplication", () => {
 			expect(jobApp.updatedAt).not.toBe(initialUpdatedAt);
 		});
 
-		it("should update updatedAt timestamp", () => {
+		test("should update updatedAt timestamp", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 			const initialUpdatedAt = jobApp.updatedAt;
@@ -205,7 +205,7 @@ describe("createJobApplication", () => {
 			expect(jobApp.updatedAt).not.toBe(initialUpdatedAt);
 		});
 
-		it("should preserve unchanged properties", () => {
+		test("should preserve unchanged properties", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 			const originalDate = jobApp.applicationDate;
@@ -224,7 +224,7 @@ describe("createJobApplication", () => {
 	});
 
 	describe("generated ID", () => {
-		it("should generate unique IDs for different job applications", () => {
+		test("should generate unique IDs for different job applications", () => {
 			const result1 = createJobApplication(baseJobData);
 			const result2 = createJobApplication(baseJobData);
 			const jobApp1 = unwrapJobApp(result1);
@@ -235,7 +235,7 @@ describe("createJobApplication", () => {
 	});
 
 	describe("integration with notes", () => {
-		it("should allow adding notes to the job application", () => {
+		test("should allow adding notes to the job application", () => {
 			const result = createJobApplication(baseJobData);
 			const jobApp = unwrapJobApp(result);
 			const addResult = jobApp.notes.operations.add({
@@ -245,7 +245,7 @@ describe("createJobApplication", () => {
 			expect(addResult.isOk()).toBe(true);
 		});
 
-		it("should maintain separate note collections for different job applications", () => {
+		test("should maintain separate note collections for different job applications", () => {
 			const result1 = createJobApplication(baseJobData);
 			const result2 = createJobApplication(baseJobData);
 			const jobApp1 = unwrapJobApp(result1);
@@ -275,7 +275,7 @@ describe("createJobApplication", () => {
 	});
 
 	describe("edge cases", () => {
-		it("should handle empty strings for company and position (after trimming)", () => {
+		test("should handle empty strings for company and position (after trimming)", () => {
 			const dataWithEmptyStrings: JobApplicationForCreate = {
 				company: "   ",
 				positionTitle: "   ",
@@ -287,7 +287,7 @@ describe("createJobApplication", () => {
 			expect(result.isErr()).toBe(true);
 		});
 
-		it("should handle all interest rating values", () => {
+		test("should handle all interest rating values", () => {
 			const ratings = [1, 2, 3] as const;
 
 			for (const rating of ratings) {
@@ -301,5 +301,149 @@ describe("createJobApplication", () => {
 				expect(jobApp.interestRating).toBe(rating);
 			}
 		});
+	});
+});
+
+describe("JobApplication Enhanced Methods", () => {
+	test("isOverdue should return false when no next event date", () => {
+		const result = createJobApplication({
+			company: "Test Company",
+			positionTitle: "Developer",
+			applicationDate: new Date().toISOString(),
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (!result.isOk()) return;
+
+		const app = result.value;
+		expect(app.isOverdue()).toBe(false);
+	});
+
+	test("isOverdue should return true when next event date is in the past", () => {
+		const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // 1 day ago
+
+		const result = createJobApplication({
+			company: "Test Company",
+			positionTitle: "Developer",
+			applicationDate: new Date().toISOString(),
+			nextEventDate: pastDate.toISOString(),
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (!result.isOk()) return;
+
+		const app = result.value;
+		expect(app.isOverdue()).toBe(true);
+	});
+
+	test("isOverdue should return false when next event date is in the future", () => {
+		const futureDate = new Date(Date.now() + 24 * 60 * 60 * 1000); // 1 day from now
+
+		const result = createJobApplication({
+			company: "Test Company",
+			positionTitle: "Developer",
+			applicationDate: new Date().toISOString(),
+			nextEventDate: futureDate.toISOString(),
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (!result.isOk()) return;
+
+		const app = result.value;
+		expect(app.isOverdue()).toBe(false);
+	});
+
+	test("getCurrentStatus should return null when no status log entries", () => {
+		const result = createJobApplication({
+			company: "Test Company",
+			positionTitle: "Developer",
+			applicationDate: new Date().toISOString(),
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (!result.isOk()) return;
+
+		const app = result.value;
+		expect(app.getCurrentStatus()).toBeNull();
+	});
+
+	test("getCurrentStatus should return the latest status", () => {
+		const result = createJobApplication({
+			company: "Test Company",
+			positionTitle: "Developer",
+			applicationDate: new Date().toISOString(),
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (!result.isOk()) return;
+
+		const app = result.value;
+
+		// Add first status
+		app.newStatus({ category: "active", current: "applied" });
+
+		// Small delay to ensure different timestamps
+		const delay = () => new Promise((resolve) => setTimeout(resolve, 2));
+
+		delay().then(() => {
+			// Add second status
+			app.newStatus({ category: "active", current: "interview" });
+
+			const currentStatus = app.getCurrentStatus();
+			expect(currentStatus).not.toBeNull();
+			expect(currentStatus?.current).toBe("interview");
+			expect(currentStatus?.category).toBe("active");
+		});
+	});
+
+	test("getCurrentStatus should handle multiple statuses correctly", async () => {
+		const result = createJobApplication({
+			company: "Test Company",
+			positionTitle: "Developer",
+			applicationDate: new Date().toISOString(),
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (!result.isOk()) return;
+
+		const app = result.value;
+
+		// Add statuses with small delays to ensure different timestamps
+		app.newStatus({ category: "active", current: "applied" });
+		await new Promise((resolve) => setTimeout(resolve, 5));
+
+		app.newStatus({ category: "active", current: "screening interview" });
+		await new Promise((resolve) => setTimeout(resolve, 5));
+
+		app.newStatus({ category: "inactive", current: "rejected" });
+
+		const currentStatus = app.getCurrentStatus();
+		expect(currentStatus).not.toBeNull();
+		expect(currentStatus?.current).toBe("rejected");
+		expect(currentStatus?.category).toBe("inactive");
+	});
+
+	test("status methods should work together correctly", async () => {
+		const pastDate = new Date(Date.now() - 24 * 60 * 60 * 1000); // 1 day ago
+
+		const result = createJobApplication({
+			company: "Test Company",
+			positionTitle: "Developer",
+			applicationDate: new Date().toISOString(),
+			nextEventDate: pastDate.toISOString(),
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (!result.isOk()) return;
+
+		const app = result.value;
+
+		// Add active status
+		app.newStatus({ category: "active", current: "interview" });
+
+		// Check both methods work correctly
+		expect(app.isOverdue()).toBe(true);
+		expect(app.getCurrentStatus()?.category).toBe("active");
+		expect(app.getCurrentStatus()?.current).toBe("interview");
 	});
 });
