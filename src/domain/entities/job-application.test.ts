@@ -13,9 +13,12 @@ describe("createJobApplication", () => {
 
 	// Test helper to unwrap Result and get JobApplication
 	const unwrapJobApp = (result: ReturnType<typeof createJobApplication>) => {
-		expect(result.isOk()).toBe(true);
-		if (!result.isOk()) throw new Error("Expected Ok result");
-		return result.value;
+		return result.match(
+			(res) => res,
+			(err) => {
+				throw new Error(err.message);
+			},
+		);
 	};
 
 	test("should create a job application with required fields", () => {
@@ -181,7 +184,7 @@ describe("createJobApplication", () => {
 			const initialUpdatedAt = jobApp.updatedAt;
 
 			jobApp.update({
-				id: jobApp.id, // Required for update type
+				id: jobApp.id, // Required for an update
 				company: "New Company",
 				interestRating: 2,
 			});
