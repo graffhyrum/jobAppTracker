@@ -26,14 +26,14 @@ test.describe("Application inline editing", () => {
 
 	test("should display editable cells with hover indicators", async ({
 		POMs,
+		testJobApplication,
 	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 		await pipeline.assertions.hasApplications();
 
-		// Get the first application ID and test hover states for editable cells
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		await pipeline.assertions.editableHoverStateVisibleById(
 			applicationId,
 			"company",
@@ -83,13 +83,15 @@ test.describe("Application inline editing", () => {
 		await pipeline.assertions.containsApplicationWithCompany(newCompanyName);
 	});
 
-	test("should edit position title successfully", async ({ POMs }) => {
+	test("should edit position title successfully", async ({
+		POMs,
+		testJobApplication,
+	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
-		// Get the first application ID and edit the position title
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		await pipeline.actions.editPositionTitleById(
 			applicationId,
 			"Senior Software Engineer",
@@ -102,13 +104,15 @@ test.describe("Application inline editing", () => {
 		);
 	});
 
-	test("should edit status via dropdown successfully", async ({ POMs }) => {
+	test("should edit status via dropdown successfully", async ({
+		POMs,
+		testJobApplication,
+	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
-		// Get the first application ID and edit the status
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		await pipeline.actions.editStatusById(applicationId, "interview");
 
 		// Verify the change
@@ -117,13 +121,13 @@ test.describe("Application inline editing", () => {
 
 	test("should edit interest rating via dropdown successfully", async ({
 		POMs,
+		testJobApplication,
 	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
-		// Get the first application ID and edit interest rating
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		await pipeline.actions.editInterestRatingById(applicationId, "3");
 
 		// Verify the change (should show ★★★)
@@ -177,19 +181,23 @@ test.describe("Application inline editing", () => {
 		);
 	});
 
-	test("should work after filtering applications", async ({ POMs }) => {
+	test("should work after filtering applications", async ({
+		POMs,
+		testJobApplication,
+	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
-		// Filter by company name
-		await pipeline.actions.searchApplications("Test Company");
+		// Filter by company name using predictable test data
+		await pipeline.actions.searchApplications(testJobApplication.company);
 
 		// Verify filtering worked
-		await pipeline.assertions.containsApplicationWithCompany("Test Company");
+		await pipeline.assertions.containsApplicationWithCompany(
+			testJobApplication.company,
+		);
 
-		// Get the first visible application ID and edit after filtering
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		await pipeline.actions.editCompanyNameById(
 			applicationId,
 			"Filtered Edit Test",
@@ -203,16 +211,19 @@ test.describe("Application inline editing", () => {
 		);
 	});
 
-	test("should work after sorting applications", async ({ POMs }) => {
+	test("should work after sorting applications", async ({
+		POMs,
+		testJobApplication,
+	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
-		// Click company header to sort
-		await pipeline.page.locator('th[data-column="company"]').click();
+		await test.step("Click company header to sort", async () => {
+			await pipeline.page.locator('th[data-column="company"]').click();
+		});
 
-		// Get the first application ID after sorting and edit
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		await pipeline.actions.editCompanyNameById(
 			applicationId,
 			"Sorted Edit Test",
@@ -296,13 +307,15 @@ test.describe("Application inline editing", () => {
 		await page.unroute("PUT **/applications/*");
 	});
 
-	test("should support keyboard navigation in edit forms", async ({ POMs }) => {
+	test("should support keyboard navigation in edit forms", async ({
+		POMs,
+		testJobApplication,
+	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
-		// Get application ID and start editing
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		const rowComponent = pipeline.actions.getRowById(applicationId);
 
 		await rowComponent.actions.clickCompanyCell();
@@ -317,13 +330,15 @@ test.describe("Application inline editing", () => {
 		await pipeline.assertions.noEditFormVisible();
 	});
 
-	test("should retain form focus when editing", async ({ POMs }) => {
+	test("should retain form focus when editing", async ({
+		POMs,
+		testJobApplication,
+	}) => {
 		const pipeline = POMs.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
-		// Get application ID and start editing
-		const applicationId = await pipeline.actions.getFirstRowId();
+		const applicationId = testJobApplication.id;
 		const rowComponent = pipeline.actions.getRowById(applicationId);
 
 		await rowComponent.actions.clickCompanyCell();
