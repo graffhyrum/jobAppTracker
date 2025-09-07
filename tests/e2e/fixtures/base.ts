@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/noEmptyPattern: required by playwright */
 import { test as base } from "@playwright/test";
 import {
 	createJobApplication,
@@ -46,7 +47,6 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 	},
 
 	testJobApplication: [
-		// biome-ignore lint/correctness/noEmptyPattern: required by playwright
 		async ({}, use) => {
 			const testJobApp = createJobApplication({
 				company: "Test Company",
