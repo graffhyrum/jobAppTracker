@@ -1,16 +1,16 @@
 {
-    "permissions": {
-        "allow": [
-            "Bash(bun test:e2e:*)",
-            "mcp__playwright__browser_*",
-            "mcp__playwright__browser_navigate",
-            "mcp__playwright__browser_console_messages",
-            "mcp__playwright__browser_close",
-            "Bash(git log:*)"
-        ]
-    },
-    "enableAllProjectMcpServers": true,
-    "enabledMcpjsonServers": [
-        "playwright"
-    ]
+	"permissions": {
+		"allow": [
+			"Bash(bun test:e2e:*)",
+			"mcp__playwright__browser_*",
+			"mcp__playwright__browser_navigate",
+			"mcp__playwright__browser_console_messages",
+			"mcp__playwright__browser_close",
+			"Bash(git log:*)",
+			"Bash(bun test:*)",
+			"WebFetch(domain:arktype.io)"
+		]
+	},
+	"enableAllProjectMcpServers": true,
+	"enabledMcpjsonServers": ["playwright"]
 }
