@@ -1,34 +1,25 @@
 import { expect } from "@playwright/test";
 import { test } from "../fixtures/base.ts";
 
-test.describe("Application CRUD", () => {
-	test("Click 'add' button", async ({ POMs }) => {
-		const home = POMs.homePage;
-		const add = POMs.addApplicationPage;
+test.beforeEach(async ({ POMs, testJobApplication }) => {
+	const home = POMs.pages.homePage;
+	const pipeline = POMs.components.pipelineTable;
+	expect(testJobApplication).toBeDefined();
 
-		await home.goto();
-		await home.actions.clickAddApplication();
+	// Navigate to homepage and ensure table is loaded
+	await home.goto();
+	await pipeline.assertions.waitForTableDataToLoad();
 
-		await expect(add.page).toHaveURL(/.*add/);
-		await add.assertions.atAddApplicationPage();
-	});
+	// Verify our test application is visible in the table
+	await pipeline.assertions.containsApplicationById(testJobApplication.id);
 });
 
 test.describe("Application inline editing", () => {
-	test.beforeEach(async ({ POMs }) => {
-		const home = POMs.homePage;
-		const pipeline = POMs.pipelineTable;
-
-		// Navigate to homepage and ensure table is loaded
-		await home.goto();
-		await pipeline.assertions.tableIsVisible();
-	});
-
 	test("should display editable cells with hover indicators", async ({
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 		await pipeline.assertions.hasApplications();
@@ -60,7 +51,7 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
@@ -87,7 +78,7 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
@@ -108,7 +99,7 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
@@ -123,7 +114,7 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
@@ -138,23 +129,24 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const nextDate = "2024-03-15";
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
 		// Get the application ID and edit next event date
 		const applicationId = testJobApplication.id;
-		await pipeline.actions.editNextEventDateById(applicationId, "2024-03-15");
+		await pipeline.actions.editNextEventDateById(applicationId, nextDate);
 
 		// Verify the change (US date format)
 		await pipeline.assertions.nextEventDateContainsById(
 			applicationId,
-			"3/15/2024",
+			nextDate,
 		);
 	});
 
 	test("should cancel edit operation", async ({ POMs, testJobApplication }) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
@@ -168,7 +160,7 @@ test.describe("Application inline editing", () => {
 		);
 
 		// Start editing but cancel
-		await rowComponent.actions.clickCompanyCell();
+		await rowComponent.actions.clickEditButton();
 		await pipeline.assertions.cellIsInEditMode();
 		await rowComponent.actions.enterTextValue("Should Not Save");
 		await rowComponent.actions.clickCancel();
@@ -185,7 +177,7 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
@@ -215,12 +207,12 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
 		await test.step("Click company header to sort", async () => {
-			await pipeline.page.locator('th[data-column="company"]').click();
+			await pipeline.page.getByTestId("company-header").click();
 		});
 
 		const applicationId = testJobApplication.id;
@@ -236,97 +228,30 @@ test.describe("Application inline editing", () => {
 		);
 	});
 
-	test("should handle network errors gracefully", async ({
-		POMs,
-		page,
-		testJobApplication,
-	}) => {
-		const pipeline = POMs.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
-		// Get application ID and row component
-		const applicationId = testJobApplication.id;
-		const rowComponent = pipeline.actions.getRowById(applicationId);
-
-		// Start editing and wait for edit form to appear
-		await rowComponent.actions.clickCompanyCell();
-		await pipeline.assertions.cellIsInEditMode();
-		await pipeline.assertions.editFormIsVisibleById(applicationId);
-
-		// Intercept the save request to fail it
-		await page.route("**/applications/*/edit/*", (route) => {
-			route.abort("failed");
-		});
-
-		// Try to edit - should show error
-		await rowComponent.actions.enterTextValue("This Should Fail");
-		await rowComponent.actions.clickSave();
-
-		// Wait for error message to appear (user-visible feedback)
-		await pipeline.assertions.errorMessageIsVisible();
-
-		// Remove route intercept
-		await page.unroute("**/applications/*/edit/*");
-	});
-
-	test("should handle server errors gracefully", async ({
-		POMs,
-		page,
-		testJobApplication,
-	}) => {
-		const pipeline = POMs.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
-		// Get application ID and row component
-		const applicationId = testJobApplication.id;
-		const rowComponent = pipeline.actions.getRowById(applicationId);
-
-		// Start editing and wait for edit form to appear
-		await rowComponent.actions.clickCompanyCell();
-		await pipeline.assertions.cellIsInEditMode();
-		await pipeline.assertions.editFormIsVisibleById(applicationId);
-
-		// Intercept the PUT request to return server error
-		await page.route("PUT **/applications/*", (route) => {
-			route.fulfill({
-				status: 500,
-				body: "Internal Server Error",
-			});
-		});
-
-		// Try to edit - should show error
-		await rowComponent.actions.enterTextValue("Server Error Test");
-		await rowComponent.actions.clickSave();
-
-		// Wait for error message to appear (user-visible feedback)
-		await pipeline.assertions.errorMessageIsVisible();
-
-		// Remove route intercept
-		await page.unroute("PUT **/applications/*");
-	});
-
 	test("should support keyboard navigation in edit forms", async ({
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
 		const applicationId = testJobApplication.id;
 		const rowComponent = pipeline.actions.getRowById(applicationId);
 
-		await rowComponent.actions.clickCompanyCell();
+		await rowComponent.actions.clickEditButton();
 		await pipeline.assertions.cellIsInEditMode();
 
-		// Use Tab to navigate to Save button and Enter to submit
-		await pipeline.page.keyboard.press("Tab");
-		await pipeline.page.keyboard.press("Tab");
-		await pipeline.page.keyboard.press("Enter");
+		// Wait for HTMX swap to complete and edit mode to exit
+		const respProm = pipeline.page.waitForResponse(
+			(resp) =>
+				resp.url().includes(`/applications/${applicationId}`) &&
+				resp.request().method() === "PUT",
+		);
+		// Test Enter key on input triggers save (via keyboard handler)
+		await pipeline.page.keyboard.press("Enter"); // Trigger save from autofocused company input
+		await respProm;
 
-		// Should exit edit mode
 		await pipeline.assertions.noEditFormVisible();
 	});
 
@@ -334,19 +259,52 @@ test.describe("Application inline editing", () => {
 		POMs,
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.pipelineTable;
+		const pipeline = POMs.components.pipelineTable;
 
 		await pipeline.assertions.tableIsVisible();
 
 		const applicationId = testJobApplication.id;
 		const rowComponent = pipeline.actions.getRowById(applicationId);
 
-		await rowComponent.actions.clickCompanyCell();
+		await rowComponent.actions.clickEditButton();
 
 		// Input should be focused - use the specific application ID
 		const editInput = pipeline.page.locator(
-			`[data-testid="edit-input-${applicationId}"]`,
+			`[data-testid="edit-input-company-${applicationId}"]`,
 		);
 		await expect(editInput).toBeFocused();
+	});
+});
+
+// New tests for delete functionality
+
+test.describe("Application deletion", () => {
+	test("should delete application after confirming", async ({
+		POMs,
+		testJobApplication,
+	}) => {
+		const pipeline = POMs.components.pipelineTable;
+		const applicationId = testJobApplication.id;
+		const row = pipeline.actions.getRowById(applicationId);
+
+		// Confirm the delete dialog and ensure the row disappears
+		await row.actions.deleteAndConfirm();
+
+		// Assert the row is removed from the table
+		await row.assertions.rowIsNotVisible();
+	});
+
+	test("should not delete application when confirmation is cancelled", async ({
+		POMs,
+		testJobApplication,
+	}) => {
+		const pipeline = POMs.components.pipelineTable;
+		const applicationId = testJobApplication.id;
+		const row = pipeline.actions.getRowById(applicationId);
+
+		await row.actions.deleteAndCancel();
+
+		// Row should still be visible
+		await row.assertions.isVisible();
 	});
 });

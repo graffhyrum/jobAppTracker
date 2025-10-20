@@ -9,7 +9,7 @@ A single-user job application tracking system built with TypeScript and Bun, fol
 # Development Commands
 
 ```bash
-# Development (requires SurrealDB running)
+# Development
 bun run dev                          # Start development server in watch mode
 bun run src/index.ts                 # Direct run
 
@@ -68,16 +68,16 @@ When adding functionality that requires external dependencies:
    // Domain defines the interface
    export interface JobApplicationRepository {
      save: (app: JobApplication) => ResultAsync<void, DatabaseError>
-     findById: (id: string) => ResultAsync<JobApplication | null, DatabaseError>
+     findById: (id: UUID) => ResultAsync<JobApplication | null, DatabaseError>
    }
    ```
 
 2. **Create BOTH implementations**:
    ```typescript
    // Real implementation in src/infrastructure/
-   export const SurrealJobApplicationRepository: JobApplicationRepository = {
-     save: async (app) => { /* SurrealDB operations */ },
-     findById: async (id) => { /* SurrealQL queries */ }
+   export const SQLiteJobApplicationRepository: JobApplicationRepository = {
+     save: async (app) => { /* SQLite operations */ },
+     findById: async (id) => { /* SQLite queries */ }
    }
 
    // Test implementation in tests/
@@ -145,7 +145,7 @@ Pipeline is customizable through admin interface.
 ## Technology Stack Specifics
 
 - **Runtime**: Bun (use `bun` commands, not `node` or `npm`)
-- **Database**: JSON flat file using Bun FS I/O
+- **Database**: SQLite using Bun's built-in `bun:sqlite` driver
 - **Web**: `Bun.serve` with HTMX (not Express)
 - **Validation**: ArkType for schemas and type inference
 - **Error Handling**: NeverThrow Result types
@@ -570,3 +570,4 @@ gh auth login                   # Login to GitHub
 # Memories
 - If there are linter errors in unit tests where `expect(something).toBeDefined()` is called, but TS has `TS2532: Object is possibly undefined` errors because `expect()` doesn't narrow the type, for each place in the tests where `expect(x).toBeDefined()` is used, instead use `expectDefined` as a type-narrowing wrapper around bun's `expect`.
 - When working with HTML, reference [THIS GUIDE FILE](docs/ai/HTML_GUIDE.md) for instructions on HTML conventions for the project.
+- Playwright results are written to @test-results\ the error context markdown for each test is written there.

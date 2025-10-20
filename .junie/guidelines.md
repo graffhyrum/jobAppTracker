@@ -65,7 +65,7 @@ When adding functionality that requires external dependencies:
    // Domain defines the interface
    export interface JobApplicationRepository {
      save: (app: JobApplication) => ResultAsync<void, DatabaseError>
-     findById: (id: string) => ResultAsync<JobApplication | null, DatabaseError>
+     findById: (id: UUID) => ResultAsync<JobApplication | null, DatabaseError>
    }
    ```
 

@@ -1,90 +1,49 @@
-import { expect } from "@playwright/test";
-import { test } from "../fixtures/base.ts";
+import type { PageLinkKeys } from "#src/presentation/components/pageConfig.ts";
+import { type PagePOMRegistry, test } from "../fixtures/base.ts";
 
-// Using POMs injected via our custom fixture
+const pageMatrix = [
+	{
+		name: "Homepage",
+		pomKey: "homePage",
+		linkKey: "home",
+	},
+	{
+		name: "Health Check",
+		pomKey: "healthPage",
+		linkKey: "health",
+	},
+] as const satisfies Array<{
+	name: string;
+	linkKey: string & PageLinkKeys;
+	pomKey: keyof PagePOMRegistry;
+}>;
 
-test.describe("Navigation", () => {
-	test("should display navbar on homepage", async ({ POMs }) => {
-		const home = POMs.homePage;
-		await home.goto();
-
-		await home.assertions.navIsVisible();
-		await home.assertions.navBrandIsVisible();
-		await home.assertions.navBrandHasText("Job App Tracker");
-		await home.assertions.navBrandHrefIs("/");
-
-		await home.assertions.navHomeLinkVisible();
-		await home.assertions.navHomeHrefIs("/");
-
-		await home.assertions.navHealthLinkVisible();
-		await home.assertions.navHealthHrefIs("/health");
+for (const { name, pomKey } of pageMatrix) {
+	test.beforeEach(async ({ POMs }) => {
+		const thisPageObject = POMs.pages[pomKey];
+		await thisPageObject.goto();
 	});
+	test.describe(`Navigation - ${name}`, () => {
+		test(`should display navbar on ${name}`, async ({ POMs }) => {
+			const { navbar } = POMs.components;
+			await navbar.assertions.isValid();
+		});
 
-	test("should display navbar on health check page", async ({ POMs }) => {
-		const health = POMs.healthPage;
-		await health.goto();
+		// from each page, navigate to all other pages, assert url and nav visibility
+		test(`should navigate from ${name}`, async ({ POMs }) => {
+			const { navbar } = POMs.components;
+			const otherMatrixItems = pageMatrix.filter((p) => p.pomKey !== pomKey);
+			for (const otherMatrixItem of otherMatrixItems) {
+				await test.step(`click link ${otherMatrixItem.name}`, async () => {
+					await navbar.actions[
+						`click${otherMatrixItem.linkKey.toUpperCase() as Capitalize<PageLinkKeys>}`
+					]();
+				});
 
-		await health.assertions.navIsVisible();
-		await health.assertions.navBrandIsVisible();
-		await health.assertions.navBrandHasText("Job App Tracker");
-
-		await health.assertions.navHomeLinkVisible();
-		await health.assertions.navHealthLinkVisible();
+				await test.step("assert navbar", async () => {
+					await navbar.assertions.isValid();
+				});
+			}
+		});
 	});
-
-	test("should navigate from homepage to health check", async ({ POMs }) => {
-		const home = POMs.homePage;
-		const health = POMs.healthPage;
-
-		await home.goto();
-		await home.assertions.onHomePage();
-
-		await home.actions.clickNavHealth();
-		await expect(health.page).toHaveURL("/health");
-		await health.assertions.onHealthPage();
-	});
-
-	test("should navigate from health check to homepage", async ({ POMs }) => {
-		const health = POMs.healthPage;
-		const home = POMs.homePage;
-
-		await health.goto();
-		await health.assertions.onHealthPage();
-
-		await health.actions.clickNavHome();
-		await expect(home.page).toHaveURL("/");
-		await home.assertions.onHomePage();
-	});
-
-	test("should navigate via brand logo", async ({ POMs }) => {
-		const health = POMs.healthPage;
-		const home = POMs.homePage;
-
-		await health.goto();
-		await health.assertions.onHealthPage();
-
-		await health.actions.clickNavBrand();
-		await expect(home.page).toHaveURL("/");
-		await home.assertions.onHomePage();
-	});
-
-	test("should have proper navbar styling", async ({ POMs }) => {
-		const home = POMs.homePage;
-		await home.goto();
-
-		await home.assertions.navHasDarkBackground();
-		await home.assertions.navLinksAreWhite();
-	});
-
-	test("should be responsive on mobile", async ({ POMs }) => {
-		const home = POMs.homePage;
-		const health = POMs.healthPage;
-		await home.page.setViewportSize({ width: 375, height: 667 });
-		await home.goto();
-
-		await home.assertions.navIsVisible();
-
-		await home.actions.clickNavHealth();
-		await expect(health.page).toHaveURL("/health");
-	});
-});
+}

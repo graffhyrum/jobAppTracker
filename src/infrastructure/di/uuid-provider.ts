@@ -24,4 +24,4 @@ function getUUIDGeneration(): UUIDGeneration {
 }
 
 // Create and export a singleton instance
-export const uuidGenerationProvider = getUUIDGeneration();
+export const uuidProvider = getUUIDGeneration();

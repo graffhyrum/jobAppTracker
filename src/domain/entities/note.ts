@@ -1,7 +1,7 @@
 import { ArkErrors } from "arktype";
 import { err, ok, type Result } from "neverthrow";
-import { getEntries } from "../../helpers/entries.ts";
-import { uuidGenerationProvider } from "../../infrastructure/di/uuid-generation-provider.ts";
+import { getEntries } from "../../../types/entries.ts";
+import { uuidProvider } from "../../infrastructure/di/uuid-provider.ts";
 import {
 	type Note,
 	type NoteCollection,
@@ -13,17 +13,17 @@ import {
 } from "./noteScope.ts";
 
 function getNewNoteId(): NoteId {
-	return noteModule.NoteId.assert(uuidGenerationProvider.generateUUID());
+	return noteModule.NoteId.assert(uuidProvider.generateUUID());
 }
 
 export function createNote({
 	content,
 }: NoteForCreate): Result<NoteProps, Error> {
-	const now = new Date();
+	const now = new Date().toISOString();
 	const newNote = noteModule.NoteProps({
 		content: content,
-		createdAt: now.toISOString(),
-		updatedAt: now.toISOString(),
+		createdAt: now,
+		updatedAt: now,
 	});
 	if (newNote instanceof ArkErrors) {
 		return err(new Error("Note validation failed", { cause: newNote }));
@@ -32,9 +32,9 @@ export function createNote({
 	}
 }
 
-export function createNotesCollection(): NotesCollection {
-	const collection: NoteCollection = {};
-
+export function createNotesCollectionManager(
+	collection: NoteCollection = {},
+): NotesCollection {
 	return {
 		notes: collection,
 		operations: {

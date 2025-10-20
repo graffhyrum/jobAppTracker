@@ -11,7 +11,6 @@ function createHealthPagePOM(page: Page) {
 
 	return {
 		page,
-		components: {},
 		async goto() {
 			await page.goto("/health");
 		},
@@ -21,9 +20,6 @@ function createHealthPagePOM(page: Page) {
 			},
 			async clickNavHealth() {
 				await navBar.actions.clickHealth();
-			},
-			async clickNavBrand() {
-				await navBar.actions.clickBrand();
 			},
 		},
 		assertions: {
@@ -38,27 +34,6 @@ function createHealthPagePOM(page: Page) {
 			},
 			async navBrandHasText(text: string) {
 				await navBar.assertions.brandHasText(text);
-			},
-			async navBrandHrefIs(href: string) {
-				await navBar.assertions.brandHrefIs(href);
-			},
-			async navHomeLinkVisible() {
-				await navBar.assertions.homeLinkVisible();
-			},
-			async navHomeHrefIs(href: string) {
-				await navBar.assertions.homeHrefIs(href);
-			},
-			async navHealthLinkVisible() {
-				await navBar.assertions.healthLinkVisible();
-			},
-			async navHealthHrefIs(href: string) {
-				await navBar.assertions.healthHrefIs(href);
-			},
-			async navHasDarkBackground() {
-				await navBar.assertions.hasDarkBackground();
-			},
-			async navLinksAreWhite() {
-				await navBar.assertions.linksAreWhite();
 			},
 		},
 	} as const satisfies PageObject;

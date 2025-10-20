@@ -61,6 +61,116 @@
 	color: #fff;
 }
 
+/* Error notifications in navbar */
+.error-notifications {
+	position: relative;
+	color: #fff;
+	cursor: pointer;
+}
+
+.error-summary {
+	list-style: none;
+	padding: 8px 16px;
+	border-radius: 4px;
+	transition: background-color 0.3s ease;
+	user-select: none;
+	font-weight: 500;
+}
+
+.error-summary:hover {
+	background-color: #495057;
+}
+
+.error-summary::-webkit-details-marker {
+	display: none;
+}
+
+#error-count {
+	color: #f44336;
+	font-weight: bold;
+}
+
+.error-list {
+	position: absolute;
+	right: 0;
+	top: 100%;
+	margin: 8px 0 0 0;
+	padding: 0;
+	list-style: none;
+	background: white;
+	border: 2px solid #e0e0e0;
+	border-radius: 4px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	min-width: 400px;
+	max-width: 600px;
+	max-height: 400px;
+	overflow-y: auto;
+	z-index: 1000;
+}
+
+.error-list:empty::before {
+	content: "No errors";
+	display: block;
+	padding: 16px;
+	color: #999;
+	text-align: center;
+	font-style: italic;
+}
+
+.error-item {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	padding: 12px;
+	border-bottom: 1px solid #e0e0e0;
+	background: #fff;
+	color: #333;
+	transition: background-color 0.2s ease;
+}
+
+.error-item:last-child {
+	border-bottom: none;
+}
+
+.error-item:hover {
+	background-color: #f9f9f9;
+}
+
+.error-time {
+	flex-shrink: 0;
+	font-size: 0.85em;
+	color: #666;
+	font-family: monospace;
+}
+
+.error-message {
+	flex: 1;
+	color: #d32f2f;
+	font-weight: 500;
+	word-wrap: break-word;
+}
+
+.error-close {
+	flex-shrink: 0;
+	background: none;
+	border: none;
+	color: #999;
+	font-size: 1.5em;
+	line-height: 1;
+	cursor: pointer;
+	padding: 0;
+	width: 20px;
+	height: 20px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	transition: color 0.2s ease;
+}
+
+.error-close:hover {
+	color: #d32f2f;
+}
+
 @media (max-width: 768px) {
 	.navbar-container {
 		padding: 0 15px;
@@ -77,5 +187,16 @@
 	.nav-link {
 		padding: 6px 12px;
 		font-size: 0.9rem;
+	}
+
+	.error-list {
+		min-width: 300px;
+		max-width: calc(100vw - 40px);
+		right: -10px;
+	}
+
+	.error-summary {
+		font-size: 0.9rem;
+		padding: 6px 12px;
 	}
 }

@@ -1,10 +1,16 @@
-export const addApplicationForm = (): string => {
+export function addApplicationForm(errorMessage?: string): string {
 	return `
 		<div class="add-application-container">
-			<h3>Add New Application</h3>
+			${
+				errorMessage
+					? `<div class="error-message" style="color: red; padding: 10px; margin-bottom: 20px; border: 1px solid red; border-radius: 4px; background-color: #ffebee;">${errorMessage}</div>`
+					: ""
+			}
 			<form 
 				hx-post="/applications" 
 				hx-trigger="submit"
+				hx-target="#form-and-pipeline-container"
+				hx-swap="innerHTML"
 				class="add-application-form"
 			>
 				<div class="form-group">
@@ -87,4 +93,4 @@ export const addApplicationForm = (): string => {
 			</form>
 		</div>
 	`;
-};
+}

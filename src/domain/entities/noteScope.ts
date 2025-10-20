@@ -1,13 +1,15 @@
 import { scope } from "arktype";
 import type { Result } from "neverthrow";
 import { NonEmptyString } from "./non-empty-string.ts";
+import { uuidSchema } from "./uuid.ts";
 
 export const noteScope = scope({
-	NoteId: "string.uuid",
+	"#dateTime": "string.date.iso",
+	NoteId: uuidSchema,
 	NoteProps: {
 		content: NonEmptyString,
-		createdAt: "string.date.iso",
-		updatedAt: "string.date.iso",
+		createdAt: "dateTime",
+		updatedAt: "dateTime",
 	},
 	Note: {
 		"...": "NoteProps",
@@ -15,6 +17,8 @@ export const noteScope = scope({
 	},
 	NoteForCreate: "Pick<NoteProps,'content'>",
 	NoteForUpdate: "Partial<NoteProps>",
+	NoteEntry: ["NoteId", "Note"],
+	NoteEntryArray: "NoteEntry[]",
 });
 export const noteModule = noteScope.export();
 export type NoteId = typeof noteModule.NoteId.infer;

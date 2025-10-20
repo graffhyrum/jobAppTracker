@@ -1,581 +1,195 @@
+import {
+	camelCaseToHyphenated,
+	camelCaseToSpaceSeparatedLower,
+	camelCaseToSpaceSeparatedUpper,
+} from "#src/presentation/utils/string-conversions.ts";
 import type { JobApplication } from "../../domain/entities/job-application";
-import type { PipelineConfig } from "../../domain/entities/pipeline-config";
+import { processApplicationData } from "../utils/pipeline-utils";
+import { renderApplicationTableRow } from "./table-row-renderer";
 
-const formatDate = (dateString: string) => {
-	return new Date(dateString).toLocaleDateString("en-US");
-};
-
-const formatInterestRating = (rating?: number) => {
-	if (!rating) return "";
-	return "★".repeat(rating) + "☆".repeat(3 - rating);
-};
-
-const getStatusCategory = (
-	status: string,
-	pipelineConfig: PipelineConfig,
-): "active" | "inactive" => {
-	// Defensive checks for undefined/null config
-	if (
-		!pipelineConfig ||
-		!pipelineConfig.active ||
-		!Array.isArray(pipelineConfig.active)
-	) {
-		return "inactive";
-	}
-
-	// Defensive check for empty status
-	if (!status || status.trim() === "") {
-		return "inactive";
-	}
-
-	return pipelineConfig.active.includes(status) ? "active" : "inactive";
-};
-
-export const pipelineComponent = (
-	pipelineConfig: PipelineConfig,
+export function pipelineComponent(
 	applications: JobApplication[] = [],
-	options: {
-		enableClientSidePagination?: boolean;
-		initialPageSize?: number;
-		maxSerializedRecords?: number;
-	} = {},
-): string => {
-	const {
-		enableClientSidePagination = true,
-		initialPageSize = 25,
-		maxSerializedRecords = 1000,
-	} = options;
+	sortColumn?: Column,
+	sortDirection?: "asc" | "desc",
+): string {
+	const { stats } = processApplicationData(applications);
 
-	// Default sort by last updated date (most recent first)
-	const sortedApplications = [...applications].sort(
-		(a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+	// Apply server-side sorting
+	const sortedApplications = sortApplications(
+		applications,
+		sortColumn || "updatedAt",
+		sortDirection || "desc",
 	);
 
-	const renderTableRow = (app: JobApplication) => {
-		const currentStatus = app.getCurrentStatus();
-		const statusText = currentStatus?.current || "No Status";
-		const statusCategory = currentStatus
-			? getStatusCategory(currentStatus.current, pipelineConfig)
-			: "inactive";
-		const isOverdue = app.isOverdue();
-
-		return `
-			<tr class="application-row ${statusCategory} ${isOverdue ? "overdue" : ""}" data-testid="application-row-${app.id}">
-				<td class="company-cell editable-cell" 
-					data-testid="company-cell-${app.id}"
-					hx-get="/applications/${app.id}/edit/company" 
-					hx-target="this" 
-					hx-swap="outerHTML"
-					title="Click to edit company">${app.company}</td>
-				<td class="position-cell editable-cell" 
-					data-testid="position-cell-${app.id}"
-					hx-get="/applications/${app.id}/edit/position" 
-					hx-target="this" 
-					hx-swap="outerHTML"
-					title="Click to edit position">${app.positionTitle}</td>
-				<td class="status-cell editable-cell" 
-					data-testid="status-cell-${app.id}"
-					hx-get="/applications/${app.id}/edit/status" 
-					hx-target="this" 
-					hx-swap="outerHTML"
-					title="Click to edit status">
-					<span class="status-badge ${statusCategory}" data-testid="status-badge-${app.id}">${statusText}</span>
-				</td>
-				<td class="application-date-cell" data-testid="application-date-cell-${app.id}">${formatDate(app.applicationDate)}</td>
-				<td class="updated-date-cell" data-testid="updated-date-cell-${app.id}">${formatDate(app.updatedAt)}</td>
-				<td class="interest-cell editable-cell" 
-					data-testid="interest-cell-${app.id}"
-					hx-get="/applications/${app.id}/edit/interest" 
-					hx-target="this" 
-					hx-swap="outerHTML"
-					title="Click to edit interest rating">${formatInterestRating(app.interestRating)}</td>
-				<td class="next-event-cell editable-cell" 
-					data-testid="next-event-cell-${app.id}"
-					hx-get="/applications/${app.id}/edit/nextEvent" 
-					hx-target="this" 
-					hx-swap="outerHTML"
-					title="Click to edit next event date">
-					${
-						app.nextEventDate
-							? `<span class="${isOverdue ? "overdue-date" : ""}" data-testid="next-event-date-${app.id}">${formatDate(app.nextEventDate)}</span>`
-							: '<span class="no-date" data-testid="no-next-event-${app.id}">No date set</span>'
-					}
-				</td>
-				<td class="actions-cell" data-testid="actions-cell-${app.id}">
-					<button class="action-btn view" data-testid="view-btn-${app.id}" title="View Details">👁️</button>
-				</td>
-			</tr>
-		`;
-	};
-
 	return `
-		<div id="pipeline-container" class="pipeline-container" data-testid="pipeline-container">
+		<div id="pipeline-container" class="pipeline-container" data-testid="pipeline-container"
+			hx-on:htmx:responseError="(function(ev,el){try{const t=ev.detail && ev.detail.requestConfig && ev.detail.requestConfig.target; const row=t && t.closest ? t.closest('tr') : null; const e=row?row.querySelector('[data-testid=inline-error]'):null; if(e){ e.textContent='Error updating application. Please try again.'; e.hidden=false; e.removeAttribute('hidden'); e.style.display='block'; }}catch(_) {}})(event,this)"
+			hx-on:htmx:sendError="(function(ev,el){try{const t=ev.detail && ev.detail.requestConfig && ev.detail.requestConfig.target; const row=t && t.closest ? t.closest('tr') : null; const e=row?row.querySelector('[data-testid=inline-error]'):null; if(e){ e.textContent='Network error. Please check your connection and try again.'; e.hidden=false; e.removeAttribute('hidden'); e.style.display='block'; }}catch(_) {}})(event,this)"
+			hx-on:htmx:afterOnLoad="(function(ev,el){try{const t=ev.detail && ev.detail.requestConfig && ev.detail.requestConfig.target; const row=t && t.closest ? t.closest('tr') : null; const e=row?row.querySelector('[data-testid=inline-error]'):null; if(e){ e.hidden=true; e.setAttribute('hidden',''); e.textContent=''; e.style.display=''; }}catch(_) {}})(event,this)">
 			<div class="pipeline-header">
 				<h2>Job Applications</h2>
 				<div class="summary-stats">
-					<span class="stat active">Active: ${
-						applications.filter((app) => {
-							const status = app.getCurrentStatus();
-							return (
-								status &&
-								getStatusCategory(status.current, pipelineConfig) === "active"
-							);
-						}).length
-					}</span>
-					<span class="stat inactive">Inactive: ${
-						applications.filter((app) => {
-							const status = app.getCurrentStatus();
-							return (
-								!status ||
-								getStatusCategory(status.current, pipelineConfig) === "inactive"
-							);
-						}).length
-					}</span>
-					<span class="stat total">Total: ${applications.length}</span>
+					<span class="stat active">Active: ${stats.active}</span>
+					<span class="stat inactive">Inactive: ${stats.inactive}</span>
+					<span class="stat total">Total: ${stats.total}</span>
 				</div>
 			</div>
 
-			<div class="table-controls">
-				<div class="filters">
-					<label for="search-filter" class="sr-only">Search applications</label>
-					<input 
-						type="text" 
-						id="search-filter" 
+			
+			<div class="table-tools" data-testid="table-tools">
+				<div class="search">
+					<input
+						type="search"
+						id="search-filter"
+						name="q"
 						data-testid="search-filter"
-						placeholder="Search company or position..." 
-						class="search-input"
-						aria-label="Search company or position"
-					>
-					<label for="status-filter" class="sr-only">Filter by status</label>
-					<select id="status-filter" data-testid="status-filter" class="filter-select" aria-label="Filter by status">
-						<option value="">All Statuses</option>
-						<option value="active">Active</option>
-						<option value="inactive">Inactive</option>
-						${pipelineConfig.active
-							.map((status) => `<option value="${status}">${status}</option>`)
-							.join("")}
-						${pipelineConfig.inactive
-							.map((status) => `<option value="${status}">${status}</option>`)
-							.join("")}
-					</select>
-					<label for="interest-filter" class="sr-only">Filter by interest level</label>
-					<select id="interest-filter" data-testid="interest-filter" class="filter-select" aria-label="Filter by interest level">
-						<option value="">All Interest Levels</option>
-						<option value="3">High Interest (★★★)</option>
-						<option value="2">Medium Interest (★★☆)</option>
-						<option value="1">Low Interest (★☆☆)</option>
-					</select>
-					<label for="overdue-filter" class="sr-only">Filter by overdue status</label>
-					<select id="overdue-filter" data-testid="overdue-filter" class="filter-select" aria-label="Filter by overdue status">
-						<option value="">All Applications</option>
-						<option value="overdue">Overdue Only</option>
-						<option value="upcoming">Upcoming Events</option>
-					</select>
-				</div>
-				<div class="pagination-controls">
-					<label for="page-size" class="sr-only">Items per page</label>
-					<select id="page-size" class="page-size-select" aria-label="Items per page">
-						<option value="10"${initialPageSize === 10 ? " selected" : ""}>10 per page</option>
-						<option value="25"${initialPageSize === 25 ? " selected" : ""}>25 per page</option>
-						<option value="50"${initialPageSize === 50 ? " selected" : ""}>50 per page</option>
-						<option value="100"${initialPageSize === 100 ? " selected" : ""}>100 per page</option>
-					</select>
+						placeholder="Search applications..."
+						aria-label="Search applications"
+						hx-get="/applications/search"
+						hx-trigger="keyup changed delay:300ms, search"
+						hx-target="#applications-tbody"
+						hx-swap="innerHTML"
+						hx-indicator="#search-indicator"
+						autocomplete="off"
+						inputmode="search"
+					/>
+					<span id="search-indicator" class="htmx-indicator" aria-hidden="true">Loading…</span>
 				</div>
 			</div>
-			
 			<div class="table-container">
 				<table class="applications-table" id="applications-table" data-testid="applications-table" role="table" aria-label="Job applications">
-					<thead>
-						<tr role="row">
-							<th class="sortable" data-column="company">
-								Company <span class="sort-indicator">↕️</span>
-							</th>
-							<th class="sortable" data-column="position">
-								Position <span class="sort-indicator">↕️</span>
-							</th>
-							<th class="sortable" data-column="status">
-								Status <span class="sort-indicator">↕️</span>
-							</th>
-							<th class="sortable" data-column="applicationDate">
-								Applied <span class="sort-indicator">↕️</span>
-							</th>
-							<th class="sortable" data-column="updatedAt">
-								Last Updated <span class="sort-indicator">🔽</span>
-							</th>
-							<th class="sortable" data-column="interest">
-								Interest <span class="sort-indicator">↕️</span>
-							</th>
-							<th class="sortable" data-column="nextEventDate">
-								Next Event <span class="sort-indicator">↕️</span>
-							</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody id="applications-tbody" data-testid="applications-tbody">
+					${pipelineHeaderComponent(sortColumn, sortDirection)}
+					<tbody id="applications-tbody" data-testid="applications-tbody" hx-target="closest tr" hx-swap="outerHTML">
 						${
 							sortedApplications.length > 0
-								? sortedApplications.map(renderTableRow).join("")
+								? sortedApplications.map(renderApplicationTableRow).join("")
 								: `<tr><td colspan="8" class="empty-state">No applications found</td></tr>`
 						}
 					</tbody>
 				</table>
 				
-				<div class="pagination-info" id="pagination-info">
-					Showing ${Math.min(sortedApplications.length, initialPageSize)} of ${applications.length} applications${applications.length > maxSerializedRecords ? ` (${maxSerializedRecords} loaded for client-side filtering)` : ""}
-				</div>
-				
-				<div class="pagination-nav" id="pagination-nav" role="navigation" aria-label="Table pagination">
-					<button 
-						class="pagination-btn" 
-						id="prev-page" 
-						disabled 
-						aria-label="Go to previous page"
-						aria-disabled="true"
-					>← Previous</button>
-					<span class="page-numbers" id="page-numbers" aria-live="polite" aria-label="Current page">1</span>
-					<button 
-						class="pagination-btn" 
-						id="next-page" 
-						${sortedApplications.length <= initialPageSize ? 'disabled aria-disabled="true"' : 'aria-disabled="false"'}
-						aria-label="Go to next page"
-					>Next →</button>
-				</div>
 			</div>
 		</div>
-
 		<link rel="stylesheet" href="/styles/pipeline.css">
-
-		<script>
-			// Optimize data serialization for large datasets
-			const shouldUseClientSidePagination = ${enableClientSidePagination};
-			const totalApplications = ${applications.length};
-			
-			// Only serialize limited data for client-side operations
-			const applicationData = ${JSON.stringify(
-				sortedApplications
-					.slice(
-						0,
-						enableClientSidePagination ? maxSerializedRecords : initialPageSize,
-					)
-					.map((app) => {
-						const currentStatus = app.getCurrentStatus();
-						const statusCategory = currentStatus
-							? getStatusCategory(currentStatus.current, pipelineConfig)
-							: "inactive";
-
-						return {
-							id: app.id,
-							company: app.company,
-							positionTitle: app.positionTitle,
-							applicationDate: app.applicationDate,
-							updatedAt: app.updatedAt,
-							interestRating: app.interestRating || 0,
-							nextEventDate: app.nextEventDate || null,
-							status: currentStatus?.current || "No Status",
-							statusCategory,
-							isOverdue: app.isOverdue(),
-						};
-					}),
-			)};
-
-			// Minimal config serialization
-			const pipelineConfig = ${JSON.stringify({
-				active: pipelineConfig.active,
-				inactive: pipelineConfig.inactive,
-			})};
-			
-			// Performance warning for large datasets
-			${
-				applications.length > maxSerializedRecords
-					? `
-			console.warn('Large dataset detected (${applications.length} records). Consider implementing server-side pagination for better performance.');
-			`
-					: ""
-			}
-
-			// State management
-			let currentSort = { column: 'updatedAt', direction: 'desc' };
-			let currentPage = 1;
-			let pageSize = ${initialPageSize};
-			let filteredData = [...applicationData];
-			let searchDebounceTimer = null;
-
-			// Utility functions
-			function formatDate(dateString) {
-				return new Date(dateString).toLocaleDateString('en-US');
-			}
-
-			function formatInterestRating(rating) {
-				if (!rating) return "";
-				return "★".repeat(rating) + "☆".repeat(3 - rating);
-			}
-
-			function sortData(data, column, direction) {
-				return [...data].sort((a, b) => {
-					let aVal = a[column];
-					let bVal = b[column];
-
-					// Handle dates
-					if (column === 'applicationDate' || column === 'updatedAt' || column === 'nextEventDate') {
-						aVal = aVal ? new Date(aVal).getTime() : 0;
-						bVal = bVal ? new Date(bVal).getTime() : 0;
-					}
-					
-					// Handle interest rating
-					if (column === 'interest') {
-						aVal = a.interestRating || 0;
-						bVal = b.interestRating || 0;
-					}
-
-					// Handle strings
-					if (typeof aVal === 'string') {
-						aVal = aVal.toLowerCase();
-						bVal = bVal.toLowerCase();
-					}
-
-					if (direction === 'asc') {
-						return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
-					} else {
-						return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
-					}
-				});
-			}
-
-			function filterData(immediate = true) {
-				const searchTerm = document.getElementById('search-filter').value.toLowerCase();
-				const statusFilter = document.getElementById('status-filter').value;
-				const interestFilter = document.getElementById('interest-filter').value;
-				const overdueFilter = document.getElementById('overdue-filter').value;
-
-				// Use early returns and optimized filtering
-				filteredData = applicationData.filter(app => {
-					// Search filter - most expensive, do last if other filters exist
-					const hasOtherFilters = statusFilter || interestFilter || overdueFilter;
-					
-					// Status filter - cheapest, do first
-					if (statusFilter) {
-						if (statusFilter === 'active' || statusFilter === 'inactive') {
-							if (app.statusCategory !== statusFilter) return false;
-						} else {
-							if (app.status !== statusFilter) return false;
-						}
-					}
-
-					// Interest filter - cheap numeric comparison
-					if (interestFilter && app.interestRating != interestFilter) {
-						return false;
-					}
-
-					// Overdue filter - boolean check
-					if (overdueFilter === 'overdue' && !app.isOverdue) return false;
-					if (overdueFilter === 'upcoming' && (!app.nextEventDate || app.isOverdue)) return false;
-
-					// Search filter last - most expensive
-					if (searchTerm && !app.company.toLowerCase().includes(searchTerm) && 
-						!app.positionTitle.toLowerCase().includes(searchTerm)) {
-						return false;
-					}
-
-					return true;
-				});
-
-				// Reset to page 1 when filtering changes
-				if (currentPage !== 1) {
-					currentPage = 1;
-				}
-				
-				if (immediate) {
-					updateDisplay();
-				}
-			}
-
-			// Debounced version for search input
-			function debouncedFilterData() {
-				if (searchDebounceTimer) {
-					clearTimeout(searchDebounceTimer);
-				}
-				searchDebounceTimer = setTimeout(() => {
-					filterData(true);
-					searchDebounceTimer = null;
-				}, 300); // 300ms debounce
-			}
-
-			function updateDisplay() {
-				const sortedData = sortData(filteredData, currentSort.column, currentSort.direction);
-				const startIndex = (currentPage - 1) * pageSize;
-				const endIndex = startIndex + pageSize;
-				const pageData = sortedData.slice(startIndex, endIndex);
-
-				// Update table body
-				const tbody = document.getElementById('applications-tbody');
-				if (pageData.length === 0) {
-					tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No applications found</td></tr>';
-				} else {
-					tbody.innerHTML = pageData.map(app => {
-						return \`
-							<tr class="application-row \${app.statusCategory} \${app.isOverdue ? 'overdue' : ''}" data-testid="application-row-\${app.id}">
-								<td class="company-cell editable-cell" 
-									data-testid="company-cell-\${app.id}"
-									hx-get="/applications/\${app.id}/edit/company" 
-									hx-target="this" 
-									hx-swap="outerHTML"
-									title="Click to edit company">\${app.company}</td>
-								<td class="position-cell editable-cell" 
-									data-testid="position-cell-\${app.id}"
-									hx-get="/applications/\${app.id}/edit/position" 
-									hx-target="this" 
-									hx-swap="outerHTML"
-									title="Click to edit position">\${app.positionTitle}</td>
-								<td class="status-cell editable-cell" 
-									data-testid="status-cell-\${app.id}"
-									hx-get="/applications/\${app.id}/edit/status" 
-									hx-target="this" 
-									hx-swap="outerHTML"
-									title="Click to edit status">
-									<span class="status-badge \${app.statusCategory}" data-testid="status-badge-\${app.id}">\${app.status}</span>
-								</td>
-								<td class="application-date-cell" data-testid="application-date-cell-\${app.id}">\${formatDate(app.applicationDate)}</td>
-								<td class="updated-date-cell" data-testid="updated-date-cell-\${app.id}">\${formatDate(app.updatedAt)}</td>
-								<td class="interest-cell editable-cell" 
-									data-testid="interest-cell-\${app.id}"
-									hx-get="/applications/\${app.id}/edit/interest" 
-									hx-target="this" 
-									hx-swap="outerHTML"
-									title="Click to edit interest rating">\${formatInterestRating(app.interestRating)}</td>
-								<td class="next-event-cell editable-cell" 
-									data-testid="next-event-cell-\${app.id}"
-									hx-get="/applications/\${app.id}/edit/nextEvent" 
-									hx-target="this" 
-									hx-swap="outerHTML"
-									title="Click to edit next event date">
-									\${app.nextEventDate 
-										? \`<span class="\${app.isOverdue ? 'overdue-date' : ''}" data-testid="next-event-date-\${app.id}">\${formatDate(app.nextEventDate)}</span>\`
-										: '<span class="no-date" data-testid="no-next-event-\${app.id}">No date set</span>'
-									}
-								</td>
-								<td class="actions-cell" data-testid="actions-cell-\${app.id}">
-									<button class="action-btn view" data-testid="view-btn-\${app.id}" title="View Details">👁️</button>
-								</td>
-							</tr>
-						\`;
-					}).join('');
-					
-					// Re-process HTMX attributes for dynamically generated content
-					if (typeof htmx !== 'undefined') {
-						htmx.process(tbody);
-					}
-				}
-
-				// Update pagination info
-				const totalPages = Math.ceil(filteredData.length / pageSize);
-				document.getElementById('pagination-info').textContent = 
-					\`Showing \${startIndex + 1}-\${Math.min(endIndex, filteredData.length)} of \${filteredData.length} applications\`;
-
-				// Update pagination navigation with accessibility
-				const prevBtn = document.getElementById('prev-page');
-				const nextBtn = document.getElementById('next-page');
-				const pageNumbers = document.getElementById('page-numbers');
-
-				prevBtn.disabled = currentPage <= 1;
-				prevBtn.setAttribute('aria-disabled', currentPage <= 1 ? 'true' : 'false');
-				
-				nextBtn.disabled = currentPage >= totalPages;
-				nextBtn.setAttribute('aria-disabled', currentPage >= totalPages ? 'true' : 'false');
-				
-				pageNumbers.textContent = \`\${currentPage} of \${totalPages || 1}\`;
-
-				// Update sort indicators
-				document.querySelectorAll('.sortable').forEach(th => {
-					th.classList.remove('sort-asc', 'sort-desc');
-					if (th.dataset.column === currentSort.column) {
-						th.classList.add(\`sort-\${currentSort.direction}\`);
-					}
-				});
-			}
-
-			// Event listeners
-			document.addEventListener('DOMContentLoaded', function() {
-				// Search and filter events
-				document.getElementById('search-filter').addEventListener('input', debouncedFilterData);
-				document.getElementById('status-filter').addEventListener('change', filterData);
-				document.getElementById('interest-filter').addEventListener('change', filterData);
-				document.getElementById('overdue-filter').addEventListener('change', filterData);
-
-				// Page size change
-				document.getElementById('page-size').addEventListener('change', function() {
-					pageSize = parseInt(this.value);
-					currentPage = 1;
-					updateDisplay();
-				});
-
-				// Pagination navigation
-				document.getElementById('prev-page').addEventListener('click', function() {
-					if (currentPage > 1) {
-						currentPage--;
-						updateDisplay();
-					}
-				});
-
-				document.getElementById('next-page').addEventListener('click', function() {
-					const totalPages = Math.ceil(filteredData.length / pageSize);
-					if (currentPage < totalPages) {
-						currentPage++;
-						updateDisplay();
-					}
-				});
-
-				// Column sorting
-				document.querySelectorAll('.sortable').forEach(th => {
-					th.addEventListener('click', function() {
-						const column = this.dataset.column;
-						if (currentSort.column === column) {
-							currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
-						} else {
-							currentSort.column = column;
-							currentSort.direction = 'asc';
-						}
-						updateDisplay();
-					});
-				});
-
-				// HTMX event listeners for debugging and error handling
-				document.body.addEventListener('htmx:beforeRequest', function(evt) {
-					console.log('HTMX: Starting request to', evt.detail.requestConfig.url);
-				});
-
-				document.body.addEventListener('htmx:afterRequest', function(evt) {
-					if (evt.detail.successful) {
-						console.log('HTMX: Request successful to', evt.detail.requestConfig.url);
-					} else {
-						console.error('HTMX: Request failed to', evt.detail.requestConfig.url, 'Status:', evt.detail.xhr.status);
-					}
-				});
-
-				document.body.addEventListener('htmx:responseError', function(evt) {
-					console.error('HTMX: Response error for', evt.detail.requestConfig.url, evt.detail.xhr.responseText);
-					// Show user-friendly error message
-					const errorDiv = document.createElement('div');
-					errorDiv.className = 'error-message';
-					errorDiv.textContent = 'Error updating application. Please try again.';
-					errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 12px; border-radius: 4px; z-index: 1000;';
-					document.body.appendChild(errorDiv);
-					setTimeout(() => errorDiv.remove(), 5000);
-				});
-
-				document.body.addEventListener('htmx:sendError', function(evt) {
-					console.error('HTMX: Network error for', evt.detail.requestConfig.url);
-					// Show network error message
-					const errorDiv = document.createElement('div');
-					errorDiv.className = 'error-message';
-					errorDiv.textContent = 'Network error. Please check your connection and try again.';
-					errorDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #f44336; color: white; padding: 12px; border-radius: 4px; z-index: 1000;';
-					document.body.appendChild(errorDiv);
-					setTimeout(() => errorDiv.remove(), 5000);
-				});
-
-				// Initial display update
-				updateDisplay();
-			});
-		</script>
 	`;
-};
+}
+
+function pipelineHeaderComponent(
+	sortColumn?: Column,
+	sortDirection?: "asc" | "desc",
+) {
+	const headerKeys: Column[] = [
+		"company",
+		"positionTitle",
+		"status",
+		"applicationDate",
+		"updatedAt",
+		"interestRating",
+		"nextEventDate",
+	];
+	return `
+    <thead>
+    <tr>
+    ${headerKeys
+			.map(
+				(key) => `
+<th
+    class="sortable"
+    hx-get="${getSortUrl(key, sortColumn, sortDirection)}"
+    hx-target="#pipeline-container"
+	hx-swap="outerHTML"
+	style="cursor: pointer;"
+	title="Click to sort by ${camelCaseToSpaceSeparatedLower(key)}"
+	data-testid="${camelCaseToHyphenated(key)}-header"
+	>
+	${camelCaseToSpaceSeparatedUpper(key)}
+	<span class="sort-indicator">${getSortIndicator(key, sortColumn, sortDirection)}</span>
+</th>
+`,
+			)
+			.join("")}
+    <th>Actions</th>
+    </tr>
+    </thead>
+   
+    `;
+}
+
+function sortApplications(
+	applications: JobApplication[],
+	column: Column,
+	direction: "asc" | "desc",
+): JobApplication[] {
+	return [...applications].sort((a, b) => {
+		let aVal: string | number;
+		let bVal: string | number;
+
+		switch (column) {
+			case "company":
+				aVal = a.company.toLowerCase();
+				bVal = b.company.toLowerCase();
+				break;
+			case "positionTitle":
+				aVal = a.positionTitle.toLowerCase();
+				bVal = b.positionTitle.toLowerCase();
+				break;
+			case "status": {
+				// Get current status from statusLog
+				const aStatus = a.statusLog.at(-1)?.[1]?.label || "";
+				const bStatus = b.statusLog.at(-1)?.[1]?.label || "";
+				aVal = aStatus.toLowerCase();
+				bVal = bStatus.toLowerCase();
+				break;
+			}
+			case "applicationDate":
+				aVal = new Date(a.applicationDate).getTime();
+				bVal = new Date(b.applicationDate).getTime();
+				break;
+			case "interestRating":
+				aVal = a.interestRating || 0;
+				bVal = b.interestRating || 0;
+				break;
+			case "nextEventDate":
+				aVal = a.nextEventDate ? new Date(a.nextEventDate).getTime() : 0;
+				bVal = b.nextEventDate ? new Date(b.nextEventDate).getTime() : 0;
+				break;
+			// biome-ignore lint: explicitness
+			case "updatedAt":
+			default:
+				aVal = new Date(a.updatedAt).getTime();
+				bVal = new Date(b.updatedAt).getTime();
+		}
+
+		const comparisonResult = aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+		return direction === "asc" ? comparisonResult : -comparisonResult;
+	});
+}
+
+function getSortUrl(
+	column: Column,
+	currentColumn?: string,
+	currentDirection?: "asc" | "desc",
+): string {
+	let direction: "asc" | "desc" = "asc";
+
+	// If clicking the same column, toggle a direction
+	if (column === currentColumn) {
+		direction = currentDirection === "asc" ? "desc" : "asc";
+	}
+
+	return `/api/pipeline?sortColumn=${column}&sortDirection=${direction}`;
+}
+
+function getSortIndicator(
+	column: Column,
+	currentColumn?: string,
+	currentDirection?: "asc" | "desc",
+): string {
+	if (column === currentColumn) {
+		return currentDirection === "asc" ? "🔼" : "🔽";
+	}
+	return "↕️";
+}
+
+// Status is an object, but we want a string for a key here.
+export type Column = keyof JobApplication | "status";

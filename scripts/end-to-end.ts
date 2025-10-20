@@ -15,9 +15,10 @@ async function main() {
 	console.timeEnd("pollDevServer");
 
 	// Pass through all command line arguments to Playwright
-	const playwrightArgs = ["test", ...process.argv.slice(2)];
+	// Use bunx to run Playwright with Bun's runtime to support bun:sqlite
+	const playwrightArgs = ["playwright", "test", ...process.argv.slice(2)];
 
-	const e2e = Bun.spawnSync(["playwright", ...playwrightArgs], {
+	const e2e = Bun.spawnSync(["bunx", ...playwrightArgs], {
 		stdout: "inherit",
 		stderr: "inherit",
 		onExit(_proc, _exitCode, _signalCode, _error): void | Promise<void> {

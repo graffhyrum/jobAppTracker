@@ -30,11 +30,21 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 # IntelliJ based IDEs
 .idea
 
+# Quokka
+.quokka
+
 # Finder (MacOS) folder config
 .DS_Store
-test-results
 playwright-report
 /data/job-applications.json
 
 # E2E test data backups
 /data/
+/.playwright-mcp/page-2025-09-12T21-40-34-001Z.png
+/db-files/main_db/clog/00000000000000000000.clog
+/db-files/main_db/manifest/00000000000000000000.manifest
+/db-files/main_db/rpc/clog/00000000000000000000.clog
+/db-files/main_db/rpc/manifest/00000000000000000000.manifest
+/db-files/test_db/clog/00000000000000000000.clog
+/db-files/test_db/manifest/00000000000000000000.manifest
+/db-files/.gitkeep

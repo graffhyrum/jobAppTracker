@@ -8,9 +8,39 @@
 			"mcp__playwright__browser_close",
 			"Bash(git log:*)",
 			"Bash(bun test:*)",
-			"WebFetch(domain:arktype.io)"
+			"WebFetch(domain:arktype.io)",
+			"Bash(bun vet:*)",
+			"Bash(bunx surreal help:*)",
+			"Bash(bun run:*)",
+			"Bash(bun list:*)",
+			"WebSearch",
+			"Bash(bun check:*)",
+			"Bash(bun typecheck)",
+			"WebFetch(domain:surrealdb.com)",
+			"Bash(bun dev:*)",
+			"WebFetch(domain:htmx.org)",
+			"Bash(bun fix:*)",
+			"Bash(bun typecheck:*)",
+			"mcp__playwright__browser_snapshot",
+			"mcp__playwright__browser_take_screenshot",
+			"mcp__playwright__browser_click",
+			"mcp__playwright__browser_evaluate",
+			"mcp__playwright__browser_fill_form",
+			"Bash(cat:*)",
+			"WebFetch(domain:bun.sh)",
+			"mcp__playwright__browser_network_requests",
+			"Bash(bun test:all)",
+			"Bash(curl:*)"
 		]
 	},
 	"enableAllProjectMcpServers": true,
-	"enabledMcpjsonServers": ["playwright"]
+	"enabledMcpjsonServers": ["playwright"],
+	"additionalDirectories": [
+		{
+			"path": "C:/Users/graff/WebstormProjects/jobAppTracker/node_modules/arktype"
+		},
+		{
+			"path": "C:/Users/graff/WebstormProjects/jobAppTracker/node_modules/neverthrow"
+		}
+	]
 }

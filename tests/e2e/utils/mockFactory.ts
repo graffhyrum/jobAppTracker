@@ -85,8 +85,8 @@ export async function createJobApplicationViaUI(
 ): Promise<MockJobApplicationData> {
 	const mockData = createMockJobApplication(overrides);
 
-	// Navigate to add application page
-	await page.goto("/add");
+	// Navigate to homepage where the form is now located
+	await page.goto("/");
 
 	// Fill the form
 	await fillJobApplicationForm(page, mockData);
@@ -95,9 +95,7 @@ export async function createJobApplicationViaUI(
 	const [response] = await Promise.all([
 		page.waitForResponse(
 			(response) =>
-				response.url().includes("/applications") &&
-				response.request().method() === "POST" &&
-				response.status() === 303,
+				response.request().method() === "POST" && response.status() === 200,
 			{ timeout: 10000 },
 		),
 		page.click('button[type="submit"]'),

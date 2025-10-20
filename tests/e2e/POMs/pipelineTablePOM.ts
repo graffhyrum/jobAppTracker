@@ -1,8 +1,8 @@
 import { expect, type Page } from "@playwright/test";
 import type {
+	ComponentFactory,
+	ComponentObject,
 	LocatorConfigMap,
-	PageObject,
-	PomFactory,
 } from "../config/ScreenplayTypes.ts";
 import {
 	createJobApplicationRowComponent,
@@ -17,8 +17,7 @@ function createPipelineTablePOM(page: Page) {
 		container: page.locator('[data-testid="pipeline-container"]'),
 
 		// Generic selectors for when we don't know the app ID
-		editableCells: page.locator(".editable-cell"),
-		editingCells: page.locator(".editing"),
+		editingCells: page.locator("tr.editing"),
 
 		// Error messages
 		errorMessages: page.locator(".error-message"),
@@ -28,6 +27,7 @@ function createPipelineTablePOM(page: Page) {
 		statusFilter: page.locator('[data-testid="status-filter"]'),
 		interestFilter: page.locator('[data-testid="interest-filter"]'),
 		overdueFilter: page.locator('[data-testid="overdue-filter"]'),
+		timezoneSelect: page.locator('[data-testid="timezone-select"]'),
 	} as const satisfies LocatorConfigMap;
 
 	// Helper function to get JobApplicationRowComponent for a specific app ID
@@ -61,54 +61,6 @@ function createPipelineTablePOM(page: Page) {
 		return maybeFirstId;
 	}
 
-	// Helper to get app ID for a specific row index (kept for backward compatibility)
-	async function getAppIdByIndex(index: number): Promise<string> {
-		const appIds = await getAllAppIds();
-		const maybeID = appIds[index];
-		if (!maybeID) {
-			throw new Error(`No application row found at index ${index}`);
-		}
-		return maybeID;
-	}
-
-	// Helper to get a row component by index
-	async function getRowComponentByIndex(
-		index: number,
-	): Promise<JobApplicationRowComponent> {
-		const appId = await getAppIdByIndex(index);
-		return getRowComponent(appId);
-	}
-
-	// Backward compatibility actions
-	async function clickCompanyCell(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.clickCompanyCell();
-	}
-
-	async function enterTextValue(value: string, index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.enterTextValue(value);
-	}
-
-	async function clickSave(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.clickSave();
-	}
-
-	async function clickEditableCell(cellSelector: string, index: number = 0) {
-		await page.locator(cellSelector).nth(index).click();
-	}
-
-	async function clickPositionCell(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.clickPositionCell();
-	}
-
-	async function clickStatusCell(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.clickStatusCell();
-	}
-
 	// Table-level actions
 	async function searchApplications(searchTerm: string) {
 		await locators.searchInput.fill(searchTerm);
@@ -124,6 +76,35 @@ function createPipelineTablePOM(page: Page) {
 
 	async function filterByOverdue(filter: string) {
 		await locators.overdueFilter.selectOption(filter);
+	}
+
+	async function setTimezone(tz: string) {
+		await expect(locators.timezoneSelect).toBeVisible();
+		await locators.timezoneSelect.selectOption(tz);
+	}
+
+	async function getUpdatedDateTextById(
+		applicationId: string,
+	): Promise<string> {
+		const l = page.locator(
+			`[data-testid="updated-date-cell-${applicationId}"]`,
+		);
+		await expect(l).toBeVisible();
+		return (await l.textContent())?.trim() ?? "";
+	}
+	async function getAppliedDateTextById(
+		applicationId: string,
+	): Promise<string> {
+		const l = page.locator(
+			`[data-testid="application-date-cell-${applicationId}"]`,
+		);
+		await expect(l).toBeVisible();
+		return (await l.textContent())?.trim() ?? "";
+	}
+	async function getNextEventTextById(applicationId: string): Promise<string> {
+		const l = page.locator(`[data-testid="next-event-cell-${applicationId}"]`);
+		await expect(l).toBeVisible();
+		return (await l.textContent())?.trim() ?? "";
 	}
 
 	// UUID-based row actions (primary interface)
@@ -155,52 +136,6 @@ function createPipelineTablePOM(page: Page) {
 		await rowComponent.actions.editNextEventDate(date);
 	}
 
-	// Legacy index-based actions
-	async function clickInterestCell(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.clickInterestCell();
-	}
-
-	async function clickNextEventCell(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.clickNextEventCell();
-	}
-
-	async function selectDropdownValue(value: string, index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.selectDropdownValue(value);
-	}
-
-	async function clickCancel(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.clickCancel();
-	}
-
-	async function editCompanyName(index: number, newValue: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.editCompanyName(newValue);
-	}
-
-	async function editPositionTitle(index: number, newValue: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.editPositionTitle(newValue);
-	}
-
-	async function editStatus(index: number, newStatus: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.editStatus(newStatus);
-	}
-
-	async function editInterestRating(index: number, rating: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.editInterestRating(rating);
-	}
-
-	async function editNextEventDate(index: number, date: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.actions.editNextEventDate(date);
-	}
-
 	// Table-level assertions
 	async function tableIsVisible() {
 		await expect(locators.table).toBeVisible();
@@ -208,6 +143,47 @@ function createPipelineTablePOM(page: Page) {
 
 	async function hasApplications() {
 		await expect(locators.tbody.locator("tr")).not.toHaveCount(0);
+	}
+
+	async function waitForTableDataToLoad() {
+		// Wait for table to be visible first
+		await expect(locators.table).toBeVisible();
+
+		// Wait for tbody to have at least one row (not empty)
+		await expect(locators.tbody.locator("tr")).not.toHaveCount(0);
+
+		// Wait a bit more for HTMX to finish rendering
+		await page.waitForTimeout(500);
+	}
+
+	async function debugTableState() {
+		// Check if table exists
+		const tableExists = await locators.table.isVisible();
+
+		// Check tbody content
+		const _rowCount = await locators.tbody.locator("tr").count();
+
+		// Get all application IDs currently in the table
+		const appIds = await getAllAppIds();
+		console.log(`Application IDs found: ${JSON.stringify(appIds)}`);
+
+		// Show table HTML for debugging
+		if (tableExists) {
+			const tableHTML = await locators.table.innerHTML();
+			const lines = tableHTML.split("\n");
+			const firstIndentMatch = lines[0]?.match(/^(\s*)/);
+			const firstIndent = firstIndentMatch?.[1]
+				? firstIndentMatch[1].length
+				: 0;
+
+			const normalized = lines
+				.map((l) => l.replace(new RegExp(`^\\s{0,${firstIndent}}`), "")) // trim up to firstIndent spaces
+				.join("\n");
+
+			console.log(`Table HTML: \n${normalized.substring(0, 500)}...`);
+		}
+
+		console.log("========================");
 	}
 
 	async function cellIsInEditMode() {
@@ -242,8 +218,10 @@ function createPipelineTablePOM(page: Page) {
 	}
 
 	async function containsApplicationById(applicationId: string) {
-		const rowComponent = getRowComponent(applicationId);
-		await rowComponent.assertions.isVisible();
+		// Wait for the specific row to appear
+		await expect(
+			page.locator(`[data-testid="application-row-${applicationId}"]`),
+		).toBeVisible();
 	}
 
 	// UUID-based row assertions (primary interface)
@@ -300,58 +278,6 @@ function createPipelineTablePOM(page: Page) {
 		await rowComponent.assertions.editableHoverStateVisible(cellType);
 	}
 
-	// Backward compatibility - Index-based assertions (deprecated)
-	async function editFormIsVisible(index: number = 0) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.assertions.editFormIsVisible();
-	}
-
-	async function cellValueEquals(
-		cellSelector: string,
-		index: number,
-		expectedValue: string,
-	) {
-		const cell = page.locator(cellSelector).nth(index);
-		await expect(cell).toHaveText(expectedValue);
-	}
-
-	async function companyNameEquals(index: number, expectedValue: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.assertions.companyNameEquals(expectedValue);
-	}
-
-	async function positionTitleEquals(index: number, expectedValue: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.assertions.positionTitleEquals(expectedValue);
-	}
-
-	async function statusEquals(index: number, expectedValue: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.assertions.statusEquals(expectedValue);
-	}
-
-	async function interestRatingEquals(index: number, expectedRating: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.assertions.interestRatingEquals(expectedRating);
-	}
-
-	async function nextEventDateContains(index: number, expectedDate: string) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.assertions.nextEventDateContains(expectedDate);
-	}
-
-	async function editableHoverStateVisible(
-		cellType: "company" | "position" | "status" | "interest" | "nextEvent",
-		index: number = 0,
-	) {
-		const rowComponent = await getRowComponentByIndex(index);
-		await rowComponent.assertions.editableHoverStateVisible(cellType);
-	}
-
-	async function goto() {
-		await page.goto("/");
-	}
-
 	// Actions for working with row components
 	function getRowComponent_ById(
 		applicationId: string,
@@ -359,27 +285,21 @@ function createPipelineTablePOM(page: Page) {
 		return getRowComponent(applicationId);
 	}
 
-	async function getRowComponent_ByIndex(
-		index: number,
-	): Promise<JobApplicationRowComponent> {
-		const appId = await getAppIdByIndex(index);
-		return getRowComponent(appId);
-	}
-
 	return {
 		page,
-		components: {},
-		goto,
 		actions: {
 			// Table-level actions
 			searchApplications,
 			filterByStatus,
 			filterByInterest,
 			filterByOverdue,
+			setTimezone,
+			getUpdatedDateTextById,
+			getAppliedDateTextById,
+			getNextEventTextById,
 
 			// Row component access actions
 			getRowById: getRowComponent_ById,
-			getRowByIndex: getRowComponent_ByIndex,
 			getAllRowIds: getAllAppIds,
 			getFirstRowId: getFirstAppId,
 
@@ -389,28 +309,13 @@ function createPipelineTablePOM(page: Page) {
 			editStatusById,
 			editInterestRatingById,
 			editNextEventDateById,
-
-			// Backward compatibility - Index-based actions (deprecated)
-			clickEditableCell,
-			clickCompanyCell,
-			clickPositionCell,
-			clickStatusCell,
-			clickInterestCell,
-			clickNextEventCell,
-			enterTextValue,
-			selectDropdownValue,
-			clickSave,
-			clickCancel,
-			editCompanyName,
-			editPositionTitle,
-			editStatus,
-			editInterestRating,
-			editNextEventDate,
 		},
 		assertions: {
 			// Table-level assertions
 			tableIsVisible,
 			hasApplications,
+			waitForTableDataToLoad,
+			debugTableState,
 			cellIsInEditMode,
 			noEditFormVisible,
 			errorMessageIsVisible,
@@ -427,19 +332,10 @@ function createPipelineTablePOM(page: Page) {
 			nextEventDateContainsById,
 			editFormIsVisibleById,
 			editableHoverStateVisibleById,
-
-			// Backward compatibility - Index-based assertions (deprecated)
-			editFormIsVisible,
-			cellValueEquals,
-			companyNameEquals,
-			positionTitleEquals,
-			statusEquals,
-			interestRatingEquals,
-			nextEventDateContains,
-			editableHoverStateVisible,
 		},
-	} as const satisfies PageObject;
+	} as const satisfies ComponentObject;
 }
 
-export const createPipelineTable = createPipelineTablePOM satisfies PomFactory;
+export const createPipelineTable =
+	createPipelineTablePOM satisfies ComponentFactory;
 export type PipelineTableObject = ReturnType<typeof createPipelineTable>;

@@ -1,9 +1,10 @@
 import { ArkErrors, type TraversalError, type Type } from "arktype";
 import { err, ok, type Result } from "neverthrow";
 
-type ArkTypeOut<T> = T extends Type<infer Out, {}> ? Out : never;
+type ArkTypeOut<T> = T extends Type<infer Out, infer _Scope> ? Out : never;
 
-export function toArkResult<const ArkType extends Type>(
+// biome-ignore lint/suspicious/noExplicitAny: generic function
+export function toArkResult<const ArkType extends Type<any, any>>(
 	arkType: ArkType,
 	input: unknown,
 ): Result<ArkTypeOut<ArkType>, TraversalError> {

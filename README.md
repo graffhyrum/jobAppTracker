@@ -24,6 +24,7 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 
 - **Runtime**: Bun
 - **Language**: TypeScript
+- **Database**: SQLite (using Bun's built-in driver)
 - **Web Framework**: Bun.serve with HTMX
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
@@ -57,7 +58,7 @@ The following environment variables are required:
 |----------|------|-------------|---------|
 | `BASE_URL` | string | Base URL for the application | `http://localhost` |
 | `PORT` | number | Port number for the server | `3000` |
-| `JOB_APP_REPOSITORY_TYPE` | `"json" \| "memory"` | **Required**. Storage backend type:<br/>- `"json"`: File-based storage (production)<br/>- `"memory"`: In-memory storage (testing) | `"json"` |
+| `JOB_APP_MANAGER_TYPE` | `"prod" \| "test"` | **Required**. Storage backend type:<br/>- `"prod"`: File-based SQLite database (production)<br/>- `"test"`: In-memory SQLite database (testing) | `"prod"` |
 
 ### Development
 

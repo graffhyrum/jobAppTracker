@@ -4,32 +4,23 @@ import { createNavBar } from "./navBarPOM.ts";
 
 function createHomePagePOM(page: Page) {
 	const locators = {
-		addApplicationBtn: page.getByRole("link", {
-			name: "+ Add New Application",
-		}),
 		pageTitle: page.locator("[data-testid='page-title']"),
+		addApplicationForm: page.locator(".add-application-form"),
 	} as const satisfies Record<string, Locator>;
 
 	const navBar = createNavBar(page);
 
 	return {
 		page,
-		components: {},
 		async goto() {
 			await page.goto("/");
 		},
 		actions: {
-			async clickAddApplication() {
-				await locators.addApplicationBtn.click();
-			},
 			async clickNavHome() {
 				await navBar.actions.clickHome();
 			},
 			async clickNavHealth() {
 				await navBar.actions.clickHealth();
-			},
-			async clickNavBrand() {
-				await navBar.actions.clickBrand();
 			},
 		},
 		assertions: {
@@ -44,27 +35,6 @@ function createHomePagePOM(page: Page) {
 			},
 			async navBrandHasText(text: string) {
 				await navBar.assertions.brandHasText(text);
-			},
-			async navBrandHrefIs(href: string) {
-				await navBar.assertions.brandHrefIs(href);
-			},
-			async navHomeLinkVisible() {
-				await navBar.assertions.homeLinkVisible();
-			},
-			async navHomeHrefIs(href: string) {
-				await navBar.assertions.homeHrefIs(href);
-			},
-			async navHealthLinkVisible() {
-				await navBar.assertions.healthLinkVisible();
-			},
-			async navHealthHrefIs(href: string) {
-				await navBar.assertions.healthHrefIs(href);
-			},
-			async navHasDarkBackground() {
-				await navBar.assertions.hasDarkBackground();
-			},
-			async navLinksAreWhite() {
-				await navBar.assertions.linksAreWhite();
 			},
 		},
 	} as const satisfies PageObject;

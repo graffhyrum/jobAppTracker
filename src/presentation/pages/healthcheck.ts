@@ -1,6 +1,9 @@
 import { layout } from "../components/layout";
 
-export const healthcheckPage = (): string => {
+export const healthcheckPage = (
+	dbStatusRecord: Parameters<typeof recordToHtml>[0],
+	exposedProcessVariables: Parameters<typeof recordToHtml>[0],
+): string => {
 	const content = `
 		<div class="health-status">
 			<h1 data-testid="page-title">System Health Check</h1>
@@ -16,6 +19,21 @@ export const healthcheckPage = (): string => {
 				<p><strong>Environment:</strong> Development</p>
 				<p><strong>Version:</strong> 1.0.0</p>
 			</div>
+			
+			<div class="service-check">
+				<h3>Database Status</h3>
+				${recordToHtml(dbStatusRecord)}
+			</div>
+			
+			<div class="service-check">
+			<h3>Environment Variables</h3>
+				<details>
+					<summary>Click to toggle</summary>
+					${recordToHtml(exposedProcessVariables)}
+				</details>
+				 
+			</div>
+		</div>
 		</div>
 
 		<script>
@@ -25,3 +43,9 @@ export const healthcheckPage = (): string => {
 
 	return layout("Health Check - Job App Tracker", content);
 };
+
+function recordToHtml(record: Record<string, unknown>): string {
+	return Object.entries(record)
+		.map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+		.join("");
+}

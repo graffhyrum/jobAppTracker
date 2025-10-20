@@ -81,7 +81,7 @@ type ApplicationStatus = {
 }
 
 type Note = {
-  id: string
+  id: UUID
   content: string
   createdAt: string // ISO date string
   updatedAt: string // ISO date string
@@ -90,16 +90,16 @@ type Note = {
 type NotesCollection = {
   notes: Record<string, Omit<Note, 'id'>>
   operations: {
-    get(id: string): Result<Note, Error>
+    get(id: UUID): Result<Note, Error>
     getAll(): Result<Note[], Error>
     add(data: { content: string }): Result<Note, Error>
-    update(id: string, data: { content?: string }): Result<Note, Error>
-    remove(id: string): Result<void, Error>
+    update(id: UUID, data: { content?: string }): Result<Note, Error>
+    remove(id: UUID): Result<void, Error>
   }
 }
 
 type JobApplication = {
-  id: string // UUID v7
+  id: UUID // UUID v7
   company: string
   positionTitle: string
   applicationDate: string // ISO date string
@@ -126,7 +126,7 @@ type PipelineConfig = {
 }
 
 type PDFTemplate = {
-  id: string
+  id: UUID
   name: string
   filePath: string
   fieldMappings: Record<keyof JobApplication, string>

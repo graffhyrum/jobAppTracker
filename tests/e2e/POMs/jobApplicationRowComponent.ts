@@ -23,35 +23,33 @@ export function createJobApplicationRowComponent(
 			`[data-testid="next-event-date-${applicationId}"]`,
 		),
 		actionsCell: page.locator(`[data-testid="actions-cell-${applicationId}"]`),
+		editBtn: page.locator(`[data-testid="edit-btn-${applicationId}"]`),
 		viewBtn: page.locator(`[data-testid="view-btn-${applicationId}"]`),
+		deleteBtn: page.locator(`[data-testid="delete-btn-${applicationId}"]`),
 
-		// Edit form elements
-		editForm: page.locator(`[data-testid="edit-form-${applicationId}"]`),
-		editInput: page.locator(`[data-testid="edit-input-${applicationId}"]`),
-		editSelect: page.locator(`[data-testid="edit-select-${applicationId}"]`),
+		// Edit mode elements (row-level)
+		companyInput: page.locator(
+			`[data-testid="edit-input-company-${applicationId}"]`,
+		),
+		positionInput: page.locator(
+			`[data-testid="edit-input-position-${applicationId}"]`,
+		),
+		statusSelect: page.locator(
+			`[data-testid="edit-select-status-${applicationId}"]`,
+		),
+		interestSelect: page.locator(
+			`[data-testid="edit-select-interest-${applicationId}"]`,
+		),
+		nextEventInput: page.locator(
+			`[data-testid="edit-input-nextEvent-${applicationId}"]`,
+		),
 		saveBtn: page.locator(`[data-testid="save-btn-${applicationId}"]`),
 		cancelBtn: page.locator(`[data-testid="cancel-btn-${applicationId}"]`),
-		editButtons: page.locator(`[data-testid="edit-buttons-${applicationId}"]`),
 	};
 
-	async function clickCompanyCell() {
-		await locators.companyCell.click();
-	}
-
-	async function clickPositionCell() {
-		await locators.positionCell.click();
-	}
-
-	async function clickStatusCell() {
-		await locators.statusCell.click();
-	}
-
-	async function clickInterestCell() {
-		await locators.interestCell.click();
-	}
-
-	async function clickNextEventCell() {
-		await locators.nextEventCell.click();
+	async function clickEditButton() {
+		await expect(locators.editBtn).toBeVisible({ timeout: 10000 });
+		await locators.editBtn.click();
 	}
 
 	async function clickViewButton() {
@@ -59,11 +57,28 @@ export function createJobApplicationRowComponent(
 	}
 
 	async function enterTextValue(value: string) {
-		await locators.editInput.fill(value);
+		// Prefer company input if present, otherwise position or next event
+		if (await locators.companyInput.isVisible().catch(() => false)) {
+			await locators.companyInput.fill(value);
+			return;
+		}
+		if (await locators.positionInput.isVisible().catch(() => false)) {
+			await locators.positionInput.fill(value);
+			return;
+		}
+		if (await locators.nextEventInput.isVisible().catch(() => false)) {
+			await locators.nextEventInput.fill(value);
+		}
 	}
 
 	async function selectDropdownValue(value: string) {
-		await locators.editSelect.selectOption(value);
+		if (await locators.statusSelect.isVisible().catch(() => false)) {
+			await locators.statusSelect.selectOption(value);
+			return;
+		}
+		if (await locators.interestSelect.isVisible().catch(() => false)) {
+			await locators.interestSelect.selectOption(value);
+		}
 	}
 
 	async function clickSave() {
@@ -75,43 +90,38 @@ export function createJobApplicationRowComponent(
 	}
 
 	async function editCompanyName(newValue: string) {
-		await clickCompanyCell();
-		await enterTextValue(newValue);
+		await clickEditButton();
+		await locators.companyInput.fill(newValue);
 		await clickSave();
-		// Wait for the edit form to disappear (indicates the update completed)
-		await expect(locators.editInput.or(locators.editSelect)).not.toBeVisible();
+		await expect(locators.companyInput).not.toBeVisible();
 	}
 
 	async function editPositionTitle(newValue: string) {
-		await clickPositionCell();
-		await enterTextValue(newValue);
+		await clickEditButton();
+		await locators.positionInput.fill(newValue);
 		await clickSave();
-		// Wait for the edit form to disappear (indicates the update completed)
-		await expect(locators.editInput.or(locators.editSelect)).not.toBeVisible();
+		await expect(locators.positionInput).not.toBeVisible();
 	}
 
 	async function editStatus(newStatus: string) {
-		await clickStatusCell();
-		await selectDropdownValue(newStatus);
+		await clickEditButton();
+		await locators.statusSelect.selectOption(newStatus);
 		await clickSave();
-		// Wait for the edit form to disappear (indicates the update completed)
-		await expect(locators.editInput.or(locators.editSelect)).not.toBeVisible();
+		await expect(locators.statusSelect).not.toBeVisible();
 	}
 
 	async function editInterestRating(rating: string) {
-		await clickInterestCell();
-		await selectDropdownValue(rating);
+		await clickEditButton();
+		await locators.interestSelect.selectOption(rating);
 		await clickSave();
-		// Wait for the edit form to disappear (indicates the update completed)
-		await expect(locators.editInput.or(locators.editSelect)).not.toBeVisible();
+		await expect(locators.interestSelect).not.toBeVisible();
 	}
 
 	async function editNextEventDate(date: string) {
-		await clickNextEventCell();
-		await locators.editInput.fill(date);
+		await clickEditButton();
+		await locators.nextEventInput.fill(date);
 		await clickSave();
-		// Wait for the edit form to disappear (indicates the update completed)
-		await expect(locators.editInput.or(locators.editSelect)).not.toBeVisible();
+		await expect(locators.nextEventInput).not.toBeVisible();
 	}
 
 	async function cancelEdit() {
@@ -143,44 +153,45 @@ export function createJobApplicationRowComponent(
 	}
 
 	async function editFormIsVisible() {
-		await expect(locators.editInput.or(locators.editSelect)).toBeVisible();
+		await expect(locators.row).toHaveClass(/editing/);
 		await expect(locators.saveBtn).toBeVisible();
 		await expect(locators.cancelBtn).toBeVisible();
 	}
 
 	async function noEditFormVisible() {
-		await expect(locators.editForm).not.toBeVisible();
+		await expect(locators.row).not.toHaveClass(/editing/);
 	}
 
 	async function editableHoverStateVisible(
-		cellType: "company" | "position" | "status" | "interest" | "nextEvent",
+		_cellType: "company" | "position" | "status" | "interest" | "nextEvent",
 	) {
-		const cellLocatorMap = {
-			company: locators.companyCell,
-			position: locators.positionCell,
-			status: locators.statusCell,
-			interest: locators.interestCell,
-			nextEvent: locators.nextEventCell,
-		} as const;
+		// In the new pattern, ensure the Edit button is visible in the actions cell
+		await expect(locators.editBtn).toBeVisible();
+	}
 
-		const cellLocator = cellLocatorMap[cellType];
-		if (!cellLocator) {
-			throw new Error(`Invalid cell type: ${cellType}`);
-		}
+	async function clickDeleteButton() {
+		await expect(locators.deleteBtn).toBeVisible();
+		await locators.deleteBtn.click();
+	}
 
-		await cellLocator.hover();
-		await expect(cellLocator).toHaveCSS("cursor", "pointer");
+	async function deleteAndConfirm() {
+		page.once("dialog", (d) => d.accept());
+		await locators.deleteBtn.click();
+	}
+
+	async function deleteAndCancel() {
+		page.once("dialog", (d) => d.dismiss());
+		await locators.deleteBtn.click();
+	}
+
+	async function rowIsNotVisible() {
+		await expect(locators.row).toHaveCount(0);
 	}
 
 	return {
 		page,
-		components: {},
 		actions: {
-			clickCompanyCell,
-			clickPositionCell,
-			clickStatusCell,
-			clickInterestCell,
-			clickNextEventCell,
+			clickEditButton,
 			clickViewButton,
 			enterTextValue,
 			selectDropdownValue,
@@ -192,6 +203,9 @@ export function createJobApplicationRowComponent(
 			editInterestRating,
 			editNextEventDate,
 			cancelEdit,
+			clickDeleteButton,
+			deleteAndConfirm,
+			deleteAndCancel,
 		},
 		assertions: {
 			isVisible,
@@ -203,6 +217,7 @@ export function createJobApplicationRowComponent(
 			editFormIsVisible,
 			noEditFormVisible,
 			editableHoverStateVisible,
+			rowIsNotVisible,
 		},
 	} as const satisfies ComponentObject;
 }
