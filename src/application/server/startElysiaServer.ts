@@ -8,12 +8,39 @@ import { createPipelinePlugin } from "./plugins/pipeline.plugin.ts";
 
 export function startElysiaServer() {
 	const app = new Elysia()
-		.onError(({ code, status, error }) => {
-			if (code === "NOT_FOUND") return status(404, "Not Found :(");
-			return status(
-				500,
-				`Internal Server Error\nError:\n${JSON.stringify(error, null, 2)}`,
-			);
+		// Global error handling
+		.onError(({ code, error, set, request }) => {
+			console.error(`[Error ${code}]:`, error);
+
+			if (code === "NOT_FOUND") {
+				set.status = 404;
+				return "Not Found";
+			}
+
+			const errorMessage =
+				error instanceof Error ? error.message : JSON.stringify(error);
+
+			if (code === "VALIDATION") {
+				// For HTMX requests, return HTML; otherwise return JSON
+				const isHtmxRequest = request.headers.get("HX-Request") === "true";
+				set.status = 400;
+
+				if (isHtmxRequest) {
+					set.headers["Content-Type"] = "text/html";
+					return `<div class="error-message">Validation Error: ${errorMessage}</div>`;
+				}
+
+				return { error: "Validation Error", message: errorMessage };
+			}
+
+			if (code === "PARSE") {
+				set.status = 400;
+				return `Parse Error: ${errorMessage}`;
+			}
+
+			// Internal server error
+			set.status = 500;
+			return `Internal Server Error: ${errorMessage}`;
 		})
 		// Add the HTML plugin for automatic HTML content-type handling
 		.use(html())
@@ -61,40 +88,6 @@ export function startElysiaServer() {
 		.use(createPagesPlugin)
 		.use(createPipelinePlugin)
 		.use(createApplicationsPlugin)
-		// Global error handling
-		.onError(({ code, error, set, request }) => {
-			console.error(`[Error ${code}]:`, error);
-
-			if (code === "NOT_FOUND") {
-				set.status = 404;
-				return "Not Found";
-			}
-
-			const errorMessage =
-				error instanceof Error ? error.message : JSON.stringify(error);
-
-			if (code === "VALIDATION") {
-				// For HTMX requests, return HTML; otherwise return JSON
-				const isHtmxRequest = request.headers.get("HX-Request") === "true";
-				set.status = 400;
-
-				if (isHtmxRequest) {
-					set.headers["Content-Type"] = "text/html";
-					return `<div class="error-message">Validation Error: ${errorMessage}</div>`;
-				}
-
-				return { error: "Validation Error", message: errorMessage };
-			}
-
-			if (code === "PARSE") {
-				set.status = 400;
-				return `Parse Error: ${errorMessage}`;
-			}
-
-			// Internal server error
-			set.status = 500;
-			return `Internal Server Error: ${errorMessage}`;
-		})
 		.listen(3000);
 
 	console.log(
