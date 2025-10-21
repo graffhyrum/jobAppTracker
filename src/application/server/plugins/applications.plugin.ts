@@ -260,19 +260,19 @@ function extractStringField(
 	return defaultValue;
 }
 
+/**
+ * Parses form-formatted JA Creation data to JobApplicationForCreate
+ */
 function extractApplicationData(
 	formData: typeof createApplicationBodySchema.infer,
 ): JobApplicationForCreate {
-	const applicationDateRaw = formData.applicationDate;
 	const interestRating = extractStringField(formData.interestRating);
-	const nextEventDateRaw = extractStringField(formData.nextEventDate);
+	const nextEventDateRaw = formData.nextEventDate;
 	const jobPostingUrl = extractStringField(formData.jobPostingUrl)?.trim();
 	const jobDescription = extractStringField(formData.jobDescription)?.trim();
 	const { company, positionTitle } = formData;
 
-	const applicationDate = applicationDateRaw
-		? normalize(applicationDateRaw)
-		: undefined;
+	const applicationDate = normalize(formData.applicationDate);
 	const nextEventDate = nextEventDateRaw
 		? normalize(nextEventDateRaw)
 		: undefined;
