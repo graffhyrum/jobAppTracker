@@ -77,8 +77,7 @@ type AppStatusEntry = typeof jobApplicationModule.AppStatusEntry.infer;
 export function getJobAppCurrentStatusEntry(
 	app: JobApplication,
 ): Result<AppStatusEntry, ArkErrors> {
-	const lastEntry =
-		app.statusLog[app.statusLog.length - 1] ?? "Can't find last entry";
+	const lastEntry = app.statusLog.at(-1) ?? "Can't find last entry";
 	const parseResult = jobApplicationModule.AppStatusEntry(lastEntry);
 	if (parseResult instanceof ArkErrors) {
 		return err(parseResult);
