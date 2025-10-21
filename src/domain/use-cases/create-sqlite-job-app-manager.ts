@@ -34,16 +34,13 @@ export function createSQLiteJobAppManager(
 			return ResultAsync.fromPromise(
 				db.withConnection(async (database) => {
 					const query = database.prepare(`
-            INSERT INTO job_applications (
-              id, company, positionTitle, applicationDate, interestRating,
-              nextEventDate, jobPostingUrl, jobDescription,
-              createdAt, updatedAt, notes, statusLog
-            ) VALUES (
-              $id, $company, $positionTitle, $applicationDate, $interestRating,
-              $nextEventDate, $jobPostingUrl, $jobDescription,
-              $createdAt, $updatedAt, $notes, $statusLog
-            )
-          `);
+                        INSERT INTO job_applications (id, company, positionTitle, applicationDate, interestRating,
+                                                      nextEventDate, jobPostingUrl, jobDescription,
+                                                      createdAt, updatedAt, notes, statusLog)
+                        VALUES ($id, $company, $positionTitle, $applicationDate, $interestRating,
+                                $nextEventDate, $jobPostingUrl, $jobDescription,
+                                $createdAt, $updatedAt, $notes, $statusLog)
+                    `);
 
 					query.run({
 						$id: app.id,
@@ -122,22 +119,22 @@ export function createSQLiteJobAppManager(
 
 					// Update in database
 					const updateQuery = database.prepare(`
-            UPDATE job_applications SET
-              company = $company,
-              positionTitle = $positionTitle,
-              applicationDate = $applicationDate,
-              interestRating = $interestRating,
-              nextEventDate = $nextEventDate,
-              jobPostingUrl = $jobPostingUrl,
-              jobDescription = $jobDescription,
-              updatedAt = $updatedAt,
-              notes = $notes,
-              statusLog = $statusLog
-            WHERE id = $id
-          `);
+                        UPDATE job_applications
+                        SET company         = $company,
+                            positionTitle   = $positionTitle,
+                            applicationDate = $applicationDate,
+                            interestRating  = $interestRating,
+                            nextEventDate   = $nextEventDate,
+                            jobPostingUrl   = $jobPostingUrl,
+                            jobDescription  = $jobDescription,
+                            updatedAt       = $updatedAt,
+                            notes           = $notes,
+                            statusLog       = $statusLog
+                        WHERE id = $id
+                    `);
 
 					updateQuery.run({
-						$id: id as string,
+						$id: id,
 						$company: updated.company as string,
 						$positionTitle: updated.positionTitle as string,
 						$applicationDate: updated.applicationDate as string,
@@ -183,9 +180,10 @@ export function createSQLiteJobAppManager(
 			return ResultAsync.fromPromise(
 				db.withConnection(async (database) => {
 					const query = database.prepare(`
-            SELECT * FROM job_applications
-            WHERE json_extract(statusLog, '$[#-1][1].category') = 'active'
-          `);
+                        SELECT *
+                        FROM job_applications
+                        WHERE json_extract(statusLog, '$[#-1][1].category') = 'active'
+                    `);
 					return query.all();
 				}),
 				(err) => `Failed to query Job Applications: ${err}`,
@@ -196,9 +194,10 @@ export function createSQLiteJobAppManager(
 			return ResultAsync.fromPromise(
 				db.withConnection(async (database) => {
 					const query = database.prepare(`
-            SELECT * FROM job_applications
-            WHERE json_extract(statusLog, '$[#-1][1].category') = 'inactive'
-          `);
+                        SELECT *
+                        FROM job_applications
+                        WHERE json_extract(statusLog, '$[#-1][1].category') = 'inactive'
+                    `);
 					return query.all();
 				}),
 				(err) => `Failed to query Job Applications: ${err}`,
@@ -297,37 +296,66 @@ class SQLiteConnection {
 	private initializeSchema(): void {
 		// Create table if not exists
 		this.db.run(`
-      CREATE TABLE IF NOT EXISTS job_applications (
-        id TEXT PRIMARY KEY,
-        company TEXT NOT NULL,
-        positionTitle TEXT NOT NULL,
-        applicationDate TEXT NOT NULL,
-        interestRating INTEGER,
-        nextEventDate TEXT,
-        jobPostingUrl TEXT,
-        jobDescription TEXT,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL,
-        notes TEXT NOT NULL,
-        statusLog TEXT NOT NULL
-      )
-    `);
+            CREATE TABLE IF NOT EXISTS job_applications
+            (
+                id
+                TEXT
+                PRIMARY
+                KEY,
+                company
+                TEXT
+                NOT
+                NULL,
+                positionTitle
+                TEXT
+                NOT
+                NULL,
+                applicationDate
+                TEXT
+                NOT
+                NULL,
+                interestRating
+                INTEGER,
+                nextEventDate
+                TEXT,
+                jobPostingUrl
+                TEXT,
+                jobDescription
+                TEXT,
+                createdAt
+                TEXT
+                NOT
+                NULL,
+                updatedAt
+                TEXT
+                NOT
+                NULL,
+                notes
+                TEXT
+                NOT
+                NULL,
+                statusLog
+                TEXT
+                NOT
+                NULL
+            )
+        `);
 
 		// Create indexes for better query performance
 		this.db.run(`
-      CREATE INDEX IF NOT EXISTS idx_company
-      ON job_applications(company)
-    `);
+            CREATE INDEX IF NOT EXISTS idx_company
+                ON job_applications(company)
+        `);
 
 		this.db.run(`
-      CREATE INDEX IF NOT EXISTS idx_status_category
-      ON job_applications(json_extract(statusLog, '$[#-1][1].category'))
-    `);
+            CREATE INDEX IF NOT EXISTS idx_status_category
+                ON job_applications(json_extract(statusLog, '$[#-1][1].category'))
+        `);
 
 		this.db.run(`
-      CREATE INDEX IF NOT EXISTS idx_updated_at
-      ON job_applications(updatedAt DESC)
-    `);
+            CREATE INDEX IF NOT EXISTS idx_updated_at
+                ON job_applications(updatedAt DESC)
+        `);
 	}
 
 	async withConnection<T>(operation: (db: Database) => Promise<T>): Promise<T> {

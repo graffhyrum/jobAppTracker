@@ -14,6 +14,11 @@ export const PAGE_CONFIG = {
 			text: "Health Check",
 			testId: "nav-link-health",
 		},
+		api: {
+			href: "/swagger",
+			text: "API",
+			testId: "nav-link-api",
+		},
 	},
 } as const satisfies {
 	brand: { text: string; testId: string };

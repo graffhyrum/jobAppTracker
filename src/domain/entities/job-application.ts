@@ -1,4 +1,4 @@
-import { ArkErrors, scope } from "arktype";
+import { ArkErrors, scope, type } from "arktype";
 import { err, ok, type Result } from "neverthrow";
 import { noteScope } from "./noteScope.ts";
 import { uuidSchema } from "./uuid.ts";
@@ -28,12 +28,18 @@ const jobApplicationScope = scope({
 	"#HasId": {
 		id: "JobAppId",
 	},
-	BaseProps: {
+	RequiredBaseProps: {
 		company: "string > 0",
 		positionTitle: "string > 0",
 		applicationDate: "dateTime",
-		"interestRating?": "0 < number < 4",
-		"nextEventDate?": "dateTime",
+	},
+	BaseProps: {
+		"...": "RequiredBaseProps",
+		"interestRating?": type("string")
+			.or("number")
+			.pipe((v) => (typeof v === "string" ? Number(v) : v))
+			.to("0 <= number < 4"),
+		"nextEventDate?": "dateTime | ''",
 		"jobPostingUrl?": "string",
 		"jobDescription?": "string",
 	},
@@ -46,7 +52,15 @@ const jobApplicationScope = scope({
 		statusLog: "AppStatusEntry[] > 0", // always have at least one Log
 	},
 	forCreate: "BaseProps",
-	forUpdate: "Omit<Partial<JobApp>,'id'>",
+	forUpdate: "Partial<Omit<JobApp, 'id'>>",
+	"#ForCreateKey": "keyof forCreate",
+	"#ForUpdateKey": "keyof forUpdate",
+	FormForCreate: {
+		"[ForCreateKey]": "string",
+	},
+	FormForUpdate: {
+		"[ForUpdateKey]?": "string",
+	},
 });
 
 export const jobApplicationModule = jobApplicationScope.export();
@@ -166,7 +180,7 @@ export function getStatusCategory(
 
 export function updateJobApplicationData(
 	app: JobApplication,
-	updates: Partial<JobApplicationForCreate>,
+	updates: Partial<Omit<JobApplication, "id">>,
 ): JobApplication {
 	return {
 		...app,
@@ -188,3 +202,6 @@ export function isInactive(app: JobApplication): boolean {
 	const category = getStatusCategory(app);
 	return category.isOk() && category.value === "inactive";
 }
+
+export type ApplicationStatusLabel =
+	typeof jobApplicationModule.ApplicationStatusLabel.infer;

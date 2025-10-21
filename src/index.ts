@@ -1,8 +1,8 @@
-import { startBunServer } from "./application/server/startBunServer.ts";
+import { startElysiaServer } from "./application/server/startElysiaServer.ts";
 
 main();
 
 function main() {
-	console.log("Hello via Bun!");
-	startBunServer();
+	console.log("🚀 Starting Job Application Tracker with Elysia...");
+	startElysiaServer();
 }

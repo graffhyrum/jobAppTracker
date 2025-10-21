@@ -30,7 +30,10 @@
 			"WebFetch(domain:bun.sh)",
 			"mcp__playwright__browser_network_requests",
 			"Bash(bun test:all)",
-			"Bash(curl:*)"
+			"Bash(curl:*)",
+			"WebFetch(domain:elysiajs.com)",
+			"Bash(bun test:unit:*)",
+			"WebFetch(domain:standardschema.dev)"
 		]
 	},
 	"enableAllProjectMcpServers": true,

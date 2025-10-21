@@ -51,7 +51,8 @@ bun typecheck               # use Tsc to check for type errors
 
 - **Presentation** (`src/presentation/`): Web interface
   - HTMX-powered frontend with server-rendered templates
-  - RESTful routes served via Bun.serve
+  - RESTful routes served via ElysiaJS
+  - Organized as Elysia plugins for modularity
 
 ## Hexagonal Architecture & Dependency Inversion
 
@@ -146,8 +147,11 @@ Pipeline is customizable through admin interface.
 
 - **Runtime**: Bun (use `bun` commands, not `node` or `npm`)
 - **Database**: SQLite using Bun's built-in `bun:sqlite` driver
-- **Web**: `Bun.serve` with HTMX (not Express)
-- **Validation**: ArkType for schemas and type inference
+- **Web Framework**: ElysiaJS with HTMX frontend
+  - `@elysiajs/html` - HTML response handling
+  - `@elysiajs/static` - Static file serving
+  - `@elysiajs/swagger` - OpenAPI documentation
+- **Validation**: ArkType for schemas and type inference (via Standard Schema support)
 - **Error Handling**: NeverThrow Result types
 - **PDF**: PDF-lib for form filling
 - **Testing**: Built-in Bun test runner + Playwright for E2E
@@ -162,8 +166,14 @@ src/
 │   ├── ports/        # Interfaces for infrastructure
 │   └── use-cases/    # Application workflows
 ├── application/      # Use case orchestration
+│   └── server/       # ElysiaJS server setup
 ├── infrastructure/   # External system adapters
 └── presentation/     # HTMX web interface
+    ├── components/   # HTML rendering functions
+    ├── pages/        # Full page templates
+    ├── plugins/      # Elysia route plugins
+    ├── scripts/      # Client-side JS
+    └── styles/       # CSS files
 ```
 
 ## Development Notes
@@ -222,11 +232,94 @@ export type CreateJobApplicationData = typeof CreateJobApplicationSchema.infer
 // Use in validation functions
 const validateInput = (input: unknown) => {
   const result = CreateJobApplicationSchema(input)
-  return result instanceof type.errors 
+  return result instanceof type.errors
     ? Result.err(new ValidationError(result.summary))
     : Result.ok(result)
 }
 ```
+
+## ElysiaJS Patterns
+
+### Plugin Architecture
+
+Routes are organized as Elysia plugins following dependency injection principles:
+
+```typescript
+// Plugin with dependency injection
+export const createApplicationsPlugin = (
+  jobApplicationManager: JobApplicationManager
+) =>
+  new Elysia({ prefix: "/applications" })
+    .get("/:id", async ({ params: { id }, set }) => {
+      const result = await jobApplicationManager.getJobApplication(id);
+      if (result.isErr()) {
+        set.status = 404;
+        return `Error: ${result.error}`;
+      }
+      set.headers["Content-Type"] = "text/html";
+      return renderApplicationTableRow(result.value);
+    })
+    // ... more routes
+```
+
+### Server Composition
+
+The main server composes plugins and applies global middleware:
+
+```typescript
+export function startElysiaServer() {
+  const app = new Elysia()
+    .use(html())                    // HTML plugin for content-type handling
+    .use(swagger({ ... }))          // OpenAPI documentation
+    .use(staticPlugin({ ... }))     // Static file serving
+    .use(createPagesPlugin(jobApplicationManager))
+    .use(createApplicationsPlugin(jobApplicationManager))
+    .onError(({ code, error, set }) => { /* global error handling */ })
+    .listen(3000);
+}
+```
+
+### Route Handler Context
+
+Access request data via destructured context:
+
+- `params` - Path parameters (e.g., `/applications/:id`)
+- `query` - Query string parameters (e.g., `?sortColumn=date`)
+- `body` - Request body (form data, JSON, etc.)
+- `set` - Response configuration (status, headers)
+
+### ArkType Validation with Elysia
+
+ArkType integrates seamlessly via Standard Schema support:
+
+```typescript
+import { scope } from "arktype";
+
+const updateSchema = scope({
+  UpdateFields: {
+    company: "string > 0",
+    status: "'applied'|'rejected'",
+    "interestRating?": "'1'|'2'|'3'",
+  },
+});
+
+// Use in route handler
+.put("/:id", async ({ body, set }) => {
+  const validationResult = toArkResult(
+    updateSchema.UpdateFields,
+    body
+  );
+  if (validationResult.isErr()) {
+    set.status = 400;
+    return `Validation Error: ${validationResult.error.message}`;
+  }
+  // ... handle validated data
+})
+```
+
+### OpenAPI Documentation
+
+Access auto-generated API documentation at `/swagger` endpoint. The `@elysiajs/swagger` plugin generates OpenAPI specs from route definitions and ArkType schemas.
 
 # Code Style
 

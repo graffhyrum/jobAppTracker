@@ -6,10 +6,10 @@ import type { JobApplication } from "../../domain/entities/job-application";
  * - Matches company, positionTitle, latest status label, and optional jobPostingUrl
  */
 export function filterApplications(
-	term: string,
+	substring: string,
 	applications: JobApplication[],
 ): JobApplication[] {
-	const q = term.trim().toLowerCase();
+	const q = substring.trim().toLowerCase();
 	if (!q) return applications;
 
 	return applications.filter((app) => {
