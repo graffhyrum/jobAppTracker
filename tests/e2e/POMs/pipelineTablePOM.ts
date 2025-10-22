@@ -28,6 +28,9 @@ function createPipelineTablePOM(page: Page) {
 		interestFilter: page.locator('[data-testid="interest-filter"]'),
 		overdueFilter: page.locator('[data-testid="overdue-filter"]'),
 		timezoneSelect: page.locator('[data-testid="timezone-select"]'),
+
+		// Column headers
+		companyHeader: page.getByTestId("company-header"),
 	} as const satisfies LocatorConfigMap;
 
 	// Helper function to get JobApplicationRowComponent for a specific app ID
@@ -81,6 +84,12 @@ function createPipelineTablePOM(page: Page) {
 	async function setTimezone(tz: string) {
 		await expect(locators.timezoneSelect).toBeVisible();
 		await locators.timezoneSelect.selectOption(tz);
+	}
+
+	async function clickColumnHeader(columnName: "company") {
+		if (columnName === "company") {
+			await locators.companyHeader.click();
+		}
 	}
 
 	async function getUpdatedDateTextById(
@@ -291,6 +300,7 @@ function createPipelineTablePOM(page: Page) {
 			filterByInterest,
 			filterByOverdue,
 			setTimezone,
+			clickColumnHeader,
 			getUpdatedDateTextById,
 			getAppliedDateTextById,
 			getNextEventTextById,

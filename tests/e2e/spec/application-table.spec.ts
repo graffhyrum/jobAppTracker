@@ -204,7 +204,7 @@ test.describe("Application inline editing", () => {
 		const newCompanyName = "Sorted Edit Test";
 
 		await test.step("Click company header to sort", async () => {
-			await pipelineTable.page.getByTestId("company-header").click();
+			await pipelineTable.actions.clickColumnHeader("company");
 		});
 
 		const applicationId = testJobApplication.id;
@@ -230,51 +230,62 @@ test.describe("Application inline editing", () => {
 		const applicationId = testJobApplication.id;
 		const rowComponent = pipelineTable.actions.getRowById(applicationId);
 
-		// Define all edit form field locators
-		const companyInput = page.locator(
-			`[data-testid="edit-input-company-${applicationId}"]`,
-		);
-		const positionInput = page.locator(
-			`[data-testid="edit-input-position-${applicationId}"]`,
-		);
-		const statusSelect = page.locator(
-			`[data-testid="edit-select-status-${applicationId}"]`,
-		);
-		const interestSelect = page.locator(
-			`[data-testid="edit-select-interest-${applicationId}"]`,
-		);
-		const nextEventInput = page.locator(
-			`[data-testid="edit-input-nextEvent-${applicationId}"]`,
-		);
-		const saveBtn = page.locator(`[data-testid="save-btn-${applicationId}"]`);
-		const cancelBtn = page.locator(
-			`[data-testid="cancel-btn-${applicationId}"]`,
-		);
-
 		// Enter edit mode
 		await rowComponent.actions.clickEditButton();
 		await pipelineTable.assertions.cellIsInEditMode();
 
 		// Test 1: Verify initial focus on company input
-		await expect(companyInput).toBeFocused();
+		await expect(rowComponent.locators.companyInput).toBeFocused();
 
 		await test.step("Test 2: Forward Tab navigation through all fields", async () => {
-			await pressKeyUntilFocused(page, positionInput, "Tab");
-			await pressKeyUntilFocused(page, statusSelect, "Tab");
-			await pressKeyUntilFocused(page, interestSelect, "Tab");
-			await pressKeyUntilFocused(page, nextEventInput, "Tab");
-			await pressKeyUntilFocused(page, saveBtn, "Tab");
-			await pressKeyUntilFocused(page, cancelBtn, "Tab");
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.positionInput,
+				"Tab",
+			);
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.statusSelect,
+				"Tab",
+			);
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.interestSelect,
+				"Tab",
+			);
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.nextEventInput,
+				"Tab",
+			);
+			await pressKeyUntilFocused(page, rowComponent.locators.saveBtn, "Tab");
+			await pressKeyUntilFocused(page, rowComponent.locators.cancelBtn, "Tab");
 		});
 
 		await test.step("Test 3: Backward Shift+Tab navigation", async () => {
-			await pressKeyUntilFocused(page, saveBtn, "Shift+Tab");
-			await pressKeyUntilFocused(page, nextEventInput, "Shift+Tab");
-			await pressKeyUntilFocused(page, interestSelect, "Shift+Tab");
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.saveBtn,
+				"Shift+Tab",
+			);
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.nextEventInput,
+				"Shift+Tab",
+			);
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.interestSelect,
+				"Shift+Tab",
+			);
 		});
 
 		await test.step("Test 4: Enter key submits from input field", async () => {
-			await pressKeyUntilFocused(page, companyInput, "Tab");
+			await pressKeyUntilFocused(
+				page,
+				rowComponent.locators.companyInput,
+				"Tab",
+			);
 		});
 
 		const respProm = page.waitForResponse(
@@ -289,30 +300,18 @@ test.describe("Application inline editing", () => {
 		// Test 5: Escape key cancels edit (if implemented)
 		await rowComponent.actions.clickEditButton();
 		await pipelineTable.assertions.cellIsInEditMode();
-		await expect(companyInput).toBeFocused();
+		await expect(rowComponent.locators.companyInput).toBeFocused();
 
-		await companyInput.fill("Should Not Save");
+		await rowComponent.locators.companyInput.fill("Should Not Save");
 
 		await Promise.all([
 			page.waitForLoadState("networkidle"),
 			page.keyboard.press("Escape"),
 		]);
 
-		// Check if Escape is implemented - if edit form is still visible, it's not implemented
-		const isStillEditing = await page
-			.locator("tr.editing")
-			.isVisible()
-			.catch(() => false);
-
-		if (isStillEditing) {
-			// Escape not implemented - cancel manually and document expected behavior
-			await rowComponent.actions.clickCancel();
-			await pipelineTable.assertions.noEditFormVisible();
-			console.log("Note: Escape key to cancel editing is not yet implemented");
-		} else {
-			// Escape worked - verify we exited edit mode
-			await pipelineTable.assertions.noEditFormVisible();
-		}
+		// Verify Escape key cancelled edit mode
+		await pipelineTable.assertions.noEditFormVisible();
+		await expect(rowComponent.locators.cancelBtn).not.toBeVisible();
 	});
 });
 

@@ -191,6 +191,7 @@ export function createJobApplicationRowComponent(
 
 	return {
 		page,
+		locators,
 		actions: {
 			clickEditButton,
 			clickViewButton,
