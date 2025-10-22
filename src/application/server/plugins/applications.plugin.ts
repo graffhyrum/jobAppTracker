@@ -61,10 +61,10 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 			response: type.string,
 		},
 	)
-	// GET /applications/:id/details - Returns full details page (view mode)
+	// GET /applications/:id/details - Returns full page or fragment based on request context
 	.get(
 		"/:id/details",
-		async ({ jobApplicationManager, params: { id }, set }) => {
+		async ({ jobApplicationManager, params: { id }, set, request }) => {
 			const result = await jobApplicationManager.getJobApplication(id);
 
 			if (result.isErr()) {
@@ -72,7 +72,19 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 			}
 
 			set.headers["Content-Type"] = "text/html";
-			return applicationDetailsPage(result.value);
+
+			// Content negotiation based on request context:
+			// - Browser navigation → full page with navbar
+			// - HTMX targeting body → full page with navbar (full page swap)
+			// - HTMX targeting fragment → content only (partial update)
+			const isHtmxRequest = request.headers.get("HX-Request") === "true";
+			const htmxTarget = request.headers.get("HX-Target");
+
+			const needsFullPage = !isHtmxRequest || htmxTarget === "body";
+
+			return needsFullPage
+				? applicationDetailsPage(result.value)
+				: renderApplicationDetailsView(result.value);
 		},
 		{
 			params: applicationIdParamSchema,

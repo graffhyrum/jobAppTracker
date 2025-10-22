@@ -144,14 +144,18 @@
 
 .details-action-bar .action-btn.back {
 	background-color: #f5f5f5;
-	color: #666;
-	border: 2px solid #e0e0e0;
+	color: #333;
+	border: 2px solid #d0d0d0;
 }
 
 .details-action-bar .action-btn.back:hover {
-	background-color: #eeeeee;
-	border-color: #d0d0d0;
-	color: #333;
+	background-color: #e8e8e8;
+	border-color: #b0b0b0;
+}
+
+.details-action-bar .action-btn.back:focus-visible {
+	outline: 3px solid #2196f3;
+	outline-offset: 2px;
 }
 
 .details-action-bar .action-btn.edit {
@@ -163,13 +167,23 @@
 	background-color: #1976d2;
 }
 
+.details-action-bar .action-btn.edit:focus-visible {
+	outline: 3px solid #1976d2;
+	outline-offset: 2px;
+}
+
 .details-action-bar .action-btn.save {
 	background-color: #4caf50;
 	color: white;
 }
 
 .details-action-bar .action-btn.save:hover {
-	background-color: #45a049;
+	background-color: #43a047;
+}
+
+.details-action-bar .action-btn.save:focus-visible {
+	outline: 3px solid #2e7d32;
+	outline-offset: 2px;
 }
 
 .details-action-bar .action-btn.cancel {
@@ -181,6 +195,11 @@
 	background-color: #d32f2f;
 }
 
+.details-action-bar .action-btn.cancel:focus-visible {
+	outline: 3px solid #c62828;
+	outline-offset: 2px;
+}
+
 .details-action-bar .action-btn.delete {
 	background-color: #f44336;
 	color: white;
@@ -188,6 +207,11 @@
 
 .details-action-bar .action-btn.delete:hover {
 	background-color: #d32f2f;
+}
+
+.details-action-bar .action-btn.delete:focus-visible {
+	outline: 3px solid #c62828;
+	outline-offset: 2px;
 }
 
 .application-details {
@@ -201,96 +225,152 @@
 	margin-bottom: 32px;
 }
 
+/* Card styling for sections with visual depth */
+.details-section {
+	background-color: white;
+	border: 1px solid #d0d0d0;
+	border-radius: 8px;
+	padding: 24px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
 .details-section h2 {
 	margin: 0 0 20px 0;
-	font-size: 18px;
-	color: #333;
+	font-size: 20px;
+	font-weight: 600;
+	color: #222;
 	border-bottom: 2px solid #e0e0e0;
-	padding-bottom: 8px;
+	padding-bottom: 12px;
 }
 
 .details-field {
 	margin-bottom: 20px;
 }
 
+/* Accessible label styling with clear hierarchy */
 .details-field label {
 	display: block;
-	font-weight: 600;
-	color: #555;
-	margin-bottom: 6px;
-	font-size: 14px;
+	font-weight: 700;
+	font-size: 12px;
+	color: #666;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 8px;
 }
 
+/* Field values with background for visual distinction */
 .details-field .field-value {
-	color: #333;
+	color: #222;
 	font-size: 16px;
-	padding: 8px 0;
+	line-height: 1.5;
+	padding: 12px;
+	background-color: #f8f9fa;
+	border: 1px solid #d0d0d0;
+	border-radius: 4px;
 }
 
+/* Accessible link styling with sufficient contrast */
 .details-field .field-value a {
-	color: #2196f3;
-	text-decoration: none;
+	color: #1976d2;
+	text-decoration: underline;
 	word-break: break-all;
 }
 
 .details-field .field-value a:hover {
+	color: #1565c0;
 	text-decoration: underline;
 }
 
+.details-field .field-value a:visited {
+	color: #7b1fa2;
+}
+
+.details-field .field-value a:focus-visible {
+	outline: 2px solid #2196f3;
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+/* Empty states with improved contrast */
 .details-field .field-value .no-data,
 .details-field .field-value .no-date {
-	color: #999;
+	color: #666;
 	font-style: italic;
 }
 
-.details-field .field-value .overdue-date {
-	color: #f44336;
-	font-weight: 600;
+.details-field .field-value .no-data::before,
+.details-field .field-value .no-date::before {
+	content: "— ";
 }
 
+/* Overdue date with accessible color and icon */
+.details-field .field-value .overdue-date {
+	color: #d32f2f;
+	font-weight: 700;
+}
+
+.details-field .field-value .overdue-date::before {
+	content: "⚠️ ";
+}
+
+/* Description text field with enhanced styling */
 .details-field .description-text {
 	white-space: pre-wrap;
 	line-height: 1.6;
+	padding: 16px;
+	background-color: #fafbfc;
+	border: 1px solid #d0d0d0;
+	border-radius: 4px;
+	max-height: 400px;
+	overflow-y: auto;
 }
 
-/* Edit mode styles */
+/* Edit mode styles with accessible focus states */
 .application-details.editing .edit-input,
 .application-details.editing .edit-select,
 .application-details.editing .edit-textarea {
 	width: 100%;
 	padding: 10px;
-	border: 2px solid #e0e0e0;
+	border: 2px solid #d0d0d0;
 	border-radius: 6px;
 	font-size: 16px;
 	font-family: inherit;
 	transition: border-color 0.2s ease;
+	background-color: white;
 }
 
-.application-details.editing .edit-input:focus,
-.application-details.editing .edit-select:focus,
-.application-details.editing .edit-textarea:focus {
-	outline: none;
-	border-color: #2196f3;
+.application-details.editing .edit-input:focus-visible,
+.application-details.editing .edit-select:focus-visible,
+.application-details.editing .edit-textarea:focus-visible {
+	outline: 3px solid #2196f3;
+	outline-offset: 2px;
+	border-color: #1976d2;
 }
 
 .application-details.editing .edit-textarea {
 	resize: vertical;
 	min-height: 150px;
 	font-family: inherit;
+	line-height: 1.5;
 }
 
-/* Metadata section */
+/* Metadata section with card styling */
 .details-metadata {
 	margin-bottom: 32px;
-	padding: 16px;
-	background-color: #f9f9f9;
+	padding: 20px;
+	background-color: #fafbfc;
+	border: 1px solid #d0d0d0;
 	border-radius: 8px;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .details-metadata h2 {
 	margin: 0 0 16px 0;
-	font-size: 16px;
-	color: #333;
+	font-size: 12px;
+	font-weight: 600;
+	color: #222;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
 }
 
 .metadata-grid {
@@ -303,38 +383,63 @@
 	margin-bottom: 0;
 }
 
-/* Status history section */
+/* Status history section with card styling */
 .details-status-history {
 	margin-bottom: 32px;
 }
 
 .details-status-history details {
-	border: 2px solid #e0e0e0;
+	background-color: white;
+	border: 1px solid #d0d0d0;
 	border-radius: 8px;
-	padding: 16px;
+	padding: 20px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
 }
 
 .details-status-history summary {
 	cursor: pointer;
 	list-style: none;
 	user-select: none;
+	position: relative;
+	padding-left: 28px;
 }
 
 .details-status-history summary::-webkit-details-marker {
 	display: none;
 }
 
+/* Disclosure triangle indicator */
+.details-status-history summary::before {
+	content: "▶";
+	position: absolute;
+	left: 0;
+	color: #666;
+	font-size: 14px;
+	transition: transform 0.2s ease;
+}
+
+.details-status-history details[open] summary::before {
+	transform: rotate(90deg);
+}
+
 .details-status-history summary h2 {
 	display: inline;
 	margin: 0;
 	font-size: 18px;
-	color: #333;
+	font-weight: 600;
+	color: #222;
 	border: none;
 	padding: 0;
 }
 
 .details-status-history summary:hover h2 {
-	color: #2196f3;
+	color: #1976d2;
+}
+
+.details-status-history summary:focus-visible {
+	outline: 3px solid #2196f3;
+	outline-offset: 4px;
+	border-radius: 4px;
 }
 
 .status-timeline {
@@ -361,44 +466,56 @@
 	min-width: 120px;
 }
 
-/* Status badge base styles - used in multiple contexts */
+/* Status badge base styles - accessible with borders and sufficient contrast */
 .status-log-entry .status-badge,
 .details-field .field-value .status-badge {
 	display: inline-block;
 	padding: 6px 12px;
 	border-radius: 4px;
 	font-size: 14px;
-	font-weight: 600;
+	font-weight: 700;
+	border: 2px solid currentColor;
 }
 
 .status-log-entry .status-badge.active,
 .details-field .field-value .status-badge.active {
-	background-color: #e8f5e9;
-	color: #2e7d32;
+	background-color: #c8e6c9;
+	color: #1b5e20;
+	border-color: #4caf50;
+}
+
+.status-log-entry .status-badge.active::before {
+	content: "✓ ";
 }
 
 .status-log-entry .status-badge.inactive,
 .details-field .field-value .status-badge.inactive {
-	background-color: #ffebee;
-	color: #c62828;
+	background-color: #ffcdd2;
+	color: #b71c1c;
+	border-color: #f44336;
 }
 
-/* Placeholder section */
+.status-log-entry .status-badge.inactive::before {
+	content: "✗ ";
+}
+
+/* Placeholder section with better contrast */
 .placeholder-section {
-	padding: 20px;
-	background-color: #f9f9f9;
+	padding: 24px;
+	background-color: #fafbfc;
 	border-radius: 8px;
-	border: 2px dashed #e0e0e0;
+	border: 2px dashed #b0b0b0;
 }
 
 .placeholder-section h2 {
 	margin: 0 0 12px 0;
 	font-size: 18px;
-	color: #333;
+	font-weight: 600;
+	color: #222;
 }
 
 .placeholder-text {
-	color: #999;
+	color: #666;
 	font-style: italic;
 	margin: 0;
 }
