@@ -7,11 +7,16 @@ import {
 	transformUpdateData,
 } from "#src/application/server/utils/application-route-helpers.ts";
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
+import {
+	renderApplicationDetailsEdit,
+	renderApplicationDetailsView,
+} from "#src/presentation/components/application-details-renderer.ts";
 import { formAndPipelineContent } from "#src/presentation/components/formAndPipelineContent.ts";
 import {
 	renderApplicationTableRow,
 	renderEditableRow,
 } from "#src/presentation/components/table-row-renderer.ts";
+import { applicationDetailsPage } from "#src/presentation/pages/application-details.ts";
 import {
 	applicationIdParamSchema,
 	createApplicationBodySchema,
@@ -56,6 +61,76 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 			response: type.string,
 		},
 	)
+	// GET /applications/:id/details - Returns full details page (view mode)
+	.get(
+		"/:id/details",
+		async ({ jobApplicationManager, params: { id }, set }) => {
+			const result = await jobApplicationManager.getJobApplication(id);
+
+			if (result.isErr()) {
+				throw new NotFoundError(`Error: ${result.error}`);
+			}
+
+			set.headers["Content-Type"] = "text/html";
+			return applicationDetailsPage(result.value);
+		},
+		{
+			params: applicationIdParamSchema,
+			response: type.string,
+		},
+	)
+	// GET /applications/:id/details/edit - Returns editable details content
+	.get(
+		"/:id/details/edit",
+		async ({ jobApplicationManager, params: { id }, set }) => {
+			const result = await jobApplicationManager.getJobApplication(id);
+
+			if (result.isErr()) {
+				throw new NotFoundError(`Error: ${result.error}`);
+			}
+
+			set.headers["Content-Type"] = "text/html";
+			return renderApplicationDetailsEdit(result.value);
+		},
+		{
+			params: applicationIdParamSchema,
+			response: type.string,
+		},
+	)
+	// PUT /applications/:id/details - Updates application and returns view mode details content
+	.put(
+		"/:id/details",
+		async ({ jobApplicationManager, params: { id }, body, set }) => {
+			// Update the application
+			const updateResult = await jobApplicationManager.updateJobApplication(
+				id,
+				body,
+			);
+
+			if (updateResult.isErr()) {
+				set.status = 500;
+				return `Error: ${updateResult.error}`;
+			}
+
+			// Return updated details view
+			set.headers["Content-Type"] = "text/html";
+			return renderApplicationDetailsView(updateResult.value);
+		},
+		{
+			params: applicationIdParamSchema,
+			body: jobApplicationModule.forUpdate,
+			async transform({ body, jobApplicationManager, params: { id } }) {
+				// Get current application to preserve existing statusLog
+				const currentAppResult =
+					await jobApplicationManager.getJobApplication(id);
+				const currentApp = currentAppResult.isOk()
+					? currentAppResult.value
+					: null;
+
+				body = transformUpdateData(body, currentApp);
+			},
+		},
+	)
 	// PUT /applications/:id - Updates all fields and returns display row
 	.put(
 		"/:id",
@@ -90,14 +165,19 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 			},
 		},
 	)
-	// DELETE /applications/:id - Deletes an application and returns empty content
+	// DELETE /applications/:id - Deletes an application and returns empty content or redirects
 	.delete(
 		"/:id",
-		async ({ jobApplicationManager, params: { id }, set }) => {
+		async ({ jobApplicationManager, params: { id }, set, request }) => {
 			const result = await jobApplicationManager.deleteJobApplication(id);
 			if (result.isErr()) {
 				set.status = 500;
 				return `Error: ${result.error}`;
+			}
+			// If called from details page (check referer), redirect to homepage
+			const referer = request.headers.get("referer") || "";
+			if (referer.includes("/details")) {
+				set.headers["HX-Redirect"] = "/";
 			}
 			// Return empty HTML so hx-swap="outerHTML" on the <tr> removes the row
 			set.headers["Content-Type"] = "text/html";

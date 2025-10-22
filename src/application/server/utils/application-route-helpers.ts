@@ -122,6 +122,40 @@ export const transformUpdateData = (
 		delete formData.status;
 	}
 
+	// Handle date field normalization (convert YYYY-MM-DD to ISO datetime)
+	if ("applicationDate" in formData && formData.applicationDate) {
+		formData.applicationDate = normalize(formData.applicationDate as string);
+	}
+
+	if ("nextEventDate" in formData && formData.nextEventDate) {
+		formData.nextEventDate = normalize(formData.nextEventDate as string);
+	}
+
+	// Handle optional string fields - trim and delete if empty
+	if (
+		"jobPostingUrl" in formData &&
+		typeof formData.jobPostingUrl === "string"
+	) {
+		const trimmed = formData.jobPostingUrl.trim();
+		if (trimmed) {
+			formData.jobPostingUrl = trimmed;
+		} else {
+			delete formData.jobPostingUrl;
+		}
+	}
+
+	if (
+		"jobDescription" in formData &&
+		typeof formData.jobDescription === "string"
+	) {
+		const trimmed = formData.jobDescription.trim();
+		if (trimmed) {
+			formData.jobDescription = trimmed;
+		} else {
+			delete formData.jobDescription;
+		}
+	}
+
 	const maybeParsed = jobApplicationModule.forUpdate(formData);
 	if (maybeParsed instanceof ArkErrors) {
 		throw maybeParsed;

@@ -57,7 +57,15 @@ export const renderApplicationTableRow = (app: JobApplication): string => {
 					hx-target="closest tr"
 					hx-swap="outerHTML"
 					title="Edit Application">✏️</button>
-				<button class="action-btn view" data-testid="view-btn-${app.id}" title="View Details">👁️</button>
+				<button
+					type="button"
+					class="action-btn view"
+					data-testid="view-btn-${app.id}"
+					hx-get="/applications/${app.id}/details"
+					hx-target="body"
+					hx-swap="innerHTML"
+					hx-push-url="true"
+					title="View Details">👁️</button>
 				<button
 					type="button"
 					class="action-btn delete"
