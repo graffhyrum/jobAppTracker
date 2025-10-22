@@ -48,3 +48,6 @@ playwright-report
 /db-files/test_db/clog/00000000000000000000.clog
 /db-files/test_db/manifest/00000000000000000000.manifest
 /db-files/.gitkeep
+
+# Automatic Workspace Config
+**/.well-known/appspecific/com.chrome.devtools.json

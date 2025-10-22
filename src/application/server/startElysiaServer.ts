@@ -10,11 +10,13 @@ export function startElysiaServer() {
 	const app = new Elysia()
 		// Global error handling
 		.onError(({ code, error, set, request }) => {
-			console.error(`[Error ${code}]:`, error);
+			console.error(`[Error ${code}]:`, error, request);
 
 			if (code === "NOT_FOUND") {
-				set.status = 404;
-				return "Not Found";
+				return Response.json(
+					{ message: error.message, request },
+					{ status: 404 },
+				);
 			}
 
 			const errorMessage =
@@ -43,7 +45,7 @@ export function startElysiaServer() {
 			return `Internal Server Error: ${errorMessage}`;
 		})
 		// Add the HTML plugin for automatic HTML content-type handling
-		.use(html())
+		.use(html()) // https://github.com/elysiajs/elysia/issues/1363
 		// Add Swagger for OpenAPI documentation
 		.use(
 			swagger({
@@ -89,6 +91,18 @@ export function startElysiaServer() {
 				assets: "src/presentation/assets",
 				prefix: "/assets",
 			}),
+		)
+		// Chrome DevTools workspace auto-detection endpoint
+		.get(
+			"/.well-known/appspecific/com.chrome.devtools.json",
+			async ({ set }) => {
+				set.headers["Content-Type"] = "application/json";
+				const file = Bun.file(
+					"src/presentation/.well-known/appspecific/com.chrome.devtools.json",
+				);
+				const exists = await file.exists();
+				return exists ? new Response(file) : "{}";
+			},
 		)
 		// Add custom route plugins with dependency injection
 		.use(createPagesPlugin)
