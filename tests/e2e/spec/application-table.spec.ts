@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test";
 import { test } from "../fixtures/base.ts";
+import { pressKeyUntilFocused } from "../utils/keyboard-helpers.ts";
 
 test.beforeEach(async ({ POMs, testJobApplication }) => {
 	const home = POMs.pages.homePage;
@@ -16,52 +17,43 @@ test.beforeEach(async ({ POMs, testJobApplication }) => {
 
 test.describe("Application inline editing", () => {
 	test("should display editable cells with hover indicators", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-		await pipeline.assertions.hasApplications();
+		await pipelineTable.assertions.hasApplications();
 
 		const applicationId = testJobApplication.id;
-		await pipeline.assertions.editableHoverStateVisibleById(
-			applicationId,
+		const editableFields = [
 			"company",
-		);
-		await pipeline.assertions.editableHoverStateVisibleById(
-			applicationId,
 			"position",
-		);
-		await pipeline.assertions.editableHoverStateVisibleById(
-			applicationId,
 			"status",
-		);
-		await pipeline.assertions.editableHoverStateVisibleById(
-			applicationId,
 			"interest",
-		);
-		await pipeline.assertions.editableHoverStateVisibleById(
-			applicationId,
 			"nextEvent",
-		);
+		] as const;
+
+		for (const field of editableFields) {
+			await pipelineTable.assertions.editableHoverStateVisibleById(
+				applicationId,
+				field,
+			);
+		}
 	});
 
 	test("should edit company name successfully", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
 		// Use the test job application ID
 		const applicationId = testJobApplication.id;
-		const rowComponent = pipeline.actions.getRowById(applicationId);
+		const rowComponent = pipelineTable.actions.getRowById(applicationId);
 
 		// Verify the initial company name
 		const expectedCompany = testJobApplication.company;
-		await pipeline.assertions.companyNameEqualsById(
+		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
 			expectedCompany,
 		);
@@ -71,211 +63,172 @@ test.describe("Application inline editing", () => {
 		await rowComponent.actions.editCompanyName(newCompanyName);
 
 		// Verify the change was saved - search for the updated company name in the table
-		await pipeline.assertions.containsApplicationWithCompany(newCompanyName);
+		await pipelineTable.assertions.containsApplicationWithCompany(
+			newCompanyName,
+		);
 	});
 
 	test("should edit position title successfully", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
+		const newPositionTitle = "Senior Software Engineer";
 		const applicationId = testJobApplication.id;
-		await pipeline.actions.editPositionTitleById(
+
+		await pipelineTable.actions.editPositionTitleById(
 			applicationId,
-			"Senior Software Engineer",
+			newPositionTitle,
 		);
 
 		// Verify the change
-		await pipeline.assertions.positionTitleEqualsById(
+		await pipelineTable.assertions.positionTitleEqualsById(
 			applicationId,
-			"Senior Software Engineer",
+			newPositionTitle,
 		);
 	});
 
 	test("should edit status via dropdown successfully", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
 		const applicationId = testJobApplication.id;
-		await pipeline.actions.editStatusById(applicationId, "interview");
+		await pipelineTable.actions.editStatusById(applicationId, "interview");
 
 		// Verify the change
-		await pipeline.assertions.statusEqualsById(applicationId, "interview");
+		await pipelineTable.assertions.statusEqualsById(applicationId, "interview");
 	});
 
 	test("should edit interest rating via dropdown successfully", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
 		const applicationId = testJobApplication.id;
-		await pipeline.actions.editInterestRatingById(applicationId, "3");
+		await pipelineTable.actions.editInterestRatingById(applicationId, "3");
 
 		// Verify the change (should show ★★★)
-		await pipeline.assertions.interestRatingEqualsById(applicationId, "★★★");
+		await pipelineTable.assertions.interestRatingEqualsById(
+			applicationId,
+			"★★★",
+		);
 	});
 
 	test("should edit next event date successfully", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
 		const nextDate = "2024-03-15";
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
-		// Get the application ID and edit next event date
 		const applicationId = testJobApplication.id;
-		await pipeline.actions.editNextEventDateById(applicationId, nextDate);
+
+		await pipelineTable.actions.editNextEventDateById(applicationId, nextDate);
 
 		// Verify the change (US date format)
-		await pipeline.assertions.nextEventDateContainsById(
+		await pipelineTable.assertions.nextEventDateContainsById(
 			applicationId,
 			nextDate,
 		);
 	});
 
-	test("should cancel edit operation", async ({ POMs, testJobApplication }) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
+	test("should cancel edit operation", async ({
+		POMs: {
+			components: { pipelineTable },
+		},
+		testJobApplication,
+	}) => {
 		// Get application ID and verify original company name
 		const applicationId = testJobApplication.id;
-		const rowComponent = pipeline.actions.getRowById(applicationId);
+		const rowComponent = pipelineTable.actions.getRowById(applicationId);
 		const expectedCompany = testJobApplication.company;
-		await pipeline.assertions.companyNameEqualsById(
+		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
 			expectedCompany,
 		);
 
 		// Start editing but cancel
 		await rowComponent.actions.clickEditButton();
-		await pipeline.assertions.cellIsInEditMode();
+		await pipelineTable.assertions.cellIsInEditMode();
 		await rowComponent.actions.enterTextValue("Should Not Save");
 		await rowComponent.actions.clickCancel();
 
 		// Wait for edit mode to exit and verify nothing changed
-		await pipeline.assertions.noEditFormVisible();
-		await pipeline.assertions.companyNameEqualsById(
+		await pipelineTable.assertions.noEditFormVisible();
+		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
 			expectedCompany,
 		);
 	});
 
 	test("should work after filtering applications", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
+		const newCompanyName = "Filtered Edit Test";
 
 		// Filter by company name using predictable test data
-		await pipeline.actions.searchApplications(testJobApplication.company);
+		await pipelineTable.actions.searchApplications(testJobApplication.company);
 
 		// Verify filtering worked
-		await pipeline.assertions.containsApplicationWithCompany(
+		await pipelineTable.assertions.containsApplicationWithCompany(
 			testJobApplication.company,
 		);
 
 		const applicationId = testJobApplication.id;
-		await pipeline.actions.editCompanyNameById(
+		await pipelineTable.actions.editCompanyNameById(
 			applicationId,
-			"Filtered Edit Test",
+			newCompanyName,
 		);
 
 		// Clear filter and verify change persisted
-		await pipeline.actions.searchApplications("");
-		await pipeline.assertions.companyNameEqualsById(
+		await pipelineTable.actions.searchApplications("");
+		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
-			"Filtered Edit Test",
+			newCompanyName,
 		);
 	});
 
 	test("should work after sorting applications", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
+		const newCompanyName = "Sorted Edit Test";
 
 		await test.step("Click company header to sort", async () => {
-			await pipeline.page.getByTestId("company-header").click();
+			await pipelineTable.page.getByTestId("company-header").click();
 		});
 
 		const applicationId = testJobApplication.id;
-		await pipeline.actions.editCompanyNameById(
+		await pipelineTable.actions.editCompanyNameById(
 			applicationId,
-			"Sorted Edit Test",
+			newCompanyName,
 		);
 
 		// Verify change persisted
-		await pipeline.assertions.companyNameEqualsById(
+		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
-			"Sorted Edit Test",
+			newCompanyName,
 		);
 	});
 
 	test("should support keyboard navigation in edit forms", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 		page,
 	}) => {
-		// Helper to tab until target element receives focus
-		async function sendTabUntilFocused(
-			targetLocator: ReturnType<typeof page.locator>,
-		) {
-			let found = false;
-			const start = Date.now();
-			const timeout = 10 * 1000;
-
-			while (!found && start + timeout > Date.now()) {
-				await page.keyboard.press("Tab");
-				const isFocused = await targetLocator
-					.evaluate((el) => document.activeElement === el)
-					.catch(() => false);
-				if (isFocused) found = true;
-			}
-
-			expect(found, "Target Element was never focused").toBeTruthy();
-		}
-
-		// Helper to shift-tab until target element receives focus
-		async function sendShiftTabUntilFocused(
-			targetLocator: ReturnType<typeof page.locator>,
-		) {
-			let found = false;
-			const start = Date.now();
-			const timeout = 10 * 1000;
-
-			while (!found && start + timeout > Date.now()) {
-				await page.keyboard.press("Shift+Tab");
-				const isFocused = await targetLocator
-					.evaluate((el) => document.activeElement === el)
-					.catch(() => false);
-				if (isFocused) found = true;
-			}
-
-			expect(found, "Target Element was never focused").toBeTruthy();
-		}
-
-		const pipeline = POMs.components.pipelineTable;
-		await pipeline.assertions.tableIsVisible();
-
 		const applicationId = testJobApplication.id;
-		const rowComponent = pipeline.actions.getRowById(applicationId);
+		const rowComponent = pipelineTable.actions.getRowById(applicationId);
 
 		// Define all edit form field locators
 		const companyInput = page.locator(
@@ -300,43 +253,26 @@ test.describe("Application inline editing", () => {
 
 		// Enter edit mode
 		await rowComponent.actions.clickEditButton();
-		await pipeline.assertions.cellIsInEditMode();
+		await pipelineTable.assertions.cellIsInEditMode();
 
 		// Test 1: Verify initial focus on company input
 		await expect(companyInput).toBeFocused();
 
 		// Test 2: Forward Tab navigation through all fields
-		await sendTabUntilFocused(positionInput);
-		await expect(positionInput).toBeFocused();
-
-		await sendTabUntilFocused(statusSelect);
-		await expect(statusSelect).toBeFocused();
-
-		await sendTabUntilFocused(interestSelect);
-		await expect(interestSelect).toBeFocused();
-
-		await sendTabUntilFocused(nextEventInput);
-		await expect(nextEventInput).toBeFocused();
-
-		await sendTabUntilFocused(saveBtn);
-		await expect(saveBtn).toBeFocused();
-
-		await sendTabUntilFocused(cancelBtn);
-		await expect(cancelBtn).toBeFocused();
+		await pressKeyUntilFocused(page, positionInput, "Tab");
+		await pressKeyUntilFocused(page, statusSelect, "Tab");
+		await pressKeyUntilFocused(page, interestSelect, "Tab");
+		await pressKeyUntilFocused(page, nextEventInput, "Tab");
+		await pressKeyUntilFocused(page, saveBtn, "Tab");
+		await pressKeyUntilFocused(page, cancelBtn, "Tab");
 
 		// Test 3: Backward Shift+Tab navigation
-		await sendShiftTabUntilFocused(saveBtn);
-		await expect(saveBtn).toBeFocused();
-
-		await sendShiftTabUntilFocused(nextEventInput);
-		await expect(nextEventInput).toBeFocused();
-
-		await sendShiftTabUntilFocused(interestSelect);
-		await expect(interestSelect).toBeFocused();
+		await pressKeyUntilFocused(page, saveBtn, "Shift+Tab");
+		await pressKeyUntilFocused(page, nextEventInput, "Shift+Tab");
+		await pressKeyUntilFocused(page, interestSelect, "Shift+Tab");
 
 		// Test 4: Enter key submits from input field
-		await sendTabUntilFocused(companyInput);
-		await expect(companyInput).toBeFocused();
+		await pressKeyUntilFocused(page, companyInput, "Tab");
 
 		const respProm = page.waitForResponse(
 			(resp) =>
@@ -345,11 +281,11 @@ test.describe("Application inline editing", () => {
 		);
 		await page.keyboard.press("Enter");
 		await respProm;
-		await pipeline.assertions.noEditFormVisible();
+		await pipelineTable.assertions.noEditFormVisible();
 
 		// Test 5: Escape key cancels edit (if implemented)
 		await rowComponent.actions.clickEditButton();
-		await pipeline.assertions.cellIsInEditMode();
+		await pipelineTable.assertions.cellIsInEditMode();
 		await expect(companyInput).toBeFocused();
 
 		await companyInput.fill("Should Not Save");
@@ -367,32 +303,12 @@ test.describe("Application inline editing", () => {
 		if (isStillEditing) {
 			// Escape not implemented - cancel manually and document expected behavior
 			await rowComponent.actions.clickCancel();
-			await pipeline.assertions.noEditFormVisible();
+			await pipelineTable.assertions.noEditFormVisible();
 			console.log("Note: Escape key to cancel editing is not yet implemented");
 		} else {
 			// Escape worked - verify we exited edit mode
-			await pipeline.assertions.noEditFormVisible();
+			await pipelineTable.assertions.noEditFormVisible();
 		}
-	});
-
-	test("should retain form focus when editing", async ({
-		POMs,
-		testJobApplication,
-	}) => {
-		const pipeline = POMs.components.pipelineTable;
-
-		await pipeline.assertions.tableIsVisible();
-
-		const applicationId = testJobApplication.id;
-		const rowComponent = pipeline.actions.getRowById(applicationId);
-
-		await rowComponent.actions.clickEditButton();
-
-		// Input should be focused - use the specific application ID
-		const editInput = pipeline.page.locator(
-			`[data-testid="edit-input-company-${applicationId}"]`,
-		);
-		await expect(editInput).toBeFocused();
 	});
 });
 
@@ -400,12 +316,13 @@ test.describe("Application inline editing", () => {
 
 test.describe("Application deletion", () => {
 	test("should delete application after confirming", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
 		const applicationId = testJobApplication.id;
-		const row = pipeline.actions.getRowById(applicationId);
+		const row = pipelineTable.actions.getRowById(applicationId);
 
 		// Confirm the delete dialog and ensure the row disappears
 		await row.actions.deleteAndConfirm();
@@ -415,12 +332,13 @@ test.describe("Application deletion", () => {
 	});
 
 	test("should not delete application when confirmation is cancelled", async ({
-		POMs,
+		POMs: {
+			components: { pipelineTable },
+		},
 		testJobApplication,
 	}) => {
-		const pipeline = POMs.components.pipelineTable;
 		const applicationId = testJobApplication.id;
-		const row = pipeline.actions.getRowById(applicationId);
+		const row = pipelineTable.actions.getRowById(applicationId);
 
 		await row.actions.deleteAndCancel();
 

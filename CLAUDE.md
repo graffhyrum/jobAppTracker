@@ -184,7 +184,7 @@ src/
 - Entity methods automatically update `lastUpdated` timestamps
 - Status changes trigger category recalculation
 - PDF templates use field mapping configuration for extensibility
-- Always check work at the end with `bun vet`
+- **IMPORTANT** Always check work at the end with `bun vet`
 
 ## Error Handling Patterns
 
