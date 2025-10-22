@@ -84,6 +84,12 @@ export function startElysiaServer() {
 				prefix: "/scripts",
 			}),
 		)
+		.use(
+			staticPlugin({
+				assets: "src/presentation/assets",
+				prefix: "/assets",
+			}),
+		)
 		// Add custom route plugins with dependency injection
 		.use(createPagesPlugin)
 		.use(createPipelinePlugin)
