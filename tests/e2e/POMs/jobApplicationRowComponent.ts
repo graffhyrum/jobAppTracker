@@ -50,6 +50,7 @@ export function createJobApplicationRowComponent(
 	async function clickEditButton() {
 		await expect(locators.editBtn).toBeVisible({ timeout: 10000 });
 		await locators.editBtn.click();
+		await locators.editBtn.waitFor({ state: "hidden" });
 	}
 
 	async function clickViewButton() {

@@ -22,13 +22,16 @@ export type ProcessedApplication = {
 	isOverdue: boolean;
 };
 
+// Create schema once at module initialization to avoid race conditions under concurrent load
+const isoDateSchema = type("string.date.iso").pipe.try(
+	(s: string) => s.split("T")[0],
+	type(/^\d{4}-\d{2}-\d{2}$/),
+);
+
 export function formatDate(isoDateString: string): string {
-	const parsedIso = type("string.date.iso").pipe.try(
-		(s: string) => s.split("T")[0],
-		type(/^\d{4}-\d{2}-\d{2}$/),
-	)(isoDateString);
+	const parsedIso = isoDateSchema(isoDateString);
 	if (parsedIso instanceof ArkErrors) {
-		throw new Error("Invalid date format", { cause: parsedIso });
+		throw new TypeError("Invalid date format", { cause: parsedIso });
 	}
 	return parsedIso;
 }

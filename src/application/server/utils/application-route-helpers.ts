@@ -97,6 +97,9 @@ export const extractApplicationData = (
 	return data;
 };
 
+// Create schema once at module initialization to avoid race conditions under concurrent load
+const objectJsonSchema = type("object.json").to(updateApplicationBodySchema);
+
 /**
  * Transforms form data for PUT request, handling status field conversion
  */
@@ -104,7 +107,7 @@ export const transformUpdateData = (
 	body: unknown,
 	currentApp: JobApplication | null,
 ) => {
-	const formData = type("object.json").to(updateApplicationBodySchema)(body);
+	const formData = objectJsonSchema(body);
 
 	// Handle status field transformation
 	if ("status" in formData && typeof formData.status === "string") {
@@ -174,9 +177,12 @@ export const fetchAllApplicationsOrEmpty = async (
 	return result.isOk() ? result.value : [];
 };
 
+// Create schema once at module initialization to avoid race conditions under concurrent load
+const dateNormalizeSchema = type("string.date.iso").pipe((md) =>
+	new Date(md).toISOString(),
+);
+
 // Normalize date-only strings to UTC ISO (midnight Z)
 const normalize = (s: string | undefined) => {
-	return type("string.date.iso")
-		.pipe((md) => new Date(md).toISOString())
-		.assert(s);
+	return dateNormalizeSchema.assert(s);
 };

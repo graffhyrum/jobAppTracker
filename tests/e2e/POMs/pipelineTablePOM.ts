@@ -151,9 +151,6 @@ function createPipelineTablePOM(page: Page) {
 
 		// Wait for tbody to have at least one row (not empty)
 		await expect(locators.tbody.locator("tr")).not.toHaveCount(0);
-
-		// Wait a bit more for HTMX to finish rendering
-		await page.waitForTimeout(500);
 	}
 
 	async function debugTableState() {
