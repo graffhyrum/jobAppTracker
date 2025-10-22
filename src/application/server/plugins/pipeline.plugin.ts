@@ -8,15 +8,9 @@ export const createPipelinePlugin = new Elysia({ prefix: "/api" })
 	.get(
 		"/pipeline",
 		async ({ jobApplicationManager, query, set }) => {
-			console.log("🔄 [API] Pipeline refresh requested");
-
 			// Query is already validated by Elysia using ArkType schema
 			const sortColumn = query.sortColumn as Column | undefined;
 			const sortDirection = query.sortDirection;
-
-			console.log(
-				`🔍 [API] Sort parameters: column=${sortColumn}, direction=${sortDirection}`,
-			);
 
 			// Fetch fresh applications data
 			const applicationsResult =

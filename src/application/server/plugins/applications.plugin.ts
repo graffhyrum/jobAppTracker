@@ -42,7 +42,6 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 	.get(
 		"/:id/edit",
 		async ({ jobApplicationManager, params: { id }, set }) => {
-			console.log(`🔍 [EDIT] GET /applications/${id}/edit`);
 			const result = await jobApplicationManager.getJobApplication(id);
 
 			if (result.isErr()) {
