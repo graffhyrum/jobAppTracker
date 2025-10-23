@@ -166,9 +166,6 @@ function createPipelineTablePOM(page: Page) {
 		// Check if table exists
 		const tableExists = await locators.table.isVisible();
 
-		// Check tbody content
-		const _rowCount = await locators.tbody.locator("tr").count();
-
 		// Get all application IDs currently in the table
 		const appIds = await getAllAppIds();
 		console.log(`Application IDs found: ${JSON.stringify(appIds)}`);
@@ -183,7 +180,7 @@ function createPipelineTablePOM(page: Page) {
 				: 0;
 
 			const normalized = lines
-				.map((l) => l.replace(new RegExp(`^\\s{0,${firstIndent}}`), "")) // trim up to firstIndent spaces
+				.map((l) => l.replace(new RegExp(`^\\s{0,${firstIndent}}`), "")) // trim up to the firstIndent spaces
 				.join("\n");
 
 			console.log(`Table HTML: \n${normalized.substring(0, 500)}...`);
