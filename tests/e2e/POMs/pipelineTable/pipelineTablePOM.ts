@@ -3,11 +3,11 @@ import type {
 	ComponentFactory,
 	ComponentObject,
 	LocatorConfigMap,
-} from "../config/ScreenplayTypes.ts";
+} from "../../config/ScreenplayTypes.ts";
 import {
 	createJobApplicationRowComponent,
-	type JobApplicationRowComponent,
-} from "./jobApplicationRowComponent.ts";
+	type PipelineTableRowPOM,
+} from "./pipelineTableRowPOM.ts";
 
 function createPipelineTablePOM(page: Page) {
 	const locators = {
@@ -33,8 +33,8 @@ function createPipelineTablePOM(page: Page) {
 		companyHeader: page.getByTestId("company-header"),
 	} as const satisfies LocatorConfigMap;
 
-	// Helper function to get JobApplicationRowComponent for a specific app ID
-	const getRowComponent = (appId: string): JobApplicationRowComponent => {
+	// Helper function to get PipelineTableRowPOM for a specific app ID
+	const getRowComponent = (appId: string): PipelineTableRowPOM => {
 		return createJobApplicationRowComponent(page, appId);
 	};
 
@@ -285,9 +285,7 @@ function createPipelineTablePOM(page: Page) {
 	}
 
 	// Actions for working with row components
-	function getRowComponent_ById(
-		applicationId: string,
-	): JobApplicationRowComponent {
+	function getRowComponent_ById(applicationId: string): PipelineTableRowPOM {
 		return getRowComponent(applicationId);
 	}
 

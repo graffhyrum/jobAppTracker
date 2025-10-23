@@ -75,12 +75,17 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 
 			// Content negotiation based on request context:
 			// - Browser navigation → full page with navbar
-			// - HTMX targeting body → full page with navbar (full page swap)
-			// - HTMX targeting fragment → content only (partial update)
+			// - HTMX navigation TO details (not already on details) → full page
+			// - HTMX partial update (already on details page) → content fragment only
 			const isHtmxRequest = request.headers.get("HX-Request") === "true";
-			const htmxTarget = request.headers.get("HX-Target");
+			const currentUrl = request.headers.get("HX-Current-URL") || "";
 
-			const needsFullPage = !isHtmxRequest || htmxTarget === "body";
+			// If HTMX request AND current URL contains this app's details path,
+			// it's a partial update (edit/cancel). Otherwise, it's navigation.
+			const isPartialUpdate =
+				isHtmxRequest && currentUrl.includes(`/applications/${id}/details`);
+
+			const needsFullPage = !isHtmxRequest || !isPartialUpdate;
 
 			return needsFullPage
 				? applicationDetailsPage(result.value)

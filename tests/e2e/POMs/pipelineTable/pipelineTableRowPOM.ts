@@ -1,5 +1,9 @@
-import { expect, type Page } from "@playwright/test";
-import type { ComponentObject } from "../config/ScreenplayTypes.ts";
+import { expect, type Locator, type Page } from "@playwright/test";
+import type { ComponentObject } from "../../config/ScreenplayTypes.ts";
+import {
+	type NavigationKey,
+	pressKeyUntilFocused,
+} from "../../utils/keyboard-helpers.ts";
 
 export function createJobApplicationRowComponent(
 	page: Page,
@@ -45,7 +49,7 @@ export function createJobApplicationRowComponent(
 		),
 		saveBtn: page.locator(`[data-testid="save-btn-${applicationId}"]`),
 		cancelBtn: page.locator(`[data-testid="cancel-btn-${applicationId}"]`),
-	};
+	} as const satisfies Record<string, Locator>;
 
 	async function clickEditButton() {
 		await expect(locators.editBtn).toBeVisible({ timeout: 10000 });
@@ -189,28 +193,62 @@ export function createJobApplicationRowComponent(
 		await expect(locators.row).toHaveCount(0);
 	}
 
+	async function pressUntilFocused(
+		targetLocator: keyof typeof locators,
+		key: NavigationKey,
+	) {
+		await pressKeyUntilFocused(page, locators[targetLocator], key);
+	}
+
+	async function isFocused(targetLocator: keyof typeof locators) {
+		await expect(locators[targetLocator]).toBeFocused();
+	}
+
+	async function fillInput(
+		targetLocator: keyof typeof locators,
+		value: string,
+	) {
+		await locators[targetLocator].fill(value);
+	}
+
+	async function elementIsVisible(targetLocator: keyof typeof locators) {
+		await expect(locators[targetLocator]).toBeVisible();
+	}
+
+	async function elementIsNotVisible(targetLocator: keyof typeof locators) {
+		await expect(locators[targetLocator]).not.toBeVisible();
+	}
+
 	return {
 		page,
-		locators,
+		// locators,
 		actions: {
-			clickEditButton,
-			clickViewButton,
+			fromView: {
+				clickEditButton,
+				clickViewButton,
+				clickDeleteButton,
+			},
+			fromEdit: {
+				clickSave,
+				clickCancel,
+			},
 			enterTextValue,
 			selectDropdownValue,
-			clickSave,
-			clickCancel,
 			editCompanyName,
 			editPositionTitle,
 			editStatus,
 			editInterestRating,
 			editNextEventDate,
 			cancelEdit,
-			clickDeleteButton,
 			deleteAndConfirm,
 			deleteAndCancel,
+			pressUntilFocused,
+			fillInput,
 		},
 		assertions: {
 			isVisible,
+			elementIsVisible,
+			elementIsNotVisible,
 			companyNameEquals,
 			positionTitleEquals,
 			statusEquals,
@@ -220,10 +258,11 @@ export function createJobApplicationRowComponent(
 			noEditFormVisible,
 			editableHoverStateVisible,
 			rowIsNotVisible,
+			isFocused,
 		},
 	} as const satisfies ComponentObject;
 }
 
-export type JobApplicationRowComponent = ReturnType<
+export type PipelineTableRowPOM = ReturnType<
 	typeof createJobApplicationRowComponent
 >;

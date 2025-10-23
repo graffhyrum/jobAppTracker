@@ -1,15 +1,15 @@
 import { expect, type Page } from "@playwright/test";
 
-type NavigationKey = "Tab" | "Shift+Tab";
+export type NavigationKey = "Tab" | "Shift+Tab";
 
 export async function pressKeyUntilFocused(
 	page: Page,
 	targetLocator: ReturnType<typeof page.locator>,
 	key: NavigationKey,
+	timeout: number = 3 * 1000,
 ) {
 	let found = false;
 	const start = Date.now();
-	const timeout = 10 * 1000;
 
 	while (!found && start + timeout > Date.now()) {
 		await page.keyboard.press(key);

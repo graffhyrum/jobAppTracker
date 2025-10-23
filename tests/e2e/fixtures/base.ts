@@ -13,7 +13,7 @@ import { createNavBar, type NavBarObject } from "../POMs/navBarPOM.ts";
 import {
 	createPipelineTable,
 	type PipelineTableObject,
-} from "../POMs/pipelineTablePOM.ts";
+} from "../POMs/pipelineTable/pipelineTablePOM.ts";
 
 export type PagePOMRegistry = {
 	[K in PageLinkKeys as `${string & K}Page`]?: PageObject;
