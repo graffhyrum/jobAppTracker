@@ -25,9 +25,12 @@ const jobApplicationScope = scope({
 	ApplicationStatusLabel: "(ActiveLabels|InactiveLabels)",
 	AppStatusEntry: ["dateTime", "ApplicationStatus"],
 	JobAppId: uuidSchema,
+	JobBoardId: uuidSchema,
 	"#HasId": {
 		id: "JobAppId",
 	},
+	SourceType:
+		"'job_board'|'referral'|'company_website'|'recruiter'|'networking'|'other'",
 	RequiredBaseProps: {
 		company: "string > 0",
 		positionTitle: "string > 0",
@@ -42,6 +45,10 @@ const jobApplicationScope = scope({
 		"nextEventDate?": "dateTime | ''",
 		"jobPostingUrl?": "string",
 		"jobDescription?": "string",
+		sourceType: "SourceType",
+		"jobBoardId?": "JobBoardId",
+		"sourceNotes?": "string",
+		isRemote: "boolean",
 	},
 	JobApp: {
 		"...": "BaseProps",
@@ -55,8 +62,19 @@ const jobApplicationScope = scope({
 	forUpdate: "Partial<Omit<JobApp, 'id'>>",
 	"#ForCreateKey": "keyof forCreate",
 	"#ForUpdateKey": "keyof forUpdate",
+	// FormForCreate accepts string or boolean for any field (for HTML form compatibility)
 	FormForCreate: {
-		"[ForCreateKey]": "string",
+		company: "string",
+		positionTitle: "string",
+		applicationDate: "string",
+		sourceType: "string",
+		"isRemote?": "string | boolean",
+		"interestRating?": "string | number",
+		"nextEventDate?": "string",
+		"jobPostingUrl?": "string",
+		"jobDescription?": "string",
+		"jobBoardId?": "string",
+		"sourceNotes?": "string",
 	},
 	FormForUpdate: {
 		"[ForUpdateKey]?": "string",
@@ -79,6 +97,8 @@ export type JobApplicationForUpdate =
 export type JobApplicationId = typeof jobApplicationModule.JobAppId.infer;
 export type ApplicationStatus =
 	typeof jobApplicationModule.ApplicationStatus.infer;
+export type SourceType = typeof jobApplicationModule.SourceType.infer;
+export type JobBoardId = typeof jobApplicationModule.JobBoardId.infer;
 
 export function createJobApplicationId(
 	generateUUID: () => string,

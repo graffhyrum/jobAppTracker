@@ -1,9 +1,13 @@
 import { processEnv } from "../../../processEnvFacade.ts";
 import type { JobApplication } from "../../domain/entities/job-application";
+import type { JobBoard } from "../../domain/entities/job-board.ts";
 import { formAndPipelineContent } from "../components/formAndPipelineContent.ts";
 import { layout } from "../components/layout";
 
-export const homepagePage = (applications: JobApplication[] = []): string => {
+export const homepagePage = (
+	applications: JobApplication[] = [],
+	jobBoards: JobBoard[] = [],
+): string => {
 	const content = `
 		<div class="homepage">
 			<div class="page-header">
@@ -13,9 +17,9 @@ export const homepagePage = (applications: JobApplication[] = []): string => {
 					<p>JOB_APP_MANAGER_TYPE: ${processEnv.JOB_APP_MANAGER_TYPE}</p>
 				</div>
 			</div>
-			
+
 			<div id="form-and-pipeline-container">
-				${formAndPipelineContent(applications)}
+				${formAndPipelineContent(applications, jobBoards)}
 			</div>
 		</div>
 	`;

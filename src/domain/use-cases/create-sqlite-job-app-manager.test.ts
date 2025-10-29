@@ -19,6 +19,8 @@ describe("createSQLiteJobAppManager", () => {
 		nextEventDate: new Date(Date.now() + 86400000).toISOString(), // tomorrow
 		jobPostingUrl: "https://example.com/job",
 		jobDescription: "A great job opportunity",
+		sourceType: "job_board" as const,
+		isRemote: false,
 	} as const satisfies JobApplicationForCreate;
 
 	const validUpdateData = {

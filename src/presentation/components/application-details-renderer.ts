@@ -160,6 +160,24 @@ export const renderApplicationDetailsView = (app: JobApplication): string => {
 					</details>
 				</div>
 
+				<div
+					id="interview-stages-container"
+					hx-get="/applications/${app.id}/interview-stages"
+					hx-trigger="load"
+					hx-swap="innerHTML"
+					data-testid="interview-stages-container">
+					<p class="loading-text">Loading interview stages...</p>
+				</div>
+
+				<div
+					id="contacts-container"
+					hx-get="/applications/${app.id}/contacts"
+					hx-trigger="load"
+					hx-swap="innerHTML"
+					data-testid="contacts-container">
+					<p class="loading-text">Loading contacts...</p>
+				</div>
+
 				<div class="placeholder-section" data-testid="notes-placeholder">
 					<h2>Notes</h2>
 					<p class="placeholder-text">Note editing functionality coming soon...</p>

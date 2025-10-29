@@ -71,10 +71,25 @@ export const extractApplicationData = (
 		);
 	}
 
+	// Handle isRemote which might come as string from forms or boolean from direct API calls
+	// If checkbox is unchecked, the field won't be in formData at all
+	const isRemoteValue = formData.isRemote;
+	const isRemote =
+		isRemoteValue === true ||
+		isRemoteValue === "true" ||
+		(isRemoteValue as unknown) === "true";
+
 	const data: JobApplicationForCreate = {
 		company,
 		positionTitle,
 		applicationDate,
+		// New required fields with defaults
+		sourceType:
+			typeof formData.sourceType === "string" &&
+			formData.sourceType.trim() !== ""
+				? (formData.sourceType as JobApplicationForCreate["sourceType"])
+				: "other",
+		isRemote,
 	};
 
 	// Add optional fields only if they have values
@@ -92,6 +107,15 @@ export const extractApplicationData = (
 
 	if (jobDescription) {
 		data.jobDescription = jobDescription;
+	}
+
+	if (formData.jobBoardId && typeof formData.jobBoardId === "string") {
+		data.jobBoardId =
+			formData.jobBoardId as JobApplicationForCreate["jobBoardId"];
+	}
+
+	if (formData.sourceNotes && typeof formData.sourceNotes === "string") {
+		data.sourceNotes = formData.sourceNotes;
 	}
 
 	return data;

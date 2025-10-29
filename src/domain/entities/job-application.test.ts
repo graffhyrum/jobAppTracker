@@ -28,6 +28,8 @@ describe("JobApplication Domain Entity", () => {
 		nextEventDate: "2025-09-15T10:00:00.000Z",
 		jobPostingUrl: "https://example.com/job",
 		jobDescription: "Great opportunity",
+		sourceType: "job_board" as const,
+		isRemote: false,
 	} as const satisfies JobApplicationForCreate;
 
 	const validApplicationStatus = {

@@ -5,6 +5,7 @@ import {
 	type ProcessEnvSchema,
 	processEnv,
 } from "../../../processEnvFacade.ts";
+import { createSQLiteJobBoardRepository } from "../../infrastructure/adapters/sqlite-job-board-repository.ts";
 import { getDatabasePath } from "../../infrastructure/config/sqlite-config.ts";
 import { uuidProvider } from "../../infrastructure/di/uuid-provider.ts";
 import type { ForUpdate } from "../../infrastructure/storage/storage-provider-interface.ts";
@@ -36,9 +37,11 @@ export function createSQLiteJobAppManager(
 					const query = database.prepare(`
                         INSERT INTO job_applications (id, company, positionTitle, applicationDate, interestRating,
                                                       nextEventDate, jobPostingUrl, jobDescription,
+                                                      sourceType, jobBoardId, sourceNotes, isRemote,
                                                       createdAt, updatedAt, notes, statusLog)
                         VALUES ($id, $company, $positionTitle, $applicationDate, $interestRating,
                                 $nextEventDate, $jobPostingUrl, $jobDescription,
+                                $sourceType, $jobBoardId, $sourceNotes, $isRemote,
                                 $createdAt, $updatedAt, $notes, $statusLog)
                     `);
 
@@ -51,6 +54,10 @@ export function createSQLiteJobAppManager(
 						$nextEventDate: app.nextEventDate ?? null,
 						$jobPostingUrl: app.jobPostingUrl ?? null,
 						$jobDescription: app.jobDescription ?? null,
+						$sourceType: app.sourceType,
+						$jobBoardId: app.jobBoardId ?? null,
+						$sourceNotes: app.sourceNotes ?? null,
+						$isRemote: app.isRemote ? 1 : 0,
 						$createdAt: app.createdAt,
 						$updatedAt: app.updatedAt,
 						$notes: JSON.stringify(app.notes),
@@ -127,6 +134,10 @@ export function createSQLiteJobAppManager(
                             nextEventDate   = $nextEventDate,
                             jobPostingUrl   = $jobPostingUrl,
                             jobDescription  = $jobDescription,
+                            sourceType      = $sourceType,
+                            jobBoardId      = $jobBoardId,
+                            sourceNotes     = $sourceNotes,
+                            isRemote        = $isRemote,
                             updatedAt       = $updatedAt,
                             notes           = $notes,
                             statusLog       = $statusLog
@@ -146,6 +157,10 @@ export function createSQLiteJobAppManager(
 							(updated.jobPostingUrl as string | undefined) ?? null,
 						$jobDescription:
 							(updated.jobDescription as string | undefined) ?? null,
+						$sourceType: updated.sourceType as string,
+						$jobBoardId: (updated.jobBoardId as string | undefined) ?? null,
+						$sourceNotes: (updated.sourceNotes as string | undefined) ?? null,
+						$isRemote: (updated.isRemote as boolean) ? 1 : 0,
 						$updatedAt: updated.updatedAt as string,
 						$notes:
 							typeof updated.notes === "string"
@@ -257,6 +272,9 @@ export function createSQLiteJobAppManager(
 					normalized[key] = JSON.parse(value);
 				} else if (key === "statusLog" && typeof value === "string") {
 					normalized[key] = JSON.parse(value);
+				} else if (key === "isRemote" && typeof value === "number") {
+					// Convert SQLite integer to boolean
+					normalized[key] = value === 1;
 				} else {
 					normalized[key] = value;
 				}
@@ -280,6 +298,7 @@ class SQLiteConnection {
 		const dbPath = getDatabasePath(environment);
 		this.db = new Database(dbPath, { create: true });
 		this.initializeSchema();
+		this.seedJobBoards();
 		console.log(`🔍 [SQLite] Database initialized: ${dbPath}`);
 	}
 
@@ -294,50 +313,78 @@ class SQLiteConnection {
 	}
 
 	private initializeSchema(): void {
-		// Create table if not exists
+		// Create job_boards table
+		this.db.run(`
+            CREATE TABLE IF NOT EXISTS job_boards
+            (
+                id          TEXT PRIMARY KEY,
+                name        TEXT NOT NULL,
+                rootDomain  TEXT NOT NULL,
+                domains     TEXT NOT NULL,
+                createdAt   TEXT NOT NULL
+            )
+        `);
+
+		// Create job_applications table
 		this.db.run(`
             CREATE TABLE IF NOT EXISTS job_applications
             (
-                id
-                TEXT
-                PRIMARY
-                KEY,
-                company
-                TEXT
-                NOT
-                NULL,
-                positionTitle
-                TEXT
-                NOT
-                NULL,
-                applicationDate
-                TEXT
-                NOT
-                NULL,
-                interestRating
-                INTEGER,
-                nextEventDate
-                TEXT,
-                jobPostingUrl
-                TEXT,
-                jobDescription
-                TEXT,
-                createdAt
-                TEXT
-                NOT
-                NULL,
-                updatedAt
-                TEXT
-                NOT
-                NULL,
-                notes
-                TEXT
-                NOT
-                NULL,
-                statusLog
-                TEXT
-                NOT
-                NULL
+                id              TEXT PRIMARY KEY,
+                company         TEXT NOT NULL,
+                positionTitle   TEXT NOT NULL,
+                applicationDate TEXT NOT NULL,
+                interestRating  INTEGER,
+                nextEventDate   TEXT,
+                jobPostingUrl   TEXT,
+                jobDescription  TEXT,
+                sourceType      TEXT NOT NULL,
+                jobBoardId      TEXT,
+                sourceNotes     TEXT,
+                isRemote        INTEGER NOT NULL,
+                createdAt       TEXT NOT NULL,
+                updatedAt       TEXT NOT NULL,
+                notes           TEXT NOT NULL,
+                statusLog       TEXT NOT NULL,
+                FOREIGN KEY (jobBoardId) REFERENCES job_boards(id)
+            )
+        `);
+
+		// Create interview_stages table
+		this.db.run(`
+            CREATE TABLE IF NOT EXISTS interview_stages
+            (
+                id               TEXT PRIMARY KEY,
+                jobApplicationId TEXT NOT NULL,
+                round            INTEGER NOT NULL,
+                interviewType    TEXT NOT NULL,
+                isFinalRound     INTEGER NOT NULL,
+                scheduledDate    TEXT,
+                completedDate    TEXT,
+                notes            TEXT,
+                questions        TEXT NOT NULL,
+                createdAt        TEXT NOT NULL,
+                updatedAt        TEXT NOT NULL,
+                FOREIGN KEY (jobApplicationId) REFERENCES job_applications(id) ON DELETE CASCADE
+            )
+        `);
+
+		// Create contacts table
+		this.db.run(`
+            CREATE TABLE IF NOT EXISTS contacts
+            (
+                id               TEXT PRIMARY KEY,
+                jobApplicationId TEXT NOT NULL,
+                contactName      TEXT NOT NULL,
+                contactEmail     TEXT,
+                linkedInUrl      TEXT,
+                role             TEXT,
+                channel          TEXT NOT NULL,
+                outreachDate     TEXT NOT NULL,
+                responseReceived INTEGER NOT NULL,
+                notes            TEXT,
+                createdAt        TEXT NOT NULL,
+                updatedAt        TEXT NOT NULL,
+                FOREIGN KEY (jobApplicationId) REFERENCES job_applications(id) ON DELETE CASCADE
             )
         `);
 
@@ -356,10 +403,32 @@ class SQLiteConnection {
             CREATE INDEX IF NOT EXISTS idx_updated_at
                 ON job_applications(updatedAt DESC)
         `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_interview_stages_job_app
+                ON interview_stages(jobApplicationId)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_contacts_job_app
+                ON contacts(jobApplicationId)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_job_boards_domain
+                ON job_boards(rootDomain)
+        `);
 	}
 
 	async withConnection<T>(operation: (db: Database) => Promise<T>): Promise<T> {
 		return operation(this.db);
+	}
+
+	private seedJobBoards(): void {
+		const jobBoardRepo = createSQLiteJobBoardRepository(this.db);
+		jobBoardRepo.seedCommonBoards().mapErr((err) => {
+			console.warn(`⚠️ [SQLite] Failed to seed job boards: ${err}`);
+		});
 	}
 
 	close(): void {

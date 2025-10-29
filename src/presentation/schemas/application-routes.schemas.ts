@@ -6,7 +6,8 @@ export const applicationIdParamSchema = type({
 	id: jobApplicationModule.JobAppId,
 });
 
-export const createApplicationBodySchema = jobApplicationModule.forCreate;
+// Use FormForCreate for HTML form submissions (accepts strings and booleans)
+export const createApplicationBodySchema = jobApplicationModule.FormForCreate;
 export const updateApplicationBodySchema = jobApplicationModule.FormForUpdate;
 
 // Search query validation

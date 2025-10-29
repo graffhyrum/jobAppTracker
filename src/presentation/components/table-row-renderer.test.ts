@@ -10,6 +10,8 @@ describe("Table Row Renderer", () => {
 		company: "Test Company",
 		positionTitle: "Software Engineer",
 		applicationDate: "2024-01-15T10:00:00.000Z",
+		sourceType: "other",
+		isRemote: false,
 		updatedAt: "2024-01-16T10:00:00.000Z",
 		createdAt: "2024-01-15T10:00:00.000Z",
 		notes: [],

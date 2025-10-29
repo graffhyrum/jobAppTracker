@@ -3,6 +3,14 @@ import { staticPlugin } from "@elysiajs/static";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 import { createApplicationsPlugin } from "./plugins/applications.plugin.ts";
+import {
+	createContactOperationsPlugin,
+	createContactsPlugin,
+} from "./plugins/contacts.plugin.ts";
+import {
+	createInterviewStageOperationsPlugin,
+	createInterviewStagesPlugin,
+} from "./plugins/interview-stages.plugin.ts";
 import { createPagesPlugin } from "./plugins/pages.plugin.ts";
 import { createPipelinePlugin } from "./plugins/pipeline.plugin.ts";
 
@@ -108,6 +116,10 @@ export function startElysiaServer() {
 		.use(createPagesPlugin)
 		.use(createPipelinePlugin)
 		.use(createApplicationsPlugin)
+		.use(createInterviewStagesPlugin)
+		.use(createInterviewStageOperationsPlugin)
+		.use(createContactsPlugin)
+		.use(createContactOperationsPlugin)
 		.listen(3000);
 
 	console.log(

@@ -1,6 +1,7 @@
 import { type } from "arktype";
 import { Elysia, NotFoundError } from "elysia";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
+import { jobBoardRepositoryPlugin } from "#src/application/server/plugins/jobBoardRepository.plugin.ts";
 import {
 	extractApplicationData,
 	fetchAllApplicationsOrEmpty,
@@ -25,6 +26,7 @@ import {
 
 export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 	.use(jobApplicationManagerPlugin)
+	.use(jobBoardRepositoryPlugin)
 	// GET /applications/:id - Returns display row (for cancel and initial display)
 	.get(
 		"/:id",
@@ -207,7 +209,13 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 	// POST /applications - Creates new application
 	.post(
 		"/",
-		async ({ jobApplicationManager, body, set }) => {
+		async ({ jobApplicationManager, jobBoardRepository, body, set }) => {
+			// Helper to fetch job boards
+			const getJobBoards = async () => {
+				const result = await jobBoardRepository.getAll();
+				return result.isOk() ? result.value : [];
+			};
+
 			try {
 				// Body is already validated by Elysia using ArkType schema
 				const applicationData = extractApplicationData(body);
@@ -220,10 +228,15 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 					const currentApps = await fetchAllApplicationsOrEmpty(
 						jobApplicationManager,
 					);
+					const jobBoards = await getJobBoards();
 
 					set.status = 400;
 					set.headers["Content-Type"] = "text/html";
-					return formAndPipelineContent(currentApps, `Error: ${result.error}`);
+					return formAndPipelineContent(
+						currentApps,
+						jobBoards,
+						`Error: ${result.error}`,
+					);
 				}
 
 				const newApplication = result.value;
@@ -236,27 +249,32 @@ export const createApplicationsPlugin = new Elysia({ prefix: "/applications" })
 						"Failed to fetch applications:",
 						applicationsResult.error,
 					);
+					const jobBoards = await getJobBoards();
 					set.status = 500;
 					set.headers["Content-Type"] = "text/html";
 					return formAndPipelineContent(
 						[],
+						jobBoards,
 						`Error fetching applications: ${applicationsResult.error}`,
 					);
 				}
 
+				const jobBoards = await getJobBoards();
 				set.headers["Content-Type"] = "text/html";
 				set.headers["X-Application-ID"] = newApplication.id;
-				return formAndPipelineContent(applicationsResult.value);
+				return formAndPipelineContent(applicationsResult.value, jobBoards);
 			} catch (error) {
 				console.error("Unexpected error creating application:", error);
 				const currentApps = await fetchAllApplicationsOrEmpty(
 					jobApplicationManager,
 				);
+				const jobBoards = await getJobBoards();
 
 				set.status = 500;
 				set.headers["Content-Type"] = "text/html";
 				return formAndPipelineContent(
 					currentApps,
+					jobBoards,
 					`Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
 				);
 			}

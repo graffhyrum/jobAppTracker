@@ -557,3 +557,529 @@
 		flex-wrap: wrap;
 	}
 }
+
+/* Interview Stages Section */
+.interview-stages-section {
+	margin-bottom: 32px;
+}
+
+.interview-stages-section .section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.interview-stages-section .section-header h2 {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	color: #222;
+}
+
+.interview-stages-section .empty-state {
+	color: #666;
+	font-style: italic;
+	margin: 16px 0;
+}
+
+.interview-stages-section .action-btn.add {
+	background-color: #4caf50;
+	color: white;
+	padding: 10px 16px;
+	border: none;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.interview-stages-section .action-btn.add:hover {
+	background-color: #43a047;
+}
+
+.interview-stages-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.interview-stage-card {
+	background-color: white;
+	border: 1px solid #d0d0d0;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.interview-stage-card .stage-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+.interview-stage-card .stage-title {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.interview-stage-card .stage-round {
+	display: inline-block;
+	padding: 6px 12px;
+	background-color: #e3f2fd;
+	color: #1565c0;
+	border-radius: 4px;
+	font-weight: 700;
+	font-size: 14px;
+	border: 2px solid #2196f3;
+}
+
+.interview-stage-card .stage-type {
+	font-size: 16px;
+	font-weight: 600;
+	color: #333;
+}
+
+.interview-stage-card .final-round-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	background-color: #ffd54f;
+	color: #f57f17;
+	border-radius: 4px;
+	font-weight: 700;
+	font-size: 12px;
+	border: 2px solid #ffc107;
+}
+
+.interview-stage-card .stage-actions {
+	display: flex;
+	gap: 8px;
+}
+
+.action-btn-small {
+	padding: 8px 12px;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 12px;
+	font-weight: 500;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	background-color: #f5f5f5;
+	color: #333;
+}
+
+.action-btn-small.edit {
+	background-color: #2196f3;
+	color: white;
+}
+
+.action-btn-small.edit:hover {
+	background-color: #1976d2;
+}
+
+.action-btn-small.delete {
+	background-color: #f44336;
+	color: white;
+}
+
+.action-btn-small.delete:hover {
+	background-color: #d32f2f;
+}
+
+.action-btn-small.add {
+	background-color: #4caf50;
+	color: white;
+}
+
+.action-btn-small.add:hover {
+	background-color: #43a047;
+}
+
+.interview-stage-card .stage-details {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.interview-stage-card .stage-dates {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.interview-stage-card .stage-date {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.interview-stage-card .stage-date label {
+	font-weight: 700;
+	font-size: 12px;
+	color: #666;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.interview-stage-card .stage-date span {
+	color: #222;
+	font-size: 14px;
+}
+
+.interview-stage-card .stage-notes {
+	padding: 12px;
+	background-color: #fafbfc;
+	border: 1px solid #d0d0d0;
+	border-radius: 4px;
+}
+
+.interview-stage-card .stage-notes label {
+	font-weight: 700;
+	font-size: 12px;
+	color: #666;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.interview-stage-card .stage-notes p {
+	margin: 0;
+	color: #333;
+	line-height: 1.5;
+}
+
+.interview-stage-card .stage-questions {
+	margin-top: 8px;
+}
+
+.interview-stage-card .stage-questions summary {
+	cursor: pointer;
+	font-weight: 600;
+	color: #1976d2;
+	padding: 8px 0;
+	list-style: none;
+	user-select: none;
+}
+
+.interview-stage-card .stage-questions summary:hover {
+	color: #1565c0;
+}
+
+.interview-stage-card .questions-list {
+	margin-top: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.interview-stage-card .question-item {
+	padding: 12px;
+	background-color: #f8f9fa;
+	border: 1px solid #d0d0d0;
+	border-radius: 4px;
+}
+
+.interview-stage-card .question-title {
+	font-weight: 600;
+	color: #222;
+	margin-bottom: 8px;
+}
+
+.interview-stage-card .question-answer {
+	color: #555;
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+.interview-stage-card .question-answer.no-answer {
+	color: #999;
+	font-style: italic;
+}
+
+/* Interview Stage Form */
+.interview-stage-form {
+	background-color: #f8f9fa;
+	border: 2px solid #2196f3;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 16px;
+}
+
+.interview-stage-form .form-row {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.interview-stage-form .form-field {
+	margin-bottom: 16px;
+}
+
+.interview-stage-form .form-field label {
+	display: block;
+	font-weight: 600;
+	font-size: 14px;
+	color: #333;
+	margin-bottom: 8px;
+}
+
+.interview-stage-form .form-input,
+.interview-stage-form .form-select,
+.interview-stage-form .form-textarea {
+	width: 100%;
+	padding: 10px;
+	border: 2px solid #d0d0d0;
+	border-radius: 6px;
+	font-size: 14px;
+	font-family: inherit;
+	transition: border-color 0.2s ease;
+}
+
+.interview-stage-form .form-input:focus,
+.interview-stage-form .form-select:focus,
+.interview-stage-form .form-textarea:focus {
+	outline: none;
+	border-color: #2196f3;
+}
+
+.interview-stage-form .form-textarea {
+	resize: vertical;
+	min-height: 80px;
+	line-height: 1.5;
+}
+
+.interview-stage-form .questions-form-list {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	margin-bottom: 12px;
+}
+
+.interview-stage-form .question-form-item {
+	display: grid;
+	grid-template-columns: 1fr 1fr auto;
+	gap: 12px;
+	align-items: start;
+	padding: 12px;
+	background-color: white;
+	border: 1px solid #d0d0d0;
+	border-radius: 6px;
+}
+
+.interview-stage-form .btn-remove-question {
+	padding: 8px 12px;
+	background-color: #f44336;
+	color: white;
+	border: none;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.interview-stage-form .btn-remove-question:hover {
+	background-color: #d32f2f;
+}
+
+.interview-stage-form .form-actions {
+	display: flex;
+	gap: 12px;
+	margin-top: 20px;
+}
+
+/* Contacts Section - Similar styles to Interview Stages */
+.contacts-section {
+	margin-bottom: 32px;
+}
+
+.contacts-section .section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.contacts-section .section-header h2 {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	color: #222;
+}
+
+.contacts-section .empty-state {
+	color: #666;
+	font-style: italic;
+	margin: 16px 0;
+}
+
+.contacts-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.contact-card {
+	background-color: white;
+	border: 1px solid #d0d0d0;
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+}
+
+.contact-card .contact-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+.contact-card .contact-name {
+	font-size: 18px;
+	font-weight: 700;
+	color: #222;
+	margin-bottom: 8px;
+}
+
+.contact-card .contact-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+
+.contact-card .role-badge,
+.contact-card .channel-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 4px;
+	font-weight: 600;
+	font-size: 12px;
+	border: 2px solid currentColor;
+}
+
+.contact-card .role-badge {
+	background-color: #e3f2fd;
+	color: #1565c0;
+	border-color: #2196f3;
+}
+
+.contact-card .channel-badge {
+	background-color: #f3e5f5;
+	color: #6a1b9a;
+	border-color: #9c27b0;
+}
+
+.contact-card .response-badge {
+	display: inline-block;
+	padding: 4px 10px;
+	border-radius: 4px;
+	font-weight: 600;
+	font-size: 12px;
+	border: 2px solid currentColor;
+}
+
+.contact-card .response-badge.received {
+	background-color: #c8e6c9;
+	color: #1b5e20;
+	border-color: #4caf50;
+}
+
+.contact-card .response-badge.no-response {
+	background-color: #ffecb3;
+	color: #f57f17;
+	border-color: #ffc107;
+}
+
+.contact-card .contact-details {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.contact-card .contact-info {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 14px;
+	color: #555;
+}
+
+.contact-card .contact-info a {
+	color: #1976d2;
+	text-decoration: underline;
+}
+
+.contact-card .contact-info a:hover {
+	color: #1565c0;
+}
+
+.contact-card .contact-notes {
+	padding: 12px;
+	background-color: #fafbfc;
+	border: 1px solid #d0d0d0;
+	border-radius: 4px;
+	margin-top: 12px;
+}
+
+.contact-card .contact-notes label {
+	font-weight: 700;
+	font-size: 12px;
+	color: #666;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.contact-card .contact-notes p {
+	margin: 0;
+	color: #333;
+	line-height: 1.5;
+}
+
+/* Contact Form */
+.contact-form {
+	background-color: #f8f9fa;
+	border: 2px solid #2196f3;
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 16px;
+}
+
+/* Loading state */
+.loading-text {
+	color: #666;
+	font-style: italic;
+	text-align: center;
+	padding: 20px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.interview-stage-form .form-row,
+	.interview-stage-form .question-form-item {
+		grid-template-columns: 1fr;
+	}
+
+	.contact-card .contact-header {
+		flex-direction: column;
+		gap: 12px;
+	}
+}

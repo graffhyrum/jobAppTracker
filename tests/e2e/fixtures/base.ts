@@ -57,6 +57,8 @@ export const test = base.extend<TestFixtures>({
 			company: "Test Company",
 			positionTitle: `Test Position - ${testInfo.workerIndex}`,
 			applicationDate: new Date().toISOString(),
+			sourceType: "other" as const,
+			isRemote: false,
 		} satisfies typeof createApplicationBodySchema.infer;
 
 		// Create via API using form data
@@ -88,6 +90,8 @@ export const test = base.extend<TestFixtures>({
 		const testJobApp: JobApplication = {
 			id: applicationId,
 			...testJobAppData,
+			sourceType: "other",
+			isRemote: false,
 			createdAt: new Date().toISOString(),
 			updatedAt: new Date().toISOString(),
 			notes: [],
