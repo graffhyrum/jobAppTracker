@@ -16,10 +16,10 @@ export interface Root2 {
 	interest?: number;
 	job_rec_id?: number;
 	stages: Stage[];
-	sourced_job: any;
+	sourced_job: unknown;
 	result: Result;
 	notes?: string;
-	strategies: any[];
+	strategies: unknown[];
 	status: string;
 	pipeline_connections: PipelineConnection[];
 }
@@ -59,7 +59,7 @@ export interface Result {
 	id: number;
 	outcome: string;
 	date: string;
-	notes: any;
+	notes: unknown;
 }
 
 export interface PipelineConnection {
