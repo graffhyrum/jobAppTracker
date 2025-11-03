@@ -30,7 +30,7 @@
 	},
 	"private": true,
 	"scripts": {
-		"start": "bun run src/index.ts",
+		"start": "bun run dist/jobapptracker",
 		"dev": "bun --watch run src/index.ts",
 		"build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
 		"test:all": "bun test:unit && bun test:e2e",

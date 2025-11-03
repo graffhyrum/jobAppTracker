@@ -7,7 +7,10 @@ import type {
 	JobApplicationId,
 } from "../entities/job-application.ts";
 import type { JobApplicationManager } from "../ports/job-application-manager.ts";
-import { jobApplicationManager } from "./create-sqlite-job-app-manager.ts";
+import { jobAppManagerRegistry } from "./create-sqlite-job-app-manager.ts";
+
+// Get the test manager for testing
+const jobApplicationManager = jobAppManagerRegistry.getManager("test");
 
 describe("createSQLiteJobAppManager", () => {
 	// Test data that represents realistic job application scenarios

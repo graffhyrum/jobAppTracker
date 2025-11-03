@@ -33,7 +33,9 @@
 			"Bash(curl:*)",
 			"WebFetch(domain:elysiajs.com)",
 			"Bash(bun test:unit:*)",
-			"WebFetch(domain:standardschema.dev)"
+			"WebFetch(domain:standardschema.dev)",
+			"Bash(bun build)",
+			"Bash(find:*)"
 		]
 	},
 	"enableAllProjectMcpServers": true,

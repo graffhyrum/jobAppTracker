@@ -1,10 +1,40 @@
 import { PAGE_CONFIG } from "./pageConfig.ts";
 
-export function navbar(): string {
+export type NavbarOptions = {
+	isDev?: boolean;
+	currentDb?: "test" | "prod";
+};
+
+export function navbar(options: NavbarOptions = {}): string {
+	const { isDev = false, currentDb = "prod" } = options;
 	const {
 		brand,
 		links: { home, health, api },
 	} = PAGE_CONFIG;
+
+	const dbSelector = `
+		<div class="db-selector" data-testid="db-selector">
+			<span class="db-selector-label">DB:</span>
+			<div class="db-selector-buttons">
+				<button
+					class="db-selector-button ${currentDb === "test" ? "active" : ""}"
+					hx-post="/dev/switch-db"
+					hx-vals='{"environment": "test"}'
+					hx-swap="none"
+					data-testid="db-selector-test">
+					Test
+				</button>
+				<button
+					class="db-selector-button ${currentDb === "prod" ? "active" : ""}"
+					hx-post="/dev/switch-db"
+					hx-vals='{"environment": "prod"}'
+					hx-swap="none"
+					data-testid="db-selector-prod">
+					Prod
+				</button>
+			</div>
+		</div>`;
+
 	return `
 <nav class="navbar" data-testid="navbar">
 	<div class="navbar-container">
@@ -22,6 +52,7 @@ export function navbar(): string {
 				<a href=${api.href} class="nav-link" data-testid=${api.testId}>${api.text}</a>
 			</li>
 		</ul>
+		${isDev ? dbSelector : ""}
 	</div>
 </nav>`;
 }

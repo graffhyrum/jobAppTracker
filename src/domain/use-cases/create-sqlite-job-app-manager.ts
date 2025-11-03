@@ -424,6 +424,14 @@ class SQLiteConnection {
 		return operation(this.db);
 	}
 
+	/**
+	 * Get the underlying Database instance.
+	 * Use this to create repository instances that share the same initialized connection.
+	 */
+	getDatabase(): Database {
+		return this.db;
+	}
+
 	private seedJobBoards(): void {
 		const jobBoardRepo = createSQLiteJobBoardRepository(this.db);
 		jobBoardRepo.seedCommonBoards().mapErr((err) => {
@@ -437,9 +445,63 @@ class SQLiteConnection {
 }
 
 export type ManagerType = ProcessEnvSchema["JOB_APP_MANAGER_TYPE"];
-const configMap = {
-	test: () => createSQLiteJobAppManager("test"),
-	prod: () => createSQLiteJobAppManager("prod"),
-} as const satisfies Record<ManagerType, () => JobApplicationManager>;
-const instance = configMap[processEnv.JOB_APP_MANAGER_TYPE]();
-export const jobApplicationManager = instance;
+
+/**
+ * Registry for managing JobApplicationManager instances.
+ * Allows runtime switching between test and prod databases in dev mode.
+ */
+function createJobAppManagerRegistry(initialEnvironment: ManagerType) {
+	const managers = new Map<ManagerType, JobApplicationManager>();
+
+	function getOrCreateManager(env: ManagerType): JobApplicationManager {
+		const existing = managers.get(env);
+		if (existing) {
+			return existing;
+		}
+
+		const newManager = createSQLiteJobAppManager(env);
+		managers.set(env, newManager);
+		return newManager;
+	}
+
+	// Pre-create both test and prod managers at startup for faster access
+	getOrCreateManager("test");
+	getOrCreateManager("prod");
+
+	return {
+		/**
+		 * Gets manager for specified environment without mutating global state.
+		 * This is thread-safe and can be called concurrently from multiple requests.
+		 */
+		getManager(env: ManagerType): JobApplicationManager {
+			return getOrCreateManager(env);
+		},
+
+		/**
+		 * Gets the default environment from initial configuration.
+		 */
+		getDefaultEnvironment(): ManagerType {
+			return initialEnvironment;
+		},
+
+		/**
+		 * Gets the initialized Database instance for the specified environment.
+		 * Use this to create repository instances that share the same database connection.
+		 */
+		getDatabase(env: ManagerType): Database {
+			// Ensure the manager (and thus the SQLiteConnection) exists
+			getOrCreateManager(env);
+			return SQLiteConnection.getInstance(env).getDatabase();
+		},
+	};
+}
+
+// Create registry with initial environment from process.env
+const registry = createJobAppManagerRegistry(processEnv.JOB_APP_MANAGER_TYPE);
+
+/**
+ * Global registry for job application managers.
+ * Use `jobAppManagerRegistry.getManager(env)` to get a manager for a specific environment.
+ * Each manager instance is cached and reused.
+ */
+export const jobAppManagerRegistry = registry;

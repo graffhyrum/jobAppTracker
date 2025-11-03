@@ -66,7 +66,10 @@ function startDevServer() {
 	return Bun.spawn(["bun", "start"], {
 		stdout: "inherit",
 		stderr: "inherit",
-		env: { ...process.env },
+		env: {
+			...process.env,
+			NODE_ENV: "development", // Enable dev tools for E2E testing
+		},
 	});
 }
 

@@ -171,6 +171,59 @@
 	color: #d32f2f;
 }
 
+/* Database selector styles (dev mode only) */
+.db-selector {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 4px 12px;
+	border-radius: 4px;
+	background-color: rgba(255, 255, 255, 0.1);
+}
+
+.db-selector-label {
+	color: #fff;
+	font-size: 0.85rem;
+	font-weight: 500;
+	opacity: 0.8;
+}
+
+.db-selector-buttons {
+	display: flex;
+	gap: 4px;
+	background-color: rgba(0, 0, 0, 0.2);
+	border-radius: 4px;
+	padding: 2px;
+}
+
+.db-selector-button {
+	padding: 4px 12px;
+	border: none;
+	border-radius: 3px;
+	background-color: transparent;
+	color: rgba(255, 255, 255, 0.7);
+	font-size: 0.85rem;
+	font-weight: 500;
+	cursor: pointer;
+	transition:
+		background-color 0.2s ease,
+		color 0.2s ease;
+}
+
+.db-selector-button:hover {
+	background-color: rgba(255, 255, 255, 0.1);
+	color: #fff;
+}
+
+.db-selector-button.active {
+	background-color: #007bff;
+	color: #fff;
+}
+
+.db-selector-button.active:hover {
+	background-color: #0056b3;
+}
+
 @media (max-width: 768px) {
 	.navbar-container {
 		padding: 0 15px;

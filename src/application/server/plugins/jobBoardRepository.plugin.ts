@@ -1,7 +1,10 @@
 import { Elysia } from "elysia";
-import { jobBoardRepository } from "#src/domain/use-cases/create-sqlite-job-board-repo.ts";
+import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
 
-export const jobBoardRepositoryPlugin = new Elysia().decorate(
-	"jobBoardRepository",
-	jobBoardRepository,
-);
+/**
+ * Factory function to create an Elysia plugin that decorates the context with a job board repository.
+ * Accepts a JobBoardRepository instance to allow dependency injection.
+ */
+export const createJobBoardRepositoryPlugin = (
+	jobBoardRepository: JobBoardRepository,
+) => new Elysia().decorate("jobBoardRepository", jobBoardRepository);

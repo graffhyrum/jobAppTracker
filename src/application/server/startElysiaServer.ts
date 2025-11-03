@@ -2,11 +2,15 @@ import { html } from "@elysiajs/html";
 import { staticPlugin } from "@elysiajs/static";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
+import { jobAppManagerRegistry } from "#src/domain/use-cases/create-sqlite-job-app-manager.ts";
+import { createSQLiteJobBoardRepo } from "#src/domain/use-cases/create-sqlite-job-board-repo.ts";
+import { isDevelopment } from "../../infrastructure/utils/environment-detector.ts";
 import { createApplicationsPlugin } from "./plugins/applications.plugin.ts";
 import {
 	createContactOperationsPlugin,
 	createContactsPlugin,
 } from "./plugins/contacts.plugin.ts";
+import { createDevToolsPlugin } from "./plugins/dev-tools.plugin.ts";
 import {
 	createInterviewStageOperationsPlugin,
 	createInterviewStagesPlugin,
@@ -15,6 +19,12 @@ import { createPagesPlugin } from "./plugins/pages.plugin.ts";
 import { createPipelinePlugin } from "./plugins/pipeline.plugin.ts";
 
 export function startElysiaServer() {
+	// Get the initialized database instance from the registry
+	const defaultEnv = jobAppManagerRegistry.getDefaultEnvironment();
+	const db = jobAppManagerRegistry.getDatabase(defaultEnv);
+
+	// Create repositories using the shared database connection
+	const jobBoardRepository = createSQLiteJobBoardRepo(db);
 	const app = new Elysia()
 		// Global error handling
 		.onError(({ code, error, set, request }) => {
@@ -113,14 +123,21 @@ export function startElysiaServer() {
 			},
 		)
 		// Add custom route plugins with dependency injection
-		.use(createPagesPlugin)
+		.use(createPagesPlugin(jobBoardRepository))
 		.use(createPipelinePlugin)
-		.use(createApplicationsPlugin)
+		.use(createApplicationsPlugin(jobBoardRepository))
 		.use(createInterviewStagesPlugin)
 		.use(createInterviewStageOperationsPlugin)
 		.use(createContactsPlugin)
-		.use(createContactOperationsPlugin)
-		.listen(3000);
+		.use(createContactOperationsPlugin);
+
+	// Conditionally add dev tools plugin in development mode
+	if (isDevelopment()) {
+		app.use(createDevToolsPlugin);
+		console.log("🛠️  Dev tools enabled at /dev/*");
+	}
+
+	app.listen(3000);
 
 	console.log(
 		`🦊 Elysia is running at http://${app.server?.hostname}:${app.server?.port}`,

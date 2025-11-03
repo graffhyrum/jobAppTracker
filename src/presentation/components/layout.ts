@@ -1,6 +1,14 @@
-import { navbar } from "./navbar";
+import { type NavbarOptions, navbar } from "./navbar";
 
-export const layout = (title: string, content: string): string => `
+export type LayoutOptions = {
+	navbar?: NavbarOptions;
+};
+
+export const layout = (
+	title: string,
+	content: string,
+	options: LayoutOptions = {},
+): string => `
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +25,7 @@ export const layout = (title: string, content: string): string => `
 	<link rel="alternate icon" href="/assets/favicon.svg" type="image/svg+xml">
 </head>
 <body>
-	${navbar()}
+	${navbar(options.navbar)}
 	<div class="main-content">
 		${content}
 	</div>

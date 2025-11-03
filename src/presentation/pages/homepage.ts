@@ -2,11 +2,12 @@ import { processEnv } from "../../../processEnvFacade.ts";
 import type { JobApplication } from "../../domain/entities/job-application";
 import type { JobBoard } from "../../domain/entities/job-board.ts";
 import { formAndPipelineContent } from "../components/formAndPipelineContent.ts";
-import { layout } from "../components/layout";
+import { type LayoutOptions, layout } from "../components/layout";
 
 export const homepagePage = (
 	applications: JobApplication[] = [],
 	jobBoards: JobBoard[] = [],
+	layoutOptions: LayoutOptions = {},
 ): string => {
 	const content = `
 		<div class="homepage">
@@ -24,5 +25,5 @@ export const homepagePage = (
 		</div>
 	`;
 
-	return layout("Job App Tracker", content);
+	return layout("Job App Tracker", content, layoutOptions);
 };
