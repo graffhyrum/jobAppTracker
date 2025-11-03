@@ -35,7 +35,8 @@
 			"Bash(bun test:unit:*)",
 			"WebFetch(domain:standardschema.dev)",
 			"Bash(bun build)",
-			"Bash(find:*)"
+			"Bash(find:*)",
+			"Bash(bun test:coverage:*)"
 		]
 	},
 	"enableAllProjectMcpServers": true,

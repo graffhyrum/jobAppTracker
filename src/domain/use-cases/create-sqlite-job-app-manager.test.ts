@@ -337,3 +337,66 @@ describe("createSQLiteJobAppManager", () => {
 		});
 	});
 });
+
+describe("JobAppManagerRegistry", () => {
+	describe("getDatabase", () => {
+		it("should return Database instance for test environment", () => {
+			const db = jobAppManagerRegistry.getDatabase("test");
+
+			expect(db).toBeDefined();
+			expect(typeof db.prepare).toBe("function");
+			expect(typeof db.run).toBe("function");
+			expect(typeof db.close).toBe("function");
+		});
+
+		it("should return Database instance for prod environment", () => {
+			const db = jobAppManagerRegistry.getDatabase("prod");
+
+			expect(db).toBeDefined();
+			expect(typeof db.prepare).toBe("function");
+			expect(typeof db.run).toBe("function");
+			expect(typeof db.close).toBe("function");
+		});
+
+		it("should return same instance on multiple calls", () => {
+			const db1 = jobAppManagerRegistry.getDatabase("test");
+			const db2 = jobAppManagerRegistry.getDatabase("test");
+
+			// Should be the same instance (reference equality)
+			expect(db1).toBe(db2);
+		});
+
+		it("should return different instances for different environments", () => {
+			const testDb = jobAppManagerRegistry.getDatabase("test");
+			const prodDb = jobAppManagerRegistry.getDatabase("prod");
+
+			// Should be different instances
+			expect(testDb).not.toBe(prodDb);
+		});
+	});
+
+	describe("getManager", () => {
+		it("should return manager for test environment", () => {
+			const manager = jobAppManagerRegistry.getManager("test");
+
+			expect(manager).toBeDefined();
+			expect(typeof manager.createJobApplication).toBe("function");
+		});
+
+		it("should return manager for prod environment", () => {
+			const manager = jobAppManagerRegistry.getManager("prod");
+
+			expect(manager).toBeDefined();
+			expect(typeof manager.createJobApplication).toBe("function");
+		});
+	});
+
+	describe("getDefaultEnvironment", () => {
+		it("should return the default environment", () => {
+			const env = jobAppManagerRegistry.getDefaultEnvironment();
+
+			expect(env).toBeDefined();
+			expect(["test", "prod"]).toContain(env);
+		});
+	});
+});

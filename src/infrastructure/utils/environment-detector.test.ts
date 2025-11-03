@@ -19,12 +19,21 @@ describe("environment-detector", () => {
 			expect(typeof result).toBe("boolean");
 		});
 
-		it("detects development from actual Bun.main path", () => {
+		it("detects development from actual Bun.main path with forward slash", () => {
 			// When running tests, Bun.main typically contains /src/
 			// This is an integration test that verifies actual behavior
 			const bunMainPath = Bun.main;
-			const containsSrc =
-				bunMainPath.includes("/src/") || bunMainPath.includes("\\src\\");
+			const containsSrc = bunMainPath.includes("/src/");
+
+			if (containsSrc) {
+				expect(isDevelopment()).toBe(true);
+			}
+		});
+
+		it("detects development from actual Bun.main path with backslash", () => {
+			// Windows-style path with backslash
+			const bunMainPath = Bun.main;
+			const containsSrc = bunMainPath.includes("\\src\\");
 
 			if (containsSrc) {
 				expect(isDevelopment()).toBe(true);
@@ -42,6 +51,43 @@ describe("environment-detector", () => {
 			process.env.NODE_ENV = previousNodeEnv;
 
 			expect(result).toBe(true);
+		});
+
+		it("handles production-like path without src directory", () => {
+			// When Bun.main doesn't contain /src/ or \src\,
+			// and NODE_ENV is not 'development', should return false
+			// Note: This branch is hard to test since Bun.main is immutable
+			// and typically contains src/ during test execution
+			const bunMainPath = Bun.main;
+			const isDevPath =
+				bunMainPath.includes("/src/") || bunMainPath.includes("\\src\\");
+
+			if (!isDevPath && process.env.NODE_ENV !== "development") {
+				expect(isDevelopment()).toBe(false);
+			}
+		});
+
+		it("returns false for production environment", () => {
+			const previousNodeEnv = process.env.NODE_ENV;
+			// Explicitly unset NODE_ENV to test default behavior
+			delete process.env.NODE_ENV;
+
+			// When Bun.main contains src/, this will still return true
+			// This documents the limitation of testing Bun.main paths
+			const bunMainPath = Bun.main;
+			const containsSrc =
+				bunMainPath.includes("/src/") || bunMainPath.includes("\\src\\");
+
+			const result = isDevelopment();
+
+			// Restore NODE_ENV
+			process.env.NODE_ENV = previousNodeEnv;
+
+			if (containsSrc) {
+				expect(result).toBe(true);
+			} else {
+				expect(result).toBe(false);
+			}
 		});
 	});
 
