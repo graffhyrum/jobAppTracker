@@ -1,0 +1,209 @@
+/* Theme CSS Variables - Dark Mode Support */
+
+/* Light theme (default) */
+:root {
+	/* Background colors */
+	--color-bg-body: #f5f5f5;
+	--color-bg-container: #ffffff;
+	--color-bg-secondary: #f8f9fa;
+	--color-bg-tertiary: #fafbfc;
+	--color-bg-hover: #f8f9fa;
+	--color-bg-navbar: #343a40;
+	--color-bg-editing: #fff3cd;
+
+	/* Text colors */
+	--color-text-primary: #333;
+	--color-text-secondary: #666;
+	--color-text-tertiary: #999;
+	--color-text-dark: #222;
+	--color-text-medium: #555;
+	--color-text-light: #6c757d;
+	--color-text-inverse: #ffffff;
+
+	/* Border colors */
+	--color-border-primary: #e0e0e0;
+	--color-border-secondary: #d0d0d0;
+	--color-border-tertiary: #ddd;
+	--color-border-light: #f0f0f0;
+	--color-border-medium: #ced4da;
+	--color-border-dark: #b0b0b0;
+
+	/* Accent colors - Primary (Green) */
+	--color-accent-primary: #4caf50;
+	--color-accent-primary-hover: #45a049;
+	--color-accent-primary-dark: #43a047;
+	--color-accent-primary-darker: #2e7d32;
+	--color-accent-primary-light: #e8f5e8;
+	--color-accent-primary-lighter: #c8e6c9;
+	--color-accent-primary-text: #2d5f2d;
+	--color-accent-primary-text-dark: #1b5e20;
+
+	/* Accent colors - Blue */
+	--color-accent-blue: #007bff;
+	--color-accent-blue-hover: #0056b3;
+	--color-accent-blue-light: #2196f3;
+	--color-accent-blue-medium: #1976d2;
+	--color-accent-blue-dark: #1565c0;
+	--color-accent-blue-lighter: #e3f2fd;
+	--color-accent-blue-focus: #80bdff;
+
+	/* Accent colors - Purple */
+	--color-accent-purple: #9c27b0;
+	--color-accent-purple-text: #6a1b9a;
+	--color-accent-purple-dark: #7b1fa2;
+	--color-accent-purple-light: #f3e5f5;
+
+	/* Accent colors - Yellow/Gold */
+	--color-accent-yellow: #ffc107;
+	--color-accent-yellow-light: #ffd54f;
+	--color-accent-yellow-lighter: #ffecb3;
+	--color-accent-yellow-text: #f57f17;
+	--color-accent-gold: #ffd700;
+
+	/* Status colors - Error/Danger (Red) */
+	--color-status-error: #f44336;
+	--color-status-error-hover: #d32f2f;
+	--color-status-error-dark: #c62828;
+	--color-status-error-darker: #b71c1c;
+	--color-status-error-light: #ffeaef;
+	--color-status-error-lighter: #ffcdd2;
+	--color-status-error-text: #8b2635;
+	--color-status-error-alt: #dc3545;
+
+	/* Status colors - Success (Green) */
+	--color-status-success: #28a745;
+	--color-status-success-hover: #218838;
+
+	/* Status colors - Overdue */
+	--color-status-overdue: #d32f2f;
+	--color-status-overdue-bg: #fff5f5;
+	--color-status-overdue-hover: #ffeaea;
+
+	/* Secondary button colors */
+	--color-btn-secondary-bg: #f5f5f5;
+	--color-btn-secondary-hover: #eeeeee;
+	--color-btn-secondary-text: #666;
+	--color-btn-secondary-border: #e0e0e0;
+	--color-btn-gray: #6c757d;
+	--color-btn-gray-hover: #5a6268;
+
+	/* Shadow colors */
+	--shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+	--shadow-md: 0 2px 6px rgba(0, 0, 0, 0.06);
+	--shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.08);
+	--shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.15);
+	--shadow-hover: 0 4px 8px rgba(76, 175, 80, 0.3);
+	--shadow-hover-strong: 0 4px 8px rgba(76, 175, 80, 0.4);
+	--shadow-focus: 0 0 0 2px rgba(76, 175, 80, 0.1);
+	--shadow-focus-blue: 0 0 0 2px rgba(0, 123, 255, 0.25);
+
+	/* Overlay colors */
+	--overlay-light: rgba(255, 255, 255, 0.1);
+	--overlay-medium: rgba(0, 0, 0, 0.1);
+	--overlay-dark: rgba(0, 0, 0, 0.2);
+	--overlay-navbar-btn: rgba(255, 255, 255, 0.7);
+}
+
+/* Dark theme */
+[data-theme="dark"] {
+	/* Background colors */
+	--color-bg-body: #1a1a1a;
+	--color-bg-container: #2d2d2d;
+	--color-bg-secondary: #242424;
+	--color-bg-tertiary: #2a2a2a;
+	--color-bg-hover: #353535;
+	--color-bg-navbar: #0d0d0d;
+	--color-bg-editing: #4a4420;
+
+	/* Text colors */
+	--color-text-primary: #e0e0e0;
+	--color-text-secondary: #a0a0a0;
+	--color-text-tertiary: #707070;
+	--color-text-dark: #f0f0f0;
+	--color-text-medium: #b0b0b0;
+	--color-text-light: #909090;
+	--color-text-inverse: #ffffff;
+
+	/* Border colors */
+	--color-border-primary: #404040;
+	--color-border-secondary: #4a4a4a;
+	--color-border-tertiary: #3a3a3a;
+	--color-border-light: #353535;
+	--color-border-medium: #454545;
+	--color-border-dark: #5a5a5a;
+
+	/* Accent colors - Primary (Green) */
+	--color-accent-primary: #66bb6a;
+	--color-accent-primary-hover: #5cb860;
+	--color-accent-primary-dark: #52af57;
+	--color-accent-primary-darker: #48a44d;
+	--color-accent-primary-light: #1e3a1f;
+	--color-accent-primary-lighter: #2d4a2e;
+	--color-accent-primary-text: #88c98b;
+	--color-accent-primary-text-dark: #a5d7a7;
+
+	/* Accent colors - Blue */
+	--color-accent-blue: #4a9eff;
+	--color-accent-blue-hover: #357ae8;
+	--color-accent-blue-light: #5ba3ff;
+	--color-accent-blue-medium: #4a90e2;
+	--color-accent-blue-dark: #3d7dca;
+	--color-accent-blue-lighter: #1e3a5c;
+	--color-accent-blue-focus: #5ba3ff;
+
+	/* Accent colors - Purple */
+	--color-accent-purple: #ba68c8;
+	--color-accent-purple-text: #ab47bc;
+	--color-accent-purple-dark: #9c27b0;
+	--color-accent-purple-light: #2a1f2e;
+
+	/* Accent colors - Yellow/Gold */
+	--color-accent-yellow: #ffb74d;
+	--color-accent-yellow-light: #ffd54f;
+	--color-accent-yellow-lighter: #4a3f2d;
+	--color-accent-yellow-text: #ffb74d;
+	--color-accent-gold: #ffd700;
+
+	/* Status colors - Error/Danger (Red) */
+	--color-status-error: #ef5350;
+	--color-status-error-hover: #e53935;
+	--color-status-error-dark: #d32f2f;
+	--color-status-error-darker: #c62828;
+	--color-status-error-light: #3a1f1f;
+	--color-status-error-lighter: #4a2828;
+	--color-status-error-text: #ff8a80;
+	--color-status-error-alt: #ef5350;
+
+	/* Status colors - Success (Green) */
+	--color-status-success: #66bb6a;
+	--color-status-success-hover: #5cb860;
+
+	/* Status colors - Overdue */
+	--color-status-overdue: #ef5350;
+	--color-status-overdue-bg: #3a1f1f;
+	--color-status-overdue-hover: #4a2828;
+
+	/* Secondary button colors */
+	--color-btn-secondary-bg: #3a3a3a;
+	--color-btn-secondary-hover: #454545;
+	--color-btn-secondary-text: #a0a0a0;
+	--color-btn-secondary-border: #4a4a4a;
+	--color-btn-gray: #808080;
+	--color-btn-gray-hover: #909090;
+
+	/* Shadow colors - subtle in dark mode */
+	--shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+	--shadow-md: 0 2px 6px rgba(0, 0, 0, 0.4);
+	--shadow-lg: 0 2px 8px rgba(0, 0, 0, 0.5);
+	--shadow-xl: 0 4px 12px rgba(0, 0, 0, 0.6);
+	--shadow-hover: 0 4px 8px rgba(102, 187, 106, 0.3);
+	--shadow-hover-strong: 0 4px 8px rgba(102, 187, 106, 0.4);
+	--shadow-focus: 0 0 0 2px rgba(102, 187, 106, 0.2);
+	--shadow-focus-blue: 0 0 0 2px rgba(74, 158, 255, 0.3);
+
+	/* Overlay colors */
+	--overlay-light: rgba(255, 255, 255, 0.05);
+	--overlay-medium: rgba(0, 0, 0, 0.3);
+	--overlay-dark: rgba(0, 0, 0, 0.5);
+	--overlay-navbar-btn: rgba(255, 255, 255, 0.5);
+}

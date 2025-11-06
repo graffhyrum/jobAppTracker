@@ -12,11 +12,11 @@
 }
 
 .pipeline-container {
-	background: white;
+	background: var(--color-bg-container);
 	border-radius: 8px;
 	padding: 24px;
 	margin: 20px 0;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--shadow-sm);
 }
 
 .pipeline-header {
@@ -30,7 +30,7 @@
 
 .pipeline-header h2 {
 	margin: 0;
-	color: #333;
+	color: var(--color-text-primary);
 	font-size: 1.5em;
 }
 
@@ -48,21 +48,21 @@
 }
 
 .stat.active {
-	background-color: #e8f5e8;
-	color: #2d5f2d;
-	border: 2px solid #4caf50;
+	background-color: var(--color-accent-primary-light);
+	color: var(--color-accent-primary-text);
+	border: 2px solid var(--color-accent-primary);
 }
 
 .stat.inactive {
-	background-color: #ffeaef;
-	color: #8b2635;
-	border: 2px solid #f44336;
+	background-color: var(--color-status-error-light);
+	color: var(--color-status-error-text);
+	border: 2px solid var(--color-status-error);
 }
 
 .stat.total {
-	background-color: #f5f5f5;
-	color: #555;
-	border: 2px solid #999;
+	background-color: var(--color-btn-secondary-bg);
+	color: var(--color-text-medium);
+	border: 2px solid var(--color-text-tertiary);
 }
 
 .table-controls {
@@ -85,10 +85,10 @@
 .filter-select,
 .page-size-select {
 	padding: 8px 12px;
-	border: 1px solid #ddd;
+	border: 1px solid var(--color-border-tertiary);
 	border-radius: 4px;
 	font-size: 0.9em;
-	background: white;
+	background: var(--color-bg-container);
 }
 
 .search-input {
@@ -104,14 +104,14 @@
 .filter-select:focus,
 .page-size-select:focus {
 	outline: none;
-	border-color: #4caf50;
-	box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+	border-color: var(--color-accent-primary);
+	box-shadow: var(--shadow-focus);
 }
 
 .table-container {
 	overflow-x: auto;
 	border-radius: 8px;
-	border: 1px solid #e0e0e0;
+	border: 1px solid var(--color-border-primary);
 }
 
 .applications-table {
@@ -121,12 +121,12 @@
 }
 
 .applications-table th {
-	background-color: #f8f9fa;
-	color: #495057;
+	background-color: var(--color-bg-secondary);
+	color: var(--color-text-medium);
 	font-weight: 600;
 	padding: 12px 8px;
 	text-align: left;
-	border-bottom: 2px solid #e0e0e0;
+	border-bottom: 2px solid var(--color-border-primary);
 	position: sticky;
 	top: 0;
 }
@@ -138,7 +138,7 @@
 }
 
 .applications-table th.sortable:hover {
-	background-color: #e9ecef;
+	background-color: var(--color-btn-secondary-hover);
 }
 
 .sort-indicator {
@@ -157,30 +157,30 @@
 
 .applications-table td {
 	padding: 12px 8px;
-	border-bottom: 1px solid #e0e0e0;
+	border-bottom: 1px solid var(--color-border-primary);
 	vertical-align: top;
 }
 
 .application-row:hover {
-	background-color: #f8f9fa;
+	background-color: var(--color-bg-secondary);
 }
 
 .application-row.overdue {
-	background-color: #fff5f5;
+	background-color: var(--color-status-overdue-bg);
 }
 
 .application-row.overdue:hover {
-	background-color: #ffeaea;
+	background-color: var(--color-status-overdue-hover);
 }
 
 .company-cell {
 	font-weight: 600;
-	color: #333;
+	color: var(--color-text-primary);
 	min-width: 120px;
 }
 
 .position-cell {
-	color: #555;
+	color: var(--color-text-medium);
 	min-width: 150px;
 }
 
@@ -198,33 +198,33 @@
 }
 
 .status-badge.active {
-	background-color: #e8f5e8;
-	color: #2d5f2d;
-	border: 1px solid #4caf50;
+	background-color: var(--color-accent-primary-light);
+	color: var(--color-accent-primary-text);
+	border: 1px solid var(--color-accent-primary);
 }
 
 .status-badge.inactive {
-	background-color: #ffeaef;
-	color: #8b2635;
-	border: 1px solid #f44336;
+	background-color: var(--color-status-error-light);
+	color: var(--color-status-error-text);
+	border: 1px solid var(--color-status-error);
 }
 
 .application-date-cell,
 .updated-date-cell,
 .next-event-cell {
-	color: #666;
+	color: var(--color-text-secondary);
 	font-size: 0.85em;
 	min-width: 90px;
 }
 
 .interest-cell {
-	color: #ffd700;
+	color: var(--color-accent-gold);
 	font-size: 1.1em;
 	min-width: 80px;
 }
 
 .overdue-date {
-	color: #d32f2f;
+	color: var(--color-status-overdue);
 	font-weight: 600;
 }
 
@@ -244,19 +244,19 @@
 }
 
 .action-btn:hover {
-	background-color: rgba(0, 0, 0, 0.1);
+	background-color: var(--overlay-medium);
 }
 
 .empty-state {
 	text-align: center;
-	color: #999;
+	color: var(--color-text-tertiary);
 	font-style: italic;
 	padding: 40px;
 }
 
 .pagination-info {
 	text-align: center;
-	color: #666;
+	color: var(--color-text-secondary);
 	margin: 16px 0 8px;
 	font-size: 0.9em;
 }
@@ -271,8 +271,8 @@
 
 .pagination-btn {
 	padding: 8px 16px;
-	border: 1px solid #ddd;
-	background: white;
+	border: 1px solid var(--color-border-tertiary);
+	background: var(--color-bg-container);
 	border-radius: 4px;
 	cursor: pointer;
 	transition: all 0.2s ease;
@@ -280,8 +280,8 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-	background-color: #f5f5f5;
-	border-color: #4caf50;
+	background-color: var(--color-btn-secondary-bg);
+	border-color: var(--color-accent-primary);
 }
 
 .pagination-btn:disabled {
@@ -290,7 +290,7 @@
 }
 
 .page-numbers {
-	color: #666;
+	color: var(--color-text-secondary);
 	font-weight: 600;
 }
 
@@ -376,7 +376,7 @@
 }
 
 .editable-cell:hover {
-	background-color: #f8f9fa;
+	background-color: var(--color-bg-secondary);
 }
 
 .editable-cell::after {
@@ -395,14 +395,14 @@
 }
 
 .editing {
-	background-color: #fff3cd;
+	background-color: var(--color-bg-editing);
 	padding: 4px;
 }
 
 .edit-input,
 .edit-select {
 	width: 100%;
-	border: 1px solid #ced4da;
+	border: 1px solid var(--color-border-medium);
 	border-radius: 4px;
 	padding: 4px 8px;
 	font-size: inherit;
@@ -412,8 +412,8 @@
 .edit-input:focus,
 .edit-select:focus {
 	outline: none;
-	border-color: #80bdff;
-	box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+	border-color: var(--color-accent-blue-focus);
+	box-shadow: var(--shadow-focus-blue);
 }
 
 .edit-buttons {
@@ -433,24 +433,24 @@
 }
 
 .save-btn {
-	background-color: #28a745;
-	color: white;
+	background-color: var(--color-status-success);
+	color: var(--color-text-inverse);
 }
 
 .save-btn:hover {
-	background-color: #218838;
+	background-color: var(--color-status-success-hover);
 }
 
 .cancel-btn {
-	background-color: #6c757d;
-	color: white;
+	background-color: var(--color-btn-gray);
+	color: var(--color-text-inverse);
 }
 
 .cancel-btn:hover {
-	background-color: #5a6268;
+	background-color: var(--color-btn-gray-hover);
 }
 
 .no-date {
-	color: #6c757d;
+	color: var(--color-text-light);
 	font-style: italic;
 }
