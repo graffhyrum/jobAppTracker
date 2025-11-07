@@ -2,6 +2,34 @@
 
 /* Light theme (default) */
 :root {
+	/* Spacing scale */
+	--space-xs: 4px;
+	--space-sm: 8px;
+	--space-md: 12px;
+	--space-lg: 16px;
+	--space-xl: 24px;
+	--space-2xl: 32px;
+	--space-3xl: 48px;
+
+	/* Typography scale */
+	--font-size-xs: 0.75rem; /* 12px */
+	--font-size-sm: 0.875rem; /* 14px */
+	--font-size-md: 1rem; /* 16px */
+	--font-size-lg: 1.125rem; /* 18px */
+	--font-size-xl: 1.25rem; /* 20px */
+	--font-size-2xl: 1.5rem; /* 24px */
+
+	/* Border radius */
+	--radius-sm: 4px;
+	--radius-md: 6px;
+	--radius-lg: 8px;
+	--radius-full: 9999px;
+
+	/* Transition durations */
+	--duration-fast: 0.1s;
+	--duration-normal: 0.2s;
+	--duration-slow: 0.3s;
+
 	/* Background colors */
 	--color-bg-body: #f5f5f5;
 	--color-bg-container: #ffffff;

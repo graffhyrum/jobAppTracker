@@ -1,0 +1,229 @@
+/* Button Component System */
+
+/* Base button styles - shared by all buttons */
+.btn {
+	padding: 12px 24px;
+	border-radius: 4px;
+	font-weight: 600;
+	border: none;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	text-decoration: none;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	font-size: 14px;
+}
+
+/* Size variants */
+.btn-sm {
+	padding: 8px 12px;
+	font-size: 12px;
+	gap: 4px;
+}
+
+.btn-lg {
+	padding: 14px 24px;
+	font-size: 16px;
+}
+
+/* Primary button - green accent */
+.btn-primary {
+	background-color: var(--color-accent-primary);
+	color: var(--color-text-inverse);
+}
+
+.btn-primary:hover {
+	background-color: var(--color-accent-primary-hover);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-hover);
+}
+
+.btn-primary:focus-visible {
+	outline: 2px solid var(--color-accent-primary-darker);
+	outline-offset: 2px;
+}
+
+/* Secondary button - neutral gray */
+.btn-secondary {
+	background-color: var(--color-btn-secondary-bg);
+	color: var(--color-btn-secondary-text);
+	border: 2px solid var(--color-btn-secondary-border);
+}
+
+.btn-secondary:hover {
+	background-color: var(--color-btn-secondary-hover);
+	border-color: var(--color-border-secondary);
+	color: var(--color-text-primary);
+}
+
+.btn-secondary:focus-visible {
+	outline: 2px solid var(--color-border-dark);
+	outline-offset: 2px;
+}
+
+/* Success button - green */
+.btn-success {
+	background-color: var(--color-status-success);
+	color: var(--color-text-inverse);
+}
+
+.btn-success:hover {
+	background-color: var(--color-status-success-hover);
+}
+
+.btn-success:focus-visible {
+	outline: 2px solid var(--color-status-success-hover);
+	outline-offset: 2px;
+}
+
+/* Danger/Delete button - red */
+.btn-danger {
+	background-color: var(--color-status-error);
+	color: var(--color-text-inverse);
+}
+
+.btn-danger:hover {
+	background-color: var(--color-status-error-hover);
+}
+
+.btn-danger:focus-visible {
+	outline: 2px solid var(--color-status-error-dark);
+	outline-offset: 2px;
+}
+
+/* Info button - blue */
+.btn-info {
+	background-color: var(--color-accent-blue-light);
+	color: var(--color-text-inverse);
+}
+
+.btn-info:hover {
+	background-color: var(--color-accent-blue-medium);
+}
+
+.btn-info:focus-visible {
+	outline: 2px solid var(--color-accent-blue-medium);
+	outline-offset: 2px;
+}
+
+/* Gray button */
+.btn-gray {
+	background-color: var(--color-btn-gray);
+	color: var(--color-text-inverse);
+}
+
+.btn-gray:hover {
+	background-color: var(--color-btn-gray-hover);
+}
+
+/* Icon-only button variant */
+.btn-icon {
+	background: none;
+	border: none;
+	cursor: pointer;
+	font-size: 1.1em;
+	padding: 4px;
+	border-radius: 4px;
+	transition: background-color 0.2s ease;
+}
+
+.btn-icon:hover {
+	background-color: var(--overlay-medium);
+}
+
+/* Special purpose buttons */
+.btn-back {
+	display: inline-flex;
+	align-items: center;
+	padding: 10px 16px;
+	background-color: var(--color-btn-secondary-bg);
+	color: var(--color-btn-secondary-text);
+	text-decoration: none;
+	border-radius: 6px;
+	border: 2px solid var(--color-btn-secondary-border);
+	font-weight: 500;
+	transition: all 0.2s ease;
+}
+
+.btn-back:hover {
+	background-color: var(--color-btn-secondary-hover);
+	border-color: var(--color-border-secondary);
+	color: var(--color-text-primary);
+}
+
+.btn-add {
+	display: inline-flex;
+	align-items: center;
+	padding: 14px 24px;
+	background-color: var(--color-accent-primary);
+	color: var(--color-text-inverse);
+	text-decoration: none;
+	border-radius: 6px;
+	font-weight: 600;
+	font-size: 16px;
+	transition: all 0.2s ease;
+	white-space: nowrap;
+	box-shadow: var(--shadow-hover);
+}
+
+.btn-add:hover {
+	background-color: var(--color-accent-primary-hover);
+	transform: translateY(-1px);
+	box-shadow: var(--shadow-hover-strong);
+}
+
+.btn-pagination {
+	padding: 8px 16px;
+	border: 1px solid var(--color-border-tertiary);
+	background: var(--color-bg-container);
+	border-radius: 4px;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	font-size: 0.9em;
+}
+
+.btn-pagination:hover:not(:disabled) {
+	background-color: var(--color-btn-secondary-bg);
+	border-color: var(--color-accent-primary);
+}
+
+.btn-pagination:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Disabled state for all buttons */
+.btn:disabled,
+.btn[disabled] {
+	opacity: 0.6;
+	cursor: not-allowed;
+	transform: none;
+}
+
+.btn:disabled:hover,
+.btn[disabled]:hover {
+	transform: none;
+	box-shadow: none;
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+	.btn,
+	.btn-icon,
+	.btn-back,
+	.btn-add,
+	.btn-pagination {
+		transition: none;
+	}
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.btn-back,
+	.btn-add {
+		font-size: 14px;
+		padding: 12px 20px;
+	}
+}

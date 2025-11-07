@@ -1,40 +1,21 @@
-/* Form-specific styles for add application form */
-
-.add-application-container {
-	background: var(--color-bg-container);
-	border-radius: 8px;
-	padding: 24px;
-	margin: 20px 0;
-	width: 100%;
-	box-shadow: var(--shadow-sm);
-}
-
-/* Use global h3 styles from base.css */
+/* Form-specific styles */
 
 .add-application-form {
 	display: grid;
 	gap: 16px;
 }
 
-/* Required field styling (robust): prefer label.required or aria-required */
+/* Required field styling - prefer .required class or aria-required attribute */
 label.required::after,
-label[aria-required="true"]::after {
-	content: " *";
-	color: var(--color-status-error);
-}
-/* Back-compat with existing markup during transition */
-.add-application-form .form-group label[for="company"]::after,
-.add-application-form .form-group label[for="positionTitle"]::after,
-.add-application-form .form-group label[for="applicationDate"]::after {
+label[aria-required="true"]::after,
+.form-group label[for="company"]::after,
+.form-group label[for="positionTitle"]::after,
+.form-group label[for="applicationDate"]::after {
 	content: " *";
 	color: var(--color-status-error);
 }
 
-/* Actions row uses global .form-actions styles; keep layout minimal */
-
-/* Buttons use global .btn variants; no overrides here */
-
-/* Section toggle (prefer semantic class) */
+/* Section toggle */
 .section-toggle {
 	color: var(--color-text-primary);
 	font-weight: 600;
@@ -42,11 +23,12 @@ label[aria-required="true"]::after {
 	padding: 10px 0;
 	outline: none;
 }
+
 .section-toggle:hover {
 	text-decoration: underline;
 }
 
-/* Back-compat for data-testid selector until templates updated */
+/* Form visibility toggle - specific to add application form */
 #form-container summary[data-testid="add-application-form-visibility-toggle"] {
 	color: var(--color-text-primary);
 	font-weight: 600;
@@ -54,14 +36,17 @@ label[aria-required="true"]::after {
 	padding: 10px 0;
 	outline: none;
 }
+
 #form-container,
 summary[data-testid="add-application-form-visibility-toggle"]:hover {
 	text-decoration: underline;
 }
+
 #form-container,
 summary[data-testid="add-application-form-visibility-toggle"]::-webkit-details-marker {
 	color: var(--color-text-primary);
 }
+
 #form-container,
 details[open],
 summary[data-testid="add-application-form-visibility-toggle"] {

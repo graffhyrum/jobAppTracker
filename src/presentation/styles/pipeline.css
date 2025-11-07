@@ -1,11 +1,6 @@
-.pipeline-container {
-	background: var(--color-bg-container);
-	border-radius: 8px;
-	padding: 24px;
-	margin: 20px 0;
-	box-shadow: var(--shadow-sm);
-}
+/* Pipeline-specific styles */
 
+/* Pipeline header with stats */
 .pipeline-header {
 	display: flex;
 	justify-content: space-between;
@@ -27,80 +22,58 @@
 	flex-wrap: wrap;
 }
 
-.stat {
-	padding: 8px 12px;
-	border-radius: 20px;
-	font-size: 0.9em;
+/* Pipeline-specific table cell types */
+.company-cell {
 	font-weight: 600;
-}
-
-.stat.active {
-	background-color: var(--color-accent-primary-light);
-	color: var(--color-accent-primary-text);
-	border: 2px solid var(--color-accent-primary);
-}
-
-.stat.inactive {
-	background-color: var(--color-status-error-light);
-	color: var(--color-status-error-text);
-	border: 2px solid var(--color-status-error);
-}
-
-.stat.total {
-	background-color: var(--color-btn-secondary-bg);
-	color: var(--color-text-medium);
-	border: 2px solid var(--color-text-tertiary);
-}
-
-.table-controls {
-	margin-bottom: 16px;
-	display: flex;
-	justify-content: space-between;
-	align-items: flex-end;
-	flex-wrap: wrap;
-	gap: 16px;
-}
-
-.filters {
-	display: flex;
-	gap: 12px;
-	flex-wrap: wrap;
-	align-items: center;
-}
-
-.search-input,
-.filter-select,
-.page-size-select {
-	padding: 8px 12px;
-	border: 1px solid var(--color-border-tertiary);
-	border-radius: 4px;
-	font-size: 0.9em;
-	background: var(--color-bg-container);
-}
-
-.search-input {
-	min-width: 200px;
-}
-
-.filter-select,
-.page-size-select {
+	color: var(--color-text-primary);
 	min-width: 120px;
 }
 
-.search-input:focus,
-.filter-select:focus,
-.page-size-select:focus {
-	outline: none;
-	border-color: var(--color-accent-primary);
-	box-shadow: var(--shadow-focus);
+.position-cell {
+	color: var(--color-text-medium);
+	min-width: 150px;
 }
 
-.table-container {
-	overflow-x: auto;
-	border-radius: 8px;
-	border: 1px solid var(--color-border-primary);
+.status-cell {
+	min-width: 100px;
 }
 
+.application-date-cell,
+.updated-date-cell,
+.next-event-cell {
+	color: var(--color-text-secondary);
+	font-size: 0.85em;
+	min-width: 90px;
+}
+
+.interest-cell {
+	color: var(--color-accent-gold);
+	font-size: 1.1em;
+	min-width: 80px;
+}
+
+.overdue-date {
+	color: var(--color-status-overdue);
+	font-weight: 600;
+}
+
+.actions-cell {
+	min-width: 80px;
+}
+
+.application-row:hover {
+	background-color: var(--color-bg-secondary);
+}
+
+.application-row.overdue {
+	background-color: var(--color-status-overdue-bg);
+}
+
+.application-row.overdue:hover {
+	background-color: var(--color-status-overdue-hover);
+}
+
+/* Specific table styles for pipeline */
 .applications-table {
 	width: 100%;
 	border-collapse: collapse;
@@ -128,62 +101,13 @@
 	background-color: var(--color-btn-secondary-hover);
 }
 
-.sort-indicator {
-	font-size: 0.8em;
-	opacity: 0.6;
-	margin-left: 4px;
-}
-
-.sortable.sort-asc .sort-indicator::after {
-	content: "🔼";
-}
-
-.sortable.sort-desc .sort-indicator::after {
-	content: "🔽";
-}
-
 .applications-table td {
 	padding: 12px 8px;
 	border-bottom: 1px solid var(--color-border-primary);
 	vertical-align: top;
 }
 
-.application-row:hover {
-	background-color: var(--color-bg-secondary);
-}
-
-.application-row.overdue {
-	background-color: var(--color-status-overdue-bg);
-}
-
-.application-row.overdue:hover {
-	background-color: var(--color-status-overdue-hover);
-}
-
-.company-cell {
-	font-weight: 600;
-	color: var(--color-text-primary);
-	min-width: 120px;
-}
-
-.position-cell {
-	color: var(--color-text-medium);
-	min-width: 150px;
-}
-
-.status-cell {
-	min-width: 100px;
-}
-
-.status-badge {
-	padding: 4px 8px;
-	border-radius: 12px;
-	font-size: 0.8em;
-	font-weight: 600;
-	text-transform: capitalize;
-	white-space: nowrap;
-}
-
+/* Status badges in pipeline table - uses component styles from badges.css */
 .status-badge.active {
 	background-color: var(--color-accent-primary-light);
 	color: var(--color-accent-primary-text);
@@ -196,91 +120,7 @@
 	border: 1px solid var(--color-status-error);
 }
 
-.application-date-cell,
-.updated-date-cell,
-.next-event-cell {
-	color: var(--color-text-secondary);
-	font-size: 0.85em;
-	min-width: 90px;
-}
-
-.interest-cell {
-	color: var(--color-accent-gold);
-	font-size: 1.1em;
-	min-width: 80px;
-}
-
-.overdue-date {
-	color: var(--color-status-overdue);
-	font-weight: 600;
-}
-
-.actions-cell {
-	min-width: 80px;
-}
-
-.action-btn {
-	background: none;
-	border: none;
-	cursor: pointer;
-	font-size: 1.1em;
-	padding: 4px;
-	margin: 0 2px;
-	border-radius: 4px;
-	transition: background-color 0.2s ease;
-}
-
-.action-btn:hover {
-	background-color: var(--overlay-medium);
-}
-
-.empty-state {
-	text-align: center;
-	color: var(--color-text-tertiary);
-	font-style: italic;
-	padding: 40px;
-}
-
-.pagination-info {
-	text-align: center;
-	color: var(--color-text-secondary);
-	margin: 16px 0 8px;
-	font-size: 0.9em;
-}
-
-.pagination-nav {
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	gap: 16px;
-	margin-bottom: 16px;
-}
-
-.pagination-btn {
-	padding: 8px 16px;
-	border: 1px solid var(--color-border-tertiary);
-	background: var(--color-bg-container);
-	border-radius: 4px;
-	cursor: pointer;
-	transition: all 0.2s ease;
-	font-size: 0.9em;
-}
-
-.pagination-btn:hover:not(:disabled) {
-	background-color: var(--color-btn-secondary-bg);
-	border-color: var(--color-accent-primary);
-}
-
-.pagination-btn:disabled {
-	opacity: 0.5;
-	cursor: not-allowed;
-}
-
-.page-numbers {
-	color: var(--color-text-secondary);
-	font-weight: 600;
-}
-
+/* Mobile responsiveness */
 @media (max-width: 768px) {
 	.pipeline-header {
 		flex-direction: column;
@@ -289,25 +129,6 @@
 
 	.summary-stats {
 		justify-content: center;
-	}
-
-	.table-controls {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.filters {
-		flex-direction: column;
-		align-items: stretch;
-	}
-
-	.search-input,
-	.filter-select {
-		min-width: auto;
-	}
-
-	.table-container {
-		font-size: 0.8em;
 	}
 
 	.applications-table th,
@@ -321,18 +142,12 @@
 		display: none;
 	}
 
-	/* Stack company and position */
 	.company-cell {
 		min-width: 100px;
 	}
 
 	.position-cell {
 		min-width: 120px;
-	}
-
-	.pagination-nav {
-		flex-direction: column;
-		gap: 12px;
 	}
 }
 
@@ -344,100 +159,4 @@
 	.next-event-cell {
 		display: none;
 	}
-
-	.filters {
-		gap: 8px;
-	}
-
-	.pagination-btn {
-		padding: 6px 12px;
-		font-size: 0.8em;
-	}
-}
-
-/* Click-to-Edit Styles */
-.editable-cell {
-	cursor: pointer;
-	position: relative;
-	transition: background-color 0.2s ease;
-}
-
-.editable-cell:hover {
-	background-color: var(--color-bg-secondary);
-}
-
-.editable-cell::after {
-	content: "✏️";
-	position: absolute;
-	right: 4px;
-	top: 50%;
-	transform: translateY(-50%);
-	opacity: 0;
-	transition: opacity 0.2s ease;
-	font-size: 0.7em;
-}
-
-.editable-cell:hover::after {
-	opacity: 0.5;
-}
-
-.editing {
-	background-color: var(--color-bg-editing);
-	padding: 4px;
-}
-
-.edit-input,
-.edit-select {
-	width: 100%;
-	border: 1px solid var(--color-border-medium);
-	border-radius: 4px;
-	padding: 4px 8px;
-	font-size: inherit;
-	font-family: inherit;
-}
-
-.edit-input:focus,
-.edit-select:focus {
-	outline: none;
-	border-color: var(--color-accent-blue-focus);
-	box-shadow: var(--shadow-focus-blue);
-}
-
-.edit-buttons {
-	display: flex;
-	gap: 4px;
-	margin-top: 4px;
-}
-
-.save-btn,
-.cancel-btn {
-	padding: 2px 8px;
-	border: none;
-	border-radius: 3px;
-	font-size: 0.8em;
-	cursor: pointer;
-	transition: background-color 0.2s ease;
-}
-
-.save-btn {
-	background-color: var(--color-status-success);
-	color: var(--color-text-inverse);
-}
-
-.save-btn:hover {
-	background-color: var(--color-status-success-hover);
-}
-
-.cancel-btn {
-	background-color: var(--color-btn-gray);
-	color: var(--color-text-inverse);
-}
-
-.cancel-btn:hover {
-	background-color: var(--color-btn-gray-hover);
-}
-
-.no-date {
-	color: var(--color-text-light);
-	font-style: italic;
 }
