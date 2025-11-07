@@ -9,53 +9,20 @@
 	box-shadow: var(--shadow-sm);
 }
 
-.add-application-container h3 {
-	margin-top: 0;
-	margin-bottom: 20px;
-	color: var(--color-text-primary);
-	border-bottom: 2px solid var(--color-border-primary);
-	padding-bottom: 8px;
-}
+/* Use global h3 styles from base.css */
 
 .add-application-form {
 	display: grid;
 	gap: 16px;
 }
 
-/* Enhanced form input styles for add application */
-.add-application-form .form-group {
-	display: flex;
-	flex-direction: column;
+/* Required field styling (robust): prefer label.required or aria-required */
+label.required::after,
+label[aria-required="true"]::after {
+	content: " *";
+	color: var(--color-status-error);
 }
-
-.add-application-form .form-group label {
-	font-weight: 600;
-	margin-bottom: 6px;
-	color: var(--color-text-primary);
-}
-
-.add-application-form .form-group input,
-.add-application-form .form-group select,
-.add-application-form .form-group textarea {
-	padding: 10px 12px;
-	border: 2px solid var(--color-border-primary);
-	border-radius: 4px;
-	font-size: 14px;
-	transition: border-color 0.2s ease;
-	background-color: var(--color-bg-container);
-	color: var(--color-text-primary);
-}
-
-.add-application-form .form-group input:focus,
-.add-application-form .form-group select:focus,
-.add-application-form .form-group textarea:focus {
-	outline: none;
-	border-color: var(--color-accent-primary);
-	box-shadow: var(--shadow-focus);
-}
-
-/* Required field styling for add application form */
-.add-application-form .form-group input[required] + label::after,
+/* Back-compat with existing markup during transition */
 .add-application-form .form-group label[for="company"]::after,
 .add-application-form .form-group label[for="positionTitle"]::after,
 .add-application-form .form-group label[for="applicationDate"]::after {
@@ -63,51 +30,23 @@
 	color: var(--color-status-error);
 }
 
-.add-application-form .form-actions {
-	display: flex;
-	gap: 12px;
-	margin-top: 8px;
-}
+/* Actions row uses global .form-actions styles; keep layout minimal */
 
-.add-application-form .btn-primary,
-.add-application-form .btn-secondary {
-	padding: 12px 24px;
-	border-radius: 4px;
+/* Buttons use global .btn variants; no overrides here */
+
+/* Section toggle (prefer semantic class) */
+.section-toggle {
+	color: var(--color-text-primary);
 	font-weight: 600;
-	border: none;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	padding: 10px 0;
+	outline: none;
+}
+.section-toggle:hover {
+	text-decoration: underline;
 }
 
-.add-application-form .btn-primary {
-	background-color: var(--color-accent-primary);
-	color: var(--color-text-inverse);
-}
-
-.add-application-form .btn-primary:hover {
-	background-color: var(--color-accent-primary-hover);
-	transform: translateY(-1px);
-	box-shadow: var(--shadow-hover);
-}
-
-.add-application-form .btn-secondary {
-	background-color: var(--color-btn-secondary-bg);
-	color: var(--color-btn-secondary-text);
-	border: 2px solid var(--color-btn-secondary-border);
-}
-
-.add-application-form .btn-secondary:hover {
-	background-color: var(--color-btn-secondary-hover);
-	border-color: var(--color-border-secondary);
-}
-
-@media (max-width: 768px) {
-	.add-application-form .form-actions {
-		flex-direction: column;
-	}
-}
-
-/* Add-application section toggle (details/summary) */
+/* Back-compat for data-testid selector until templates updated */
 #form-container summary[data-testid="add-application-form-visibility-toggle"] {
 	color: var(--color-text-primary);
 	font-weight: 600;
@@ -115,16 +54,16 @@
 	padding: 10px 0;
 	outline: none;
 }
-
-#form-container summary[data-testid="add-application-form-visibility-toggle"]:hover {
-	color: var(--color-text-primary);
+#form-container
+	summary[data-testid="add-application-form-visibility-toggle"]:hover {
 	text-decoration: underline;
 }
-
-#form-container summary[data-testid="add-application-form-visibility-toggle"]::-webkit-details-marker {
+#form-container
+	summary[data-testid="add-application-form-visibility-toggle"]::-webkit-details-marker {
 	color: var(--color-text-primary);
 }
-
-#form-container details[open] summary[data-testid="add-application-form-visibility-toggle"] {
+#form-container
+	details[open]
+	summary[data-testid="add-application-form-visibility-toggle"] {
 	text-decoration: none;
 }
