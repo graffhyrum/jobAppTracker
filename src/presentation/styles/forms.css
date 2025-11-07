@@ -54,16 +54,16 @@ label[aria-required="true"]::after {
 	padding: 10px 0;
 	outline: none;
 }
-#form-container
-	summary[data-testid="add-application-form-visibility-toggle"]:hover {
+#form-container,
+summary[data-testid="add-application-form-visibility-toggle"]:hover {
 	text-decoration: underline;
 }
-#form-container
-	summary[data-testid="add-application-form-visibility-toggle"]::-webkit-details-marker {
+#form-container,
+summary[data-testid="add-application-form-visibility-toggle"]::-webkit-details-marker {
 	color: var(--color-text-primary);
 }
-#form-container
-	details[open]
-	summary[data-testid="add-application-form-visibility-toggle"] {
+#form-container,
+details[open],
+summary[data-testid="add-application-form-visibility-toggle"] {
 	text-decoration: none;
 }

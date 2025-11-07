@@ -21,19 +21,19 @@ const css = await loadAllStyles();
 
 describe("styles accessibility and structure invariants", () => {
 	it("defines a base .btn class for buttons", () => {
-		const hasBtn = /\n?\.btn\s*\{[^}]*\}/s.test(css);
+		const hasBtn = /\n?\.btn\s*\{[^}]*}/s.test(css);
 		expect(hasBtn).toBe(true);
 	});
 
 	it("provides a visually hidden helper .sr-only for screen readers", () => {
-		const hasSrOnly = /\n?\.sr-only\s*\{[^}]*\}/s.test(css);
+		const hasSrOnly = /\n?\.sr-only\s*\{[^}]*}/s.test(css);
 		expect(hasSrOnly).toBe(true);
 	});
 
 	it("includes an accessible focus-visible style for standardized form controls (.form-control)", () => {
 		// Require the new standardized focus-visible rule on .form-control
 		const focusControlPattern =
-			/\n?\.form-control\s*:\s*focus-visible\s*\{[^}]*?(?:border-color:\s*var\(--color-accent-primary\)|box-shadow:\s*var\(--shadow-focus(?:-blue)?\))[^}]*\}/s;
+			/\n?\.form-control\s*:\s*focus-visible\s*\{[^}]*?(?:border-color:\s*var\(--color-accent-primary\)|box-shadow:\s*var\(--shadow-focus(?:-blue)?\))[^}]*}/s;
 		const hasControlFocusVisible = focusControlPattern.test(css);
 		expect(hasControlFocusVisible).toBe(true);
 	});
