@@ -138,7 +138,8 @@ describe("Extension API Plugin", () => {
 				}),
 			);
 
-			expect(response.status).toBe(400);
+			// Elysia returns 422 for schema validation failures
+			expect(response.status).toBe(422);
 		});
 
 		it("should create application with default 'applied' status", async () => {
