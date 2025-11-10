@@ -34,45 +34,30 @@ const apiKeyAuth = () => (app: Elysia) =>
 	});
 
 /**
+ * Helper to set CORS headers for browser extensions
+ */
+const setCorsHeaders = (origin: string | null, set: any) => {
+	if (
+		origin?.startsWith("chrome-extension://") ||
+		origin?.startsWith("moz-extension://")
+	) {
+		set.headers["Access-Control-Allow-Origin"] = origin;
+		set.headers["Access-Control-Allow-Methods"] =
+			"GET, POST, PUT, DELETE, OPTIONS";
+		set.headers["Access-Control-Allow-Headers"] = "Content-Type, X-API-Key";
+		set.headers["Access-Control-Max-Age"] = "86400";
+	}
+};
+
+/**
  * CORS middleware for browser extension
  */
 const extensionCors = () => (app: Elysia) =>
-	app
-		.onBeforeHandle(({ request, set }) => {
-			// Allow requests from browser extensions (chrome-extension:// and moz-extension://)
-			const origin = request.headers.get("Origin");
-
-			if (
-				origin?.startsWith("chrome-extension://") ||
-				origin?.startsWith("moz-extension://")
-			) {
-				set.headers["Access-Control-Allow-Origin"] = origin;
-				set.headers["Access-Control-Allow-Methods"] =
-					"GET, POST, PUT, DELETE, OPTIONS";
-				set.headers["Access-Control-Allow-Headers"] =
-					"Content-Type, X-API-Key";
-				set.headers["Access-Control-Max-Age"] = "86400";
-			}
-		})
-		.options("/*", ({ request, set }) => {
-			// Handle preflight requests - set CORS headers directly
-			const origin = request.headers.get("Origin");
-
-			if (
-				origin?.startsWith("chrome-extension://") ||
-				origin?.startsWith("moz-extension://")
-			) {
-				set.headers["Access-Control-Allow-Origin"] = origin;
-				set.headers["Access-Control-Allow-Methods"] =
-					"GET, POST, PUT, DELETE, OPTIONS";
-				set.headers["Access-Control-Allow-Headers"] =
-					"Content-Type, X-API-Key";
-				set.headers["Access-Control-Max-Age"] = "86400";
-			}
-
-			set.status = 204;
-			return "";
-		});
+	app.onBeforeHandle(({ request, set }) => {
+		// Allow requests from browser extensions
+		const origin = request.headers.get("Origin");
+		setCorsHeaders(origin, set);
+	});
 
 /**
  * Browser extension API endpoints
@@ -89,6 +74,13 @@ export const createExtensionApiPlugin = new Elysia({ prefix: "/api" })
 	// POST /api/applications/from-extension - Create application from browser extension
 	.group("/applications", (app) =>
 		app
+			// OPTIONS handler for CORS preflight (no auth required)
+			.options("/from-extension", ({ request, set }) => {
+				const origin = request.headers.get("Origin");
+				setCorsHeaders(origin, set);
+				set.status = 204;
+				return "";
+			})
 			.use(apiKeyAuth())
 			.post(
 				"/from-extension",
