@@ -1,0 +1,261 @@
+/* Table Component System */
+
+/* Table container with scroll */
+.table-container {
+	overflow-x: auto;
+	border-radius: 8px;
+	border: 1px solid var(--color-border-primary);
+}
+
+/* Base table styles */
+.table {
+	width: 100%;
+	border-collapse: collapse;
+	font-size: 0.9em;
+}
+
+/* Table header */
+.table th {
+	background-color: var(--color-bg-secondary);
+	color: var(--color-text-medium);
+	font-weight: 600;
+	padding: 12px 8px;
+	text-align: left;
+	border-bottom: 2px solid var(--color-border-primary);
+	position: sticky;
+	top: 0;
+}
+
+/* Sortable column headers */
+.table th.sortable {
+	cursor: pointer;
+	user-select: none;
+	transition: background-color 0.2s ease;
+}
+
+.table th.sortable:hover {
+	background-color: var(--color-btn-secondary-hover);
+}
+
+.sort-indicator {
+	font-size: 0.8em;
+	opacity: 0.6;
+	margin-left: 4px;
+}
+
+.sortable.sort-asc .sort-indicator::after {
+	content: "🔼";
+}
+
+.sortable.sort-desc .sort-indicator::after {
+	content: "🔽";
+}
+
+/* Table cells */
+.table td {
+	padding: 12px 8px;
+	border-bottom: 1px solid var(--color-border-primary);
+	vertical-align: top;
+}
+
+/* Table rows */
+.table-row:hover {
+	background-color: var(--color-bg-secondary);
+}
+
+.table-row.overdue {
+	background-color: var(--color-status-overdue-bg);
+}
+
+.table-row.overdue:hover {
+	background-color: var(--color-status-overdue-hover);
+}
+
+/* Common table cell types */
+.cell-company {
+	font-weight: 600;
+	color: var(--color-text-primary);
+	min-width: 120px;
+}
+
+.cell-position {
+	color: var(--color-text-medium);
+	min-width: 150px;
+}
+
+.cell-status {
+	min-width: 100px;
+}
+
+.cell-date {
+	color: var(--color-text-secondary);
+	font-size: 0.85em;
+	min-width: 90px;
+}
+
+.cell-interest {
+	color: var(--color-accent-gold);
+	font-size: 1.1em;
+	min-width: 80px;
+}
+
+.cell-actions {
+	min-width: 80px;
+}
+
+/* Editable cells */
+.cell-editable {
+	cursor: pointer;
+	position: relative;
+	transition: background-color 0.2s ease;
+}
+
+.cell-editable:hover {
+	background-color: var(--color-bg-secondary);
+}
+
+.cell-editable::after {
+	content: "✏️";
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	font-size: 0.7em;
+}
+
+.cell-editable:hover::after {
+	opacity: 0.5;
+}
+
+.cell-editing {
+	background-color: var(--color-bg-editing);
+	padding: 4px;
+}
+
+/* Edit controls in table cells */
+.edit-input,
+.edit-select {
+	width: 100%;
+	border: 1px solid var(--color-border-medium);
+	border-radius: 4px;
+	padding: 4px 8px;
+	font-size: inherit;
+	font-family: inherit;
+}
+
+.edit-input:focus,
+.edit-select:focus {
+	outline: none;
+	border-color: var(--color-accent-blue-focus);
+	box-shadow: var(--shadow-focus-blue);
+}
+
+.edit-buttons {
+	display: flex;
+	gap: 4px;
+	margin-top: 4px;
+}
+
+/* Table controls (filters, search, etc.) */
+.table-controls {
+	margin-bottom: 16px;
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-end;
+	flex-wrap: wrap;
+	gap: 16px;
+}
+
+.table-filters {
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.filter-input,
+.filter-select {
+	padding: 8px 12px;
+	border: 1px solid var(--color-border-tertiary);
+	border-radius: 4px;
+	font-size: 0.9em;
+	background: var(--color-bg-container);
+}
+
+.filter-input {
+	min-width: 200px;
+}
+
+.filter-select {
+	min-width: 120px;
+}
+
+.filter-input:focus,
+.filter-select:focus {
+	outline: none;
+	border-color: var(--color-accent-primary);
+	box-shadow: var(--shadow-focus);
+}
+
+/* Pagination */
+.pagination-info {
+	text-align: center;
+	color: var(--color-text-secondary);
+	margin: 16px 0 8px;
+	font-size: 0.9em;
+}
+
+.pagination-nav {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+.page-numbers {
+	color: var(--color-text-secondary);
+	font-weight: 600;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.table-controls {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.table-filters {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.filter-input,
+	.filter-select {
+		min-width: auto;
+	}
+
+	.table-container {
+		font-size: 0.8em;
+	}
+
+	.table th,
+	.table td {
+		padding: 8px 4px;
+	}
+
+	.pagination-nav {
+		flex-direction: column;
+		gap: 12px;
+	}
+}
+
+@media (max-width: 480px) {
+	/* Hide less important columns on very small screens */
+	.cell-date.updated,
+	.cell-interest {
+		display: none;
+	}
+}

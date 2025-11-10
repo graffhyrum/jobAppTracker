@@ -1,10 +1,10 @@
 /* Navigation bar styles */
 
 .navbar {
-	background-color: #343a40;
+	background-color: var(--color-bg-navbar);
 	padding: 0;
 	margin-bottom: 20px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--shadow-sm);
 }
 
 .navbar-container {
@@ -17,16 +17,22 @@
 	height: 60px;
 }
 
+/* Ensure brand text uses inverse color in both link and non-link cases */
+.navbar-brand,
+.navbar-brand p,
 .navbar-brand a {
-	color: #fff;
+	color: var(--color-text-inverse);
 	font-size: 1.5rem;
 	font-weight: bold;
+}
+
+.navbar-brand a {
 	text-decoration: none;
 	transition: color 0.3s ease;
 }
 
 .navbar-brand a:hover {
-	color: #007bff;
+	color: var(--color-accent-blue);
 }
 
 .navbar-nav {
@@ -42,7 +48,7 @@
 }
 
 .nav-link {
-	color: #fff;
+	color: var(--color-text-inverse);
 	text-decoration: none;
 	padding: 8px 16px;
 	border-radius: 4px;
@@ -52,19 +58,19 @@
 }
 
 .nav-link:hover {
-	background-color: #495057;
-	color: #007bff;
+	background-color: var(--overlay-medium);
+	color: var(--color-accent-blue);
 }
 
 .nav-link.active {
-	background-color: #007bff;
-	color: #fff;
+	background-color: var(--color-accent-blue);
+	color: var(--color-text-inverse);
 }
 
 /* Error notifications in navbar */
 .error-notifications {
 	position: relative;
-	color: #fff;
+	color: var(--color-text-inverse);
 	cursor: pointer;
 }
 
@@ -78,7 +84,7 @@
 }
 
 .error-summary:hover {
-	background-color: #495057;
+	background-color: var(--overlay-medium);
 }
 
 .error-summary::-webkit-details-marker {
@@ -86,7 +92,7 @@
 }
 
 #error-count {
-	color: #f44336;
+	color: var(--color-status-error);
 	font-weight: bold;
 }
 
@@ -97,10 +103,10 @@
 	margin: 8px 0 0 0;
 	padding: 0;
 	list-style: none;
-	background: white;
-	border: 2px solid #e0e0e0;
+	background: var(--color-bg-container);
+	border: 2px solid var(--color-border-primary);
 	border-radius: 4px;
-	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+	box-shadow: var(--shadow-xl);
 	min-width: 400px;
 	max-width: 600px;
 	max-height: 400px;
@@ -112,7 +118,7 @@
 	content: "No errors";
 	display: block;
 	padding: 16px;
-	color: #999;
+	color: var(--color-text-tertiary);
 	text-align: center;
 	font-style: italic;
 }
@@ -122,9 +128,9 @@
 	align-items: flex-start;
 	gap: 8px;
 	padding: 12px;
-	border-bottom: 1px solid #e0e0e0;
-	background: #fff;
-	color: #333;
+	border-bottom: 1px solid var(--color-border-primary);
+	background: var(--color-bg-container);
+	color: var(--color-text-primary);
 	transition: background-color 0.2s ease;
 }
 
@@ -133,19 +139,19 @@
 }
 
 .error-item:hover {
-	background-color: #f9f9f9;
+	background-color: var(--color-bg-hover);
 }
 
 .error-time {
 	flex-shrink: 0;
 	font-size: 0.85em;
-	color: #666;
+	color: var(--color-text-secondary);
 	font-family: monospace;
 }
 
 .error-message {
 	flex: 1;
-	color: #d32f2f;
+	color: var(--color-status-overdue);
 	font-weight: 500;
 	word-wrap: break-word;
 }
@@ -154,7 +160,7 @@
 	flex-shrink: 0;
 	background: none;
 	border: none;
-	color: #999;
+	color: var(--color-text-tertiary);
 	font-size: 1.5em;
 	line-height: 1;
 	cursor: pointer;
@@ -168,7 +174,7 @@
 }
 
 .error-close:hover {
-	color: #d32f2f;
+	color: var(--color-status-overdue);
 }
 
 /* Database selector styles (dev mode only) */
@@ -178,11 +184,11 @@
 	gap: 10px;
 	padding: 4px 12px;
 	border-radius: 4px;
-	background-color: rgba(255, 255, 255, 0.1);
+	background-color: var(--overlay-light);
 }
 
 .db-selector-label {
-	color: #fff;
+	color: var(--color-text-inverse);
 	font-size: 0.85rem;
 	font-weight: 500;
 	opacity: 0.8;
@@ -191,7 +197,7 @@
 .db-selector-buttons {
 	display: flex;
 	gap: 4px;
-	background-color: rgba(0, 0, 0, 0.2);
+	background-color: var(--overlay-dark);
 	border-radius: 4px;
 	padding: 2px;
 }
@@ -201,7 +207,7 @@
 	border: none;
 	border-radius: 3px;
 	background-color: transparent;
-	color: rgba(255, 255, 255, 0.7);
+	color: var(--overlay-navbar-btn);
 	font-size: 0.85rem;
 	font-weight: 500;
 	cursor: pointer;
@@ -211,17 +217,17 @@
 }
 
 .db-selector-button:hover {
-	background-color: rgba(255, 255, 255, 0.1);
-	color: #fff;
+	background-color: var(--overlay-light);
+	color: var(--color-text-inverse);
 }
 
 .db-selector-button.active {
-	background-color: #007bff;
-	color: #fff;
+	background-color: var(--color-accent-blue);
+	color: var(--color-text-inverse);
 }
 
 .db-selector-button.active:hover {
-	background-color: #0056b3;
+	background-color: var(--color-accent-blue-hover);
 }
 
 @media (max-width: 768px) {
@@ -252,4 +258,41 @@
 		font-size: 0.9rem;
 		padding: 6px 12px;
 	}
+}
+
+/* Theme toggle button */
+.theme-toggle {
+	background: none;
+	border: none;
+	color: var(--color-text-inverse);
+	cursor: pointer;
+	padding: 8px 12px;
+	border-radius: 4px;
+	font-size: 1.2rem;
+	transition:
+		background-color 0.3s ease,
+		transform 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	line-height: 1;
+}
+
+.theme-toggle:hover {
+	background-color: var(--overlay-medium);
+	transform: scale(1.1);
+}
+
+.theme-toggle:focus-visible {
+	outline: 2px solid var(--color-accent-blue);
+	outline-offset: 2px;
+}
+
+.theme-icon {
+	display: inline-block;
+	transition: transform 0.3s ease;
+}
+
+.theme-toggle:hover .theme-icon {
+	transform: rotate(15deg);
 }

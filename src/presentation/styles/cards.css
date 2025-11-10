@@ -1,0 +1,251 @@
+/* Card & Container Component System */
+
+/* Base container styles */
+.container {
+	background: var(--color-bg-container);
+	border-radius: 8px;
+	padding: 24px;
+	margin: 20px 0;
+	box-shadow: var(--shadow-sm);
+}
+
+/* Card variant with border */
+.card {
+	background-color: var(--color-bg-container);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 8px;
+	padding: 24px;
+	box-shadow: var(--shadow-md);
+}
+
+/* Card with stronger shadow */
+.card-elevated {
+	background-color: var(--color-bg-container);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 8px;
+	padding: 24px;
+	box-shadow: var(--shadow-lg);
+}
+
+/* Compact card */
+.card-compact {
+	background-color: var(--color-bg-container);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 8px;
+	padding: 20px;
+	box-shadow: var(--shadow-md);
+}
+
+/* Section container with tertiary background */
+.section {
+	padding: 24px;
+	background-color: var(--color-bg-tertiary);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 8px;
+	box-shadow: var(--shadow-md);
+}
+
+/* Metadata/info section */
+.metadata {
+	padding: 20px;
+	background-color: var(--color-bg-tertiary);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 8px;
+	box-shadow: var(--shadow-md);
+}
+
+/* Placeholder/empty state container */
+.placeholder {
+	padding: 24px;
+	background-color: var(--color-bg-tertiary);
+	border-radius: 8px;
+	border: 2px dashed var(--color-border-dark);
+}
+
+/* Form container with accent border */
+.form-container {
+	background-color: var(--color-bg-secondary);
+	border: 2px solid var(--color-accent-blue-light);
+	border-radius: 8px;
+	padding: 20px;
+	margin-bottom: 16px;
+}
+
+/* Card header patterns */
+.card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 16px;
+	padding-bottom: 12px;
+	border-bottom: 2px solid var(--color-border-primary);
+}
+
+.card-header-title {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--color-text-dark);
+}
+
+/* Section header */
+.section-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 16px;
+}
+
+.section-header h2 {
+	margin: 0;
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--color-text-dark);
+}
+
+/* Card list containers */
+.card-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+/* Empty state messaging */
+.empty-state {
+	text-align: center;
+	color: var(--color-text-tertiary);
+	font-style: italic;
+	padding: 40px;
+}
+
+.empty-state-inline {
+	color: var(--color-text-secondary);
+	font-style: italic;
+	margin: 16px 0;
+}
+
+/* Field groups within cards */
+.field-group {
+	margin-bottom: 20px;
+}
+
+.field-group label {
+	display: block;
+	font-weight: 700;
+	font-size: 12px;
+	color: var(--color-text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-bottom: 8px;
+}
+
+.field-value {
+	color: var(--color-text-dark);
+	font-size: 16px;
+	line-height: 1.5;
+	padding: 12px;
+	background-color: var(--color-bg-secondary);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 4px;
+}
+
+/* Field value variants */
+.field-value-link a {
+	color: var(--color-accent-blue-medium);
+	text-decoration: underline;
+	word-break: break-all;
+}
+
+.field-value-link a:hover {
+	color: var(--color-accent-blue-dark);
+	text-decoration: underline;
+}
+
+.field-value-link a:visited {
+	color: var(--color-accent-purple-dark);
+}
+
+.field-value-link a:focus-visible {
+	outline: 2px solid var(--color-accent-blue-light);
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+/* No data states */
+.no-data,
+.no-date {
+	color: var(--color-text-secondary);
+	font-style: italic;
+}
+
+.no-data::before,
+.no-date::before {
+	content: "— ";
+}
+
+/* Notes/description text field */
+.notes-field {
+	padding: 12px;
+	background-color: var(--color-bg-tertiary);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 4px;
+}
+
+.notes-field label {
+	font-weight: 700;
+	font-size: 12px;
+	color: var(--color-text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	display: block;
+	margin-bottom: 8px;
+}
+
+.notes-field p,
+.notes-field .notes-content {
+	margin: 0;
+	color: var(--color-text-primary);
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+/* Description text with scrolling */
+.description-text {
+	white-space: pre-wrap;
+	line-height: 1.6;
+	padding: 16px;
+	background-color: var(--color-bg-tertiary);
+	border: 1px solid var(--color-border-secondary);
+	border-radius: 4px;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+/* Grid layouts for cards */
+.grid-2col {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 32px;
+}
+
+.grid-form {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 16px;
+	margin-bottom: 16px;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+	.grid-2col,
+	.grid-form {
+		grid-template-columns: 1fr;
+		gap: 16px;
+	}
+
+	.container,
+	.card,
+	.card-elevated {
+		padding: 20px;
+	}
+}

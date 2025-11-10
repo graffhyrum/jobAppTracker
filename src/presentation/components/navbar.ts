@@ -51,6 +51,11 @@ export function navbar(options: NavbarOptions = {}): string {
 			<li class="nav-item">
 				<a href=${api.href} class="nav-link" data-testid=${api.testId}>${api.text}</a>
 			</li>
+			<li class="nav-item">
+				<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" data-testid="theme-toggle">
+					<span class="theme-icon">🌙</span>
+				</button>
+			</li>
 		</ul>
 		${isDev ? dbSelector : ""}
 	</div>

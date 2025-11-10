@@ -257,7 +257,7 @@ test.describe("Application inline editing", () => {
 		});
 
 		await test.step("Test 4: Enter key submits from input field", async () => {
-			await rowComponent.actions.pressUntilFocused("companyInput", "Tab");
+			await rowComponent.actions.pressUntilFocused("companyInput", "Shift+Tab");
 		});
 
 		const respProm = page.waitForResponse(

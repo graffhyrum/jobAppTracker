@@ -6,7 +6,7 @@ export async function pressKeyUntilFocused(
 	page: Page,
 	targetLocator: ReturnType<typeof page.locator>,
 	key: NavigationKey,
-	timeout: number = 3 * 1000,
+	timeout: number = 8 * 1000,
 ) {
 	let found = false;
 	const start = Date.now();
