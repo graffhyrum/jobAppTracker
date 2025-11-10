@@ -141,8 +141,8 @@ describe("Extension API Plugin", () => {
 			expect(response.status).toBe(400);
 		});
 
-		it("should default status to 'applied' when not provided", async () => {
-			const dataWithoutStatus = {
+		it("should create application with default 'applied' status", async () => {
+			const minimalData = {
 				company: "Test Company",
 				position: "Software Engineer",
 			};
@@ -154,13 +154,22 @@ describe("Extension API Plugin", () => {
 						"Content-Type": "application/json",
 						"X-API-Key": "test-api-key",
 					},
-					body: JSON.stringify(dataWithoutStatus),
+					body: JSON.stringify(minimalData),
 				}),
 			);
 
 			const data = await response.json();
 			expect(response.status).toBe(201);
 			expect(data.success).toBe(true);
+
+			// Verify the application was created with "applied" status
+			const getResult = await jobApplicationManager.getJobApplication(data.id);
+			if (getResult.isOk()) {
+				const statusLog = getResult.value.statusLog;
+				expect(statusLog.length).toBeGreaterThan(0);
+				const currentStatus = statusLog[statusLog.length - 1][1];
+				expect(currentStatus.label).toBe("applied");
+			}
 		});
 
 		it("should handle CORS preflight requests from chrome extensions", async () => {
@@ -202,7 +211,6 @@ describe("Extension API Plugin", () => {
 			const completeData = {
 				company: "Full Data Company",
 				position: "Senior Developer",
-				status: "screening interview",
 				applicationDate: new Date("2025-01-15").toISOString(),
 				interestRating: 2,
 				jobPostingUrl: "https://jobs.example.com/12345",
@@ -237,6 +245,12 @@ describe("Extension API Plugin", () => {
 				expect(app.positionTitle).toBe("Senior Developer");
 				expect(app.interestRating).toBe(2);
 				expect(app.jobPostingUrl).toBe("https://jobs.example.com/12345");
+				// Verify default status is "applied"
+				const statusLog = app.statusLog;
+				expect(statusLog.length).toBeGreaterThan(0);
+				const currentStatus = statusLog[statusLog.length - 1][1];
+				expect(currentStatus.label).toBe("applied");
+				expect(currentStatus.category).toBe("active");
 			}
 		});
 
@@ -305,27 +319,6 @@ describe("Extension API Plugin", () => {
 			expect(response.status).toBe(400);
 		});
 
-		it("should handle invalid status value", async () => {
-			const invalidData = {
-				company: "Test Company",
-				position: "Developer",
-				status: "not-a-real-status",
-			};
-
-			const response = await app.handle(
-				new Request("http://localhost/api/applications/from-extension", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-API-Key": "test-api-key",
-					},
-					body: JSON.stringify(invalidData),
-				}),
-			);
-
-			expect(response.status).toBe(400);
-		});
-
 		it("should handle malformed JSON body", async () => {
 			const response = await app.handle(
 				new Request("http://localhost/api/applications/from-extension", {
@@ -339,42 +332,6 @@ describe("Extension API Plugin", () => {
 			);
 
 			expect(response.status).toBeGreaterThanOrEqual(400);
-		});
-
-		it("should accept different valid status values", async () => {
-			const statuses = [
-				"applied",
-				"screening interview",
-				"interview",
-				"onsite",
-				"online test",
-				"take-home assignment",
-				"offer",
-				"rejected",
-			];
-
-			for (const status of statuses) {
-				const data = {
-					company: `Test Company ${status}`,
-					position: "Developer",
-					status,
-				};
-
-				const response = await app.handle(
-					new Request("http://localhost/api/applications/from-extension", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/json",
-							"X-API-Key": "test-api-key",
-						},
-						body: JSON.stringify(data),
-					}),
-				);
-
-				const result = await response.json();
-				expect(response.status).toBe(201);
-				expect(result.success).toBe(true);
-			}
 		});
 
 		it("should accept interest ratings 1, 2, and 3", async () => {
