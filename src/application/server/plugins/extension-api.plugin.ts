@@ -54,8 +54,22 @@ const extensionCors = () => (app: Elysia) =>
 				set.headers["Access-Control-Max-Age"] = "86400";
 			}
 		})
-		.options("/*", ({ set }) => {
-			// Handle preflight requests
+		.options("/*", ({ request, set }) => {
+			// Handle preflight requests - set CORS headers directly
+			const origin = request.headers.get("Origin");
+
+			if (
+				origin?.startsWith("chrome-extension://") ||
+				origin?.startsWith("moz-extension://")
+			) {
+				set.headers["Access-Control-Allow-Origin"] = origin;
+				set.headers["Access-Control-Allow-Methods"] =
+					"GET, POST, PUT, DELETE, OPTIONS";
+				set.headers["Access-Control-Allow-Headers"] =
+					"Content-Type, X-API-Key";
+				set.headers["Access-Control-Max-Age"] = "86400";
+			}
+
 			set.status = 204;
 			return "";
 		});
