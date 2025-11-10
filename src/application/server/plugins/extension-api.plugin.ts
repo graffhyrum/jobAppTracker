@@ -5,11 +5,11 @@ import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 
 /**
  * Schema for extension API request body
+ * Note: status is not included - applications are always created with "applied" status
  */
 const extensionCreateApplicationSchema = type({
 	company: type.string,
 	position: type.string,
-	"status?": type.string,
 	"applicationDate?": "Date | string",
 	"interestRating?": type.number,
 	"jobPostingUrl?": type.string,
@@ -83,11 +83,12 @@ export const createExtensionApiPlugin = new Elysia({ prefix: "/api" })
 						// Transform and validate the data
 						const applicationData = {
 							company: body.company,
-							position: body.position,
-							status: body.status || "applied",
+							positionTitle: body.position,
 							applicationDate: body.applicationDate
-								? new Date(body.applicationDate)
-								: new Date(),
+								? new Date(body.applicationDate).toISOString()
+								: new Date().toISOString(),
+							sourceType: "job_board" as const,
+							isRemote: false,
 							...(body.interestRating && {
 								interestRating: body.interestRating,
 							}),
@@ -99,7 +100,7 @@ export const createExtensionApiPlugin = new Elysia({ prefix: "/api" })
 
 						// Validate using domain schema
 						const validationResult =
-							jobApplicationModule.forCreation(applicationData);
+							jobApplicationModule.forCreate(applicationData);
 
 						if (validationResult instanceof type.errors) {
 							set.status = 400;

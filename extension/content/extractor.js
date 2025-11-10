@@ -164,11 +164,13 @@ function cleanText(text) {
   return text.replace(/\s+/g, ' ').trim();
 }
 
-// Listen for messages from popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'extractJobData') {
-    const data = extractJobData();
-    sendResponse({ success: true, data });
-  }
-  return true; // Keep message channel open for async response
-});
+// Listen for messages from popup (only in browser extension environment)
+if (typeof chrome !== 'undefined' && chrome.runtime && chrome.runtime.onMessage) {
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'extractJobData') {
+      const data = extractJobData();
+      sendResponse({ success: true, data });
+    }
+    return true; // Keep message channel open for async response
+  });
+}
