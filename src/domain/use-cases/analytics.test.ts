@@ -2,9 +2,13 @@ import { describe, expect, it } from "bun:test";
 import {
 	createJobApplication,
 	createJobApplicationId,
+	createJobApplicationWithInitialStatus,
 	type JobApplication,
 } from "../entities/job-application.ts";
-import { filterApplicationsByDateRange } from "./analytics.ts";
+import {
+	computeDefaultDateRange,
+	filterApplicationsByDateRange,
+} from "./analytics.ts";
 
 describe("Analytics Use Cases", () => {
 	const mockUuidGenerator = (seed: number) => () =>
@@ -139,6 +143,154 @@ describe("Analytics Use Cases", () => {
 			});
 
 			expect(result).toEqual([]);
+		});
+	});
+
+	describe("computeDefaultDateRange", () => {
+		const createMockApplicationWithStatus = (
+			applicationDate: string,
+			status: { category: "active" | "inactive"; label: string },
+			seed = 1000,
+		): JobApplication => {
+			return createJobApplicationWithInitialStatus(
+				{
+					company: "Test Company",
+					positionTitle: "Software Engineer",
+					applicationDate,
+					interestRating: 3,
+					sourceType: "job_board" as const,
+					isRemote: false,
+				},
+				status,
+				createJobApplicationId(mockUuidGenerator(seed)),
+			);
+		};
+
+		it("should return date range from oldest active application to today", () => {
+			const applications = [
+				createMockApplicationWithStatus(
+					"2024-01-15T10:00:00.000Z",
+					{ category: "active", label: "applied" },
+					1,
+				),
+				createMockApplicationWithStatus(
+					"2024-06-20T10:00:00.000Z",
+					{ category: "active", label: "interview" },
+					2,
+				),
+				createMockApplicationWithStatus(
+					"2024-08-10T10:00:00.000Z",
+					{ category: "active", label: "applied" },
+					3,
+				),
+			];
+
+			const result = computeDefaultDateRange(applications);
+
+			expect(result.startDate).toBe("2024-01-15");
+			// endDate should be today
+			const today = new Date().toISOString().split("T")[0];
+			expect(result.endDate).toBe(today);
+		});
+
+		it("should only consider active applications, ignoring inactive ones", () => {
+			const applications = [
+				createMockApplicationWithStatus(
+					"2023-11-15T10:00:00.000Z",
+					{ category: "inactive", label: "rejected" },
+					1,
+				),
+				createMockApplicationWithStatus(
+					"2024-03-20T10:00:00.000Z",
+					{ category: "active", label: "applied" },
+					2,
+				),
+				createMockApplicationWithStatus(
+					"2024-01-10T10:00:00.000Z",
+					{ category: "inactive", label: "no response" },
+					3,
+				),
+				createMockApplicationWithStatus(
+					"2024-07-05T10:00:00.000Z",
+					{ category: "active", label: "interview" },
+					4,
+				),
+			];
+
+			const result = computeDefaultDateRange(applications);
+
+			// Should use oldest active application (2024-03-20), not the inactive one from 2023
+			expect(result.startDate).toBe("2024-03-20");
+			const today = new Date().toISOString().split("T")[0];
+			expect(result.endDate).toBe(today);
+		});
+
+		it("should return empty range when no active applications exist", () => {
+			const applications = [
+				createMockApplicationWithStatus(
+					"2024-01-15T10:00:00.000Z",
+					{ category: "inactive", label: "rejected" },
+					1,
+				),
+				createMockApplicationWithStatus(
+					"2024-06-20T10:00:00.000Z",
+					{ category: "inactive", label: "no response" },
+					2,
+				),
+			];
+
+			const result = computeDefaultDateRange(applications);
+
+			expect(result).toEqual({});
+		});
+
+		it("should return empty range when applications array is empty", () => {
+			const result = computeDefaultDateRange([]);
+
+			expect(result).toEqual({});
+		});
+
+		it("should handle single active application", () => {
+			const applications = [
+				createMockApplicationWithStatus(
+					"2024-05-15T10:00:00.000Z",
+					{ category: "active", label: "applied" },
+					1,
+				),
+			];
+
+			const result = computeDefaultDateRange(applications);
+
+			expect(result.startDate).toBe("2024-05-15");
+			const today = new Date().toISOString().split("T")[0];
+			expect(result.endDate).toBe(today);
+		});
+
+		it("should find oldest among multiple active applications with same dates", () => {
+			const applications = [
+				createMockApplicationWithStatus(
+					"2024-06-15T10:00:00.000Z",
+					{ category: "active", label: "applied" },
+					1,
+				),
+				createMockApplicationWithStatus(
+					"2024-06-15T14:00:00.000Z",
+					{ category: "active", label: "interview" },
+					2,
+				),
+				createMockApplicationWithStatus(
+					"2024-06-15T08:00:00.000Z",
+					{ category: "active", label: "applied" },
+					3,
+				),
+			];
+
+			const result = computeDefaultDateRange(applications);
+
+			// All applications have same date (2024-06-15), so that should be the start date
+			expect(result.startDate).toBe("2024-06-15");
+			const today = new Date().toISOString().split("T")[0];
+			expect(result.endDate).toBe(today);
 		});
 	});
 });

@@ -111,6 +111,43 @@ export function filterApplicationsByDateRange(
 }
 
 /**
+ * Compute default date range from oldest active application to today
+ * Returns empty DateRange if no active applications exist
+ */
+export function computeDefaultDateRange(
+	applications: JobApplication[],
+): DateRange {
+	// Filter to only active applications
+	const activeApplications = applications.filter((app) => {
+		const statusResult = getCurrentStatus(app);
+		return statusResult.isOk() && statusResult.value.category === "active";
+	});
+
+	// If no active applications, return empty range
+	if (activeApplications.length === 0) {
+		return {};
+	}
+
+	// Find the oldest application date among active applications
+	let oldestDate: string | null = null;
+
+	for (const app of activeApplications) {
+		const appDate = String(app.applicationDate).split("T")[0] ?? "";
+		if (!oldestDate || appDate < oldestDate) {
+			oldestDate = appDate;
+		}
+	}
+
+	// Get today's date in YYYY-MM-DD format
+	const today = new Date().toISOString().split("T")[0] ?? "";
+
+	return {
+		startDate: oldestDate ?? undefined,
+		endDate: today,
+	};
+}
+
+/**
  * Analytics computation functions
  */
 

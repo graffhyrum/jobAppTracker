@@ -3,6 +3,7 @@ import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selec
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import {
 	computeAnalytics,
+	computeDefaultDateRange,
 	filterApplicationsByDateRange,
 } from "#src/domain/use-cases/analytics.ts";
 import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
@@ -14,10 +15,6 @@ import { analyticsPage } from "#src/presentation/pages/analytics.ts";
 export const createAnalyticsPlugin = new Elysia()
 	.use(jobApplicationManagerPlugin)
 	.get("/analytics", async ({ jobApplicationManager, set, cookie, query }) => {
-		// Extract date range from query parameters
-		const startDate = query.startDate as string | undefined;
-		const endDate = query.endDate as string | undefined;
-
 		// Fetch all applications
 		const applicationsResult =
 			await jobApplicationManager.getAllJobApplications();
@@ -31,10 +28,21 @@ export const createAnalyticsPlugin = new Elysia()
 			return `<div class="error-message">Failed to load analytics: ${applicationsResult.error}</div>`;
 		}
 
-		let applications = applicationsResult.value;
+		const allApplications = applicationsResult.value;
+
+		// Determine date range: use query params or compute default
+		let startDate = query.startDate as string | undefined;
+		let endDate = query.endDate as string | undefined;
+
+		// If no date range provided, compute default from oldest active application to today
+		if (!startDate && !endDate) {
+			const defaultRange = computeDefaultDateRange(allApplications);
+			startDate = defaultRange.startDate;
+			endDate = defaultRange.endDate;
+		}
 
 		// Apply date range filtering
-		applications = filterApplicationsByDateRange(applications, {
+		const applications = filterApplicationsByDateRange(allApplications, {
 			startDate,
 			endDate,
 		});
