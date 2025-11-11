@@ -1,5 +1,4 @@
 import type {
-	ApplicationStatus,
 	ApplicationStatusLabel,
 	JobApplication,
 	SourceType,
@@ -224,9 +223,7 @@ function computeSourceEffectiveness(
 	}));
 }
 
-function computeTimeInStatus(
-	applications: JobApplication[],
-): TimeInStatus[] {
+function computeTimeInStatus(applications: JobApplication[]): TimeInStatus[] {
 	// Map of status label to array of durations in days
 	const statusDurations = new Map<ApplicationStatusLabel, number[]>();
 
@@ -236,7 +233,9 @@ function computeTimeInStatus(
 		for (let i = 0; i < statusLog.length; i++) {
 			const [startTime, status] = statusLog[i];
 			const endTime =
-				i < statusLog.length - 1 ? statusLog[i + 1][0] : new Date().toISOString();
+				i < statusLog.length - 1
+					? statusLog[i + 1][0]
+					: new Date().toISOString();
 
 			const durationMs =
 				new Date(endTime).getTime() - new Date(startTime).getTime();

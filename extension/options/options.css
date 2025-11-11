@@ -69,7 +69,7 @@ input[type="url"] {
 input[type="text"]:focus,
 input[type="url"]:focus {
 	outline: none;
-	border-color: #2275D3;
+	border-color: #2275d3;
 	box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
@@ -141,7 +141,7 @@ input[type="url"]:focus {
 }
 
 .btn-primary {
-	background-color: #2275D3;
+	background-color: #2275d3;
 	color: white;
 }
 
@@ -151,8 +151,8 @@ input[type="url"]:focus {
 
 .btn-secondary {
 	background-color: white;
-	color: #2275D3;
-	border: 1px solid #2275D3;
+	color: #2275d3;
+	border: 1px solid #2275d3;
 }
 
 .btn-secondary:hover:not(:disabled) {

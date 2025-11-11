@@ -5,7 +5,15 @@ export const analyticsPage = (
 	analytics: ApplicationsAnalytics,
 	layoutOptions: LayoutOptions = {},
 ): string => {
-	const { summary, statusDistribution, applicationsByDate, sourceEffectiveness, timeInStatus, interestRatingStats, responseRate } = analytics;
+	const {
+		summary,
+		statusDistribution,
+		applicationsByDate,
+		sourceEffectiveness,
+		timeInStatus,
+		interestRatingStats,
+		responseRate,
+	} = analytics;
 
 	const content = `
 		<div class="analytics-page">

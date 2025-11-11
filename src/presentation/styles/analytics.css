@@ -19,7 +19,9 @@
 	border-radius: var(--border-radius-md);
 	padding: var(--spacing-lg);
 	text-align: center;
-	transition: transform 0.2s, box-shadow 0.2s;
+	transition:
+		transform 0.2s,
+		box-shadow 0.2s;
 }
 
 .summary-card:hover {

@@ -86,7 +86,7 @@ input[type="url"]:focus,
 select:focus,
 textarea:focus {
 	outline: none;
-	border-color: #2275D3;
+	border-color: #2275d3;
 	box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.1);
 }
 
@@ -128,7 +128,7 @@ textarea {
 }
 
 .btn-primary {
-	background-color: #2275D3;
+	background-color: #2275d3;
 	color: white;
 }
 
@@ -138,8 +138,8 @@ textarea {
 
 .btn-secondary {
 	background-color: white;
-	color: #2275D3;
-	border: 1px solid #2275D3;
+	color: #2275d3;
+	border: 1px solid #2275d3;
 }
 
 .btn-secondary:hover:not(:disabled) {
@@ -154,7 +154,7 @@ footer {
 }
 
 .settings-link {
-	color: #2275D3;
+	color: #2275d3;
 	text-decoration: none;
 	font-size: 12px;
 }

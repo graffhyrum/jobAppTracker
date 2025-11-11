@@ -1,7 +1,7 @@
 // Analytics Charts using Chart.js
 // This script expects analyticsData to be available globally
 
-(function () {
+(() => {
 	if (typeof Chart === "undefined") {
 		console.error("Chart.js is not loaded");
 		return;
@@ -68,7 +68,7 @@
 				},
 				tooltip: {
 					callbacks: {
-						label: function (context) {
+						label: (context) => {
 							const label = context.label || "";
 							const value = context.parsed || 0;
 							const total = context.dataset.data.reduce((a, b) => a + b, 0);
@@ -148,16 +148,14 @@
 					beginAtZero: true,
 					max: 100,
 					ticks: {
-						callback: function (value) {
-							return value + "%";
-						},
+						callback: (value) => `${value}%`,
 					},
 				},
 			},
 			plugins: {
 				tooltip: {
 					callbacks: {
-						label: function (context) {
+						label: (context) => {
 							const index = context.dataIndex;
 							const successRate = sourceSuccessRates[index].toFixed(1);
 							const total = sourceTotals[index];
@@ -203,9 +201,8 @@
 			plugins: {
 				tooltip: {
 					callbacks: {
-						label: function (context) {
-							return `${context.dataset.label}: ${context.parsed.x.toFixed(1)} days`;
-						},
+						label: (context) =>
+							`${context.dataset.label}: ${context.parsed.x.toFixed(1)} days`,
 					},
 				},
 			},
@@ -213,7 +210,9 @@
 	});
 
 	// 5. Interest Rating Success Rate Chart
-	const ratings = analyticsData.interestRatingStats.map((r) => `Rating ${r.rating}`);
+	const ratings = analyticsData.interestRatingStats.map(
+		(r) => `Rating ${r.rating}`,
+	);
 	const ratingSuccessRates = analyticsData.interestRatingStats.map(
 		(r) => r.successRate * 100,
 	);
@@ -241,16 +240,14 @@
 					beginAtZero: true,
 					max: 100,
 					ticks: {
-						callback: function (value) {
-							return value + "%";
-						},
+						callback: (value) => `${value}%`,
 					},
 				},
 			},
 			plugins: {
 				tooltip: {
 					callbacks: {
-						label: function (context) {
+						label: (context) => {
 							const index = context.dataIndex;
 							const successRate = ratingSuccessRates[index].toFixed(1);
 							const total = ratingTotals[index];
@@ -291,7 +288,7 @@
 				},
 				tooltip: {
 					callbacks: {
-						label: function (context) {
+						label: (context) => {
 							const label = context.label || "";
 							const value = context.parsed || 0;
 							const total = context.dataset.data.reduce((a, b) => a + b, 0);
