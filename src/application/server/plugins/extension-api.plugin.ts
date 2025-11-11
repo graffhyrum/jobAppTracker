@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import { Elysia } from "elysia";
+import type { HTTPHeaders } from "elysia/types";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 
@@ -36,7 +37,10 @@ const apiKeyAuth = () => (app: Elysia) =>
 /**
  * Helper to set CORS headers for browser extensions
  */
-const setCorsHeaders = (origin: string | null, set: any) => {
+const setCorsHeaders = (
+	origin: string | null,
+	set: { headers: HTTPHeaders },
+) => {
 	if (
 		origin?.startsWith("chrome-extension://") ||
 		origin?.startsWith("moz-extension://")
@@ -118,7 +122,9 @@ export const createExtensionApiPlugin = new Elysia({ prefix: "/api" })
 
 						// Create the application
 						const result =
-							await jobApplicationManager.createJobApplication(validationResult);
+							await jobApplicationManager.createJobApplication(
+								validationResult,
+							);
 
 						if (result.isErr()) {
 							set.status = 500;

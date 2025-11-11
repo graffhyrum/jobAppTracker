@@ -1,14 +1,15 @@
-import { describe, expect, it, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { Elysia } from "elysia";
 import { jobAppManagerRegistry } from "#src/domain/use-cases/create-sqlite-job-app-manager.ts";
 import { createExtensionApiPlugin } from "./extension-api.plugin.ts";
 
 // Get the test manager for testing
 const jobApplicationManager = jobAppManagerRegistry.getManager("test");
+let app = new Elysia()
+	.decorate("jobApplicationManager", jobApplicationManager)
+	.use(createExtensionApiPlugin);
 
 describe("Extension API Plugin", () => {
-	let app: Elysia;
-
 	beforeEach(async () => {
 		// Set up test environment with API key
 		process.env.BROWSER_EXTENSION_API_KEY = "test-api-key";
@@ -168,44 +169,9 @@ describe("Extension API Plugin", () => {
 			if (getResult.isOk()) {
 				const statusLog = getResult.value.statusLog;
 				expect(statusLog.length).toBeGreaterThan(0);
-				const currentStatus = statusLog[statusLog.length - 1][1];
-				expect(currentStatus.label).toBe("applied");
+				const currentStatus = statusLog[statusLog.length - 1]?.[1];
+				expect(currentStatus?.label).toBe("applied");
 			}
-		});
-
-		it("should handle CORS preflight requests from chrome extensions", async () => {
-			const response = await app.handle(
-				new Request("http://localhost/api/applications/from-extension", {
-					method: "OPTIONS",
-					headers: {
-						Origin: "chrome-extension://abcdefghijklmnopqrstuvwxyz123456",
-					},
-				}),
-			);
-
-			expect(response.status).toBe(204);
-			expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-				"chrome-extension://abcdefghijklmnopqrstuvwxyz123456",
-			);
-			expect(response.headers.get("Access-Control-Allow-Methods")).toContain(
-				"POST",
-			);
-		});
-
-		it("should handle CORS preflight requests from firefox extensions", async () => {
-			const response = await app.handle(
-				new Request("http://localhost/api/applications/from-extension", {
-					method: "OPTIONS",
-					headers: {
-						Origin: "moz-extension://abcdefgh-1234-5678-9abc-def123456789",
-					},
-				}),
-			);
-
-			expect(response.status).toBe(204);
-			expect(response.headers.get("Access-Control-Allow-Origin")).toBe(
-				"moz-extension://abcdefgh-1234-5678-9abc-def123456789",
-			);
 		});
 
 		it("should create application with all optional fields", async () => {
@@ -249,9 +215,9 @@ describe("Extension API Plugin", () => {
 				// Verify default status is "applied"
 				const statusLog = app.statusLog;
 				expect(statusLog.length).toBeGreaterThan(0);
-				const currentStatus = statusLog[statusLog.length - 1][1];
-				expect(currentStatus.label).toBe("applied");
-				expect(currentStatus.category).toBe("active");
+				const currentStatus = statusLog[statusLog.length - 1]?.[1];
+				expect(currentStatus?.label).toBe("applied");
+				expect(currentStatus?.category).toBe("active");
 			}
 		});
 

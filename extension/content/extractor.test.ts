@@ -1,20 +1,105 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { getAndAssertJobData, type JobData } from "./extractorSchema.ts";
 
-// Register happy-dom globals
-GlobalRegistrator.register();
+// Register happy-dom globals once
+try {
+	GlobalRegistrator.register();
+} catch {
+	// Already registered, ignore
+}
+
+type AssertionMatcher = "toBe" | "toContain";
+
+type TestConfig = {
+	name: string;
+	bodyHtml: string | null;
+	headHtml: string | null;
+	url: string | null;
+	documentTitle: string | null;
+	expectedCompany: string | null;
+	expectedPosition: string | null;
+	expectedDescriptionContains: string | null;
+	expectedUrl: string | null;
+	expectNull: boolean;
+	positionMatcher: AssertionMatcher;
+	companyMatcher: AssertionMatcher;
+	additionalAssertions: ((result: JobData) => void) | null;
+};
+
+const runExtractorTests = (
+	extractorFn: () => JobData | null,
+	tests: TestConfig[],
+	validateSchema: boolean = false,
+) => {
+	for (const test of tests) {
+		it(test.name, () => {
+			if (test.bodyHtml) document.body.innerHTML = test.bodyHtml;
+			if (test.headHtml) document.head.innerHTML = test.headHtml;
+			if (test.url) {
+				Object.defineProperty(window, "location", {
+					value: { href: test.url },
+					writable: true,
+				});
+			}
+			if (test.documentTitle) document.title = test.documentTitle;
+
+			const extractResult = extractorFn();
+
+			if (test.expectNull) {
+				expect(extractResult).toBeNull();
+				return;
+			}
+
+			expect(extractResult).toBeDefined();
+
+			// Only validate schema for extractJobData tests (which return complete JobData)
+			// Individual extractors don't include jobPostingUrl field
+			const result = validateSchema
+				? getAndAssertJobData(extractResult)
+				: (extractResult as any);
+
+			if (test.expectedCompany) {
+				if (test.companyMatcher === "toBe") {
+					expect(result.company).toBe(test.expectedCompany);
+				} else {
+					expect(result.company).toContain(test.expectedCompany);
+				}
+			}
+			if (test.expectedPosition) {
+				if (test.positionMatcher === "toBe") {
+					expect(result.position).toBe(test.expectedPosition);
+				} else {
+					expect(result.position).toContain(test.expectedPosition);
+				}
+			}
+			if (test.expectedDescriptionContains) {
+				expect(result.jobDescription).toContain(
+					test.expectedDescriptionContains,
+				);
+			}
+			if (test.expectedUrl) {
+				expect(result.jobPostingUrl).toBe(test.expectedUrl);
+			}
+			if (test.additionalAssertions) {
+				test.additionalAssertions(result);
+			}
+		});
+	}
+};
 
 describe("Content Script Extractor", () => {
-	let extractJobData: () => any;
-	let extractLinkedInJob: () => any;
-	let extractIndeedJob: () => any;
-	let extractGreenhouseJob: () => any;
-	let extractLeverJob: () => any;
-	let extractGeneric: () => any;
+	let extractJobData: () => JobData | null;
+	let extractLinkedInJob: () => JobData | null;
+	let extractIndeedJob: () => JobData | null;
+	let extractGreenhouseJob: () => JobData | null;
+	let extractLeverJob: () => JobData | null;
+	let extractGeneric: () => JobData | null;
 
 	beforeEach(async () => {
 		// Clear the document
 		document.body.innerHTML = "";
+		document.head.innerHTML = "";
 
 		// Load the extractor script by evaluating it
 		// Since it's not a module, we need to evaluate it in the global scope
@@ -38,7 +123,9 @@ describe("Content Script Extractor", () => {
     `;
 
 		// biome-ignore lint: eval needed for dynamic code loading in tests
-		const functions = eval(`(function() { ${wrappedCode} })()`);
+		const functions = eval(`(function () {
+            ${wrappedCode}
+        })()`);
 
 		extractJobData = functions.extractJobData;
 		extractLinkedInJob = functions.extractLinkedInJob;
@@ -49,324 +136,425 @@ describe("Content Script Extractor", () => {
 	});
 
 	describe("LinkedIn Job Extraction", () => {
-		it("should extract job data from LinkedIn unified card format", () => {
-			document.body.innerHTML = `
-        <div class="job-details-jobs-unified-top-card__company-name">Acme Corp</div>
-        <div class="job-details-jobs-unified-top-card__job-title">Senior Software Engineer</div>
-        <div class="jobs-description__content">
-          We are looking for an experienced software engineer to join our team.
-          Must have 5+ years of experience with TypeScript and React.
-        </div>
-      `;
+		const linkedInTests: TestConfig[] = [
+			{
+				name: "should extract job data from LinkedIn unified card format",
+				bodyHtml: `
+					<div class="job-details-jobs-unified-top-card__company-name">Acme Corp</div>
+					<div class="job-details-jobs-unified-top-card__job-title">Senior Software Engineer</div>
+					<div class="jobs-description__content">
+						We are looking for an experienced software engineer to join our team.
+						Must have 5+ years of experience with TypeScript and React.
+					</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: "Acme Corp",
+				expectedPosition: "Senior Software Engineer",
+				expectedDescriptionContains: "experienced software engineer",
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should extract job data from LinkedIn topcard format",
+				bodyHtml: `
+					<a class="topcard__org-name-link">Tech Startup Inc</a>
+					<h1 class="topcard__title">Full Stack Developer</h1>
+					<div class="description__text">
+						Join our fast-growing startup as a full stack developer.
+					</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: "Tech Startup Inc",
+				expectedPosition: "Full Stack Developer",
+				expectedDescriptionContains: "fast-growing startup",
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should return null if required fields are missing",
+				bodyHtml: `
+					<div class="job-details-jobs-unified-top-card__company-name">Acme Corp</div>
+					<!-- Missing job title -->
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: true,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+		];
 
-			const result = extractLinkedInJob();
-
-			expect(result).toBeDefined();
-			expect(result?.company).toBe("Acme Corp");
-			expect(result?.position).toBe("Senior Software Engineer");
-			expect(result?.jobDescription).toContain("experienced software engineer");
-		});
-
-		it("should extract job data from LinkedIn topcard format", () => {
-			document.body.innerHTML = `
-        <a class="topcard__org-name-link">Tech Startup Inc</a>
-        <h1 class="topcard__title">Full Stack Developer</h1>
-        <div class="description__text">
-          Join our fast-growing startup as a full stack developer.
-        </div>
-      `;
-
-			const result = extractLinkedInJob();
-
-			expect(result).toBeDefined();
-			expect(result?.company).toBe("Tech Startup Inc");
-			expect(result?.position).toBe("Full Stack Developer");
-			expect(result?.jobDescription).toContain("fast-growing startup");
-		});
-
-		it("should return null if required fields are missing", () => {
-			document.body.innerHTML = `
-        <div class="job-details-jobs-unified-top-card__company-name">Acme Corp</div>
-        <!-- Missing job title -->
-      `;
-
-			const result = extractLinkedInJob();
-
-			expect(result).toBeNull();
-		});
+		runExtractorTests(() => extractLinkedInJob(), linkedInTests);
 	});
 
 	describe("Indeed Job Extraction", () => {
-		it("should extract job data from Indeed using data attribute", () => {
-			document.body.innerHTML = `
-        <div data-company-name="true">Global Tech Solutions</div>
-        <h1 class="jobsearch-JobInfoHeader-title">Backend Engineer</h1>
-        <div id="jobDescriptionText">
-          We need a backend engineer with experience in Node.js and databases.
-          Competitive salary and benefits package offered.
-        </div>
-      `;
+		const indeedTests: TestConfig[] = [
+			{
+				name: "should extract job data from Indeed using data attribute",
+				bodyHtml: `
+					<div data-company-name="true">Global Tech Solutions</div>
+					<h1 class="jobsearch-JobInfoHeader-title">Backend Engineer</h1>
+					<div id="jobDescriptionText">
+						We need a backend engineer with experience in Node.js and databases.
+						Competitive salary and benefits package offered.
+					</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: "Global Tech Solutions",
+				expectedPosition: "Backend Engineer",
+				expectedDescriptionContains: "Node.js and databases",
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should extract job data from Indeed using company info container",
+				bodyHtml: `
+					<div class="jobsearch-CompanyInfoContainer">Remote First Company</div>
+					<h1 class="jobsearch-JobInfoHeader-title">DevOps Engineer</h1>
+					<div id="jobDescriptionText">Remote DevOps position available.</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: "Remote First Company",
+				expectedPosition: "DevOps Engineer",
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should return null if required fields are missing",
+				bodyHtml: `
+					<div data-company-name="true">Some Company</div>
+					<!-- Missing job title -->
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: true,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+		];
 
-			const result = extractIndeedJob();
-
-			expect(result).toBeDefined();
-			expect(result?.company).toBe("Global Tech Solutions");
-			expect(result?.position).toBe("Backend Engineer");
-			expect(result?.jobDescription).toContain("Node.js and databases");
-		});
-
-		it("should extract job data from Indeed using company info container", () => {
-			document.body.innerHTML = `
-        <div class="jobsearch-CompanyInfoContainer">Remote First Company</div>
-        <h1 class="jobsearch-JobInfoHeader-title">DevOps Engineer</h1>
-        <div id="jobDescriptionText">Remote DevOps position available.</div>
-      `;
-
-			const result = extractIndeedJob();
-
-			expect(result).toBeDefined();
-			expect(result?.company).toBe("Remote First Company");
-			expect(result?.position).toBe("DevOps Engineer");
-		});
-
-		it("should return null if required fields are missing", () => {
-			document.body.innerHTML = `
-        <div data-company-name="true">Some Company</div>
-        <!-- Missing job title -->
-      `;
-
-			const result = extractIndeedJob();
-
-			expect(result).toBeNull();
-		});
+		runExtractorTests(() => extractIndeedJob(), indeedTests);
 	});
 
 	describe("Greenhouse Job Extraction", () => {
-		it("should extract job data from Greenhouse application page", () => {
-			document.body.innerHTML = `
-        <div class="company-name">Innovative Startup</div>
-        <div class="app-title">Product Manager</div>
-        <div id="content">
-          <p>We're looking for a product manager to lead our product team.</p>
-          <p>Requirements: 3+ years PM experience, strong communication skills.</p>
-        </div>
-      `;
+		const greenhouseTests: TestConfig[] = [
+			{
+				name: "should extract job data from Greenhouse application page",
+				bodyHtml: `
+					<div class="company-name">Innovative Startup</div>
+					<div class="app-title">Product Manager</div>
+					<div id="content">
+						<p>We're looking for a product manager to lead our product team.</p>
+						<p>Requirements: 3+ years PM experience, strong communication skills.</p>
+					</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: "Innovative Startup",
+				expectedPosition: "Product Manager",
+				expectedDescriptionContains: "product manager",
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should use h1 as fallback for position title",
+				bodyHtml: `
+					<div class="company-name">Design Co</div>
+					<h1>UX Designer</h1>
+					<div class="job-post">Looking for creative UX designer.</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: "Design Co",
+				expectedPosition: "UX Designer",
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should return null if company or position is missing",
+				bodyHtml: `
+					<h1>Some Position</h1>
+					<!-- Missing company name -->
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: true,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+		];
 
-			const result = extractGreenhouseJob();
-
-			expect(result).toBeDefined();
-			expect(result?.company).toBe("Innovative Startup");
-			expect(result?.position).toBe("Product Manager");
-			expect(result?.jobDescription).toContain("product manager");
-		});
-
-		it("should use h1 as fallback for position title", () => {
-			document.body.innerHTML = `
-        <div class="company-name">Design Co</div>
-        <h1>UX Designer</h1>
-        <div class="job-post">Looking for creative UX designer.</div>
-      `;
-
-			const result = extractGreenhouseJob();
-
-			expect(result).toBeDefined();
-			expect(result?.company).toBe("Design Co");
-			expect(result?.position).toBe("UX Designer");
-		});
-
-		it("should return null if company or position is missing", () => {
-			document.body.innerHTML = `
-        <h1>Some Position</h1>
-        <!-- Missing company name -->
-      `;
-
-			const result = extractGreenhouseJob();
-
-			expect(result).toBeNull();
-		});
+		runExtractorTests(() => extractGreenhouseJob(), greenhouseTests);
 	});
 
 	describe("Lever Job Extraction", () => {
-		it("should extract job data from Lever posting", () => {
-			document.body.innerHTML = `
-        <div class="main-header-text-logo">Enterprise Solutions Ltd</div>
-        <div class="posting-headline">
-          <h2>Senior Data Scientist</h2>
-        </div>
-        <div class="posting-description">
-          <p>We're seeking a data scientist with ML expertise.</p>
-          <p>Location: San Francisco or Remote</p>
-        </div>
-      `;
+		const leverTests: TestConfig[] = [
+			{
+				name: "should extract job data from Lever posting",
+				bodyHtml: `
+					<div class="main-header-text-logo">Enterprise Solutions Ltd</div>
+					<div class="posting-headline">
+						<h2>Senior Data Scientist</h2>
+					</div>
+					<div class="posting-description">
+						<p>We're seeking a data scientist with ML expertise.</p>
+						<p>Location: San Francisco or Remote</p>
+					</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: "Enterprise Solutions Ltd",
+				expectedPosition: "Senior Data Scientist",
+				expectedDescriptionContains: "ML expertise",
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should use section-wrapper as fallback for description",
+				bodyHtml: `
+					<div class="main-header-text-logo">AI Company</div>
+					<div class="posting-headline">
+						<h2>ML Engineer</h2>
+					</div>
+					<div class="section-wrapper">Machine learning position available.</div>
+				`,
+				headHtml: null,
+				url: null,
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: null,
+				expectedDescriptionContains: "Machine learning position",
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+		];
 
-			const result = extractLeverJob();
-
-			expect(result).toBeDefined();
-			expect(result?.company).toBe("Enterprise Solutions Ltd");
-			expect(result?.position).toBe("Senior Data Scientist");
-			expect(result?.jobDescription).toContain("ML expertise");
-		});
-
-		it("should use section-wrapper as fallback for description", () => {
-			document.body.innerHTML = `
-        <div class="main-header-text-logo">AI Company</div>
-        <div class="posting-headline">
-          <h2>ML Engineer</h2>
-        </div>
-        <div class="section-wrapper">Machine learning position available.</div>
-      `;
-
-			const result = extractLeverJob();
-
-			expect(result).toBeDefined();
-			expect(result?.jobDescription).toContain("Machine learning position");
-		});
+		runExtractorTests(() => extractLeverJob(), leverTests);
 	});
 
 	describe("Generic Extraction", () => {
-		beforeEach(() => {
-			// Mock window.location for generic extractor
-			Object.defineProperty(window, "location", {
-				value: {
-					href: "https://example.com/jobs/12345",
+		const genericTests: TestConfig[] = [
+			{
+				name: "should extract data from h1 and meta tags",
+				bodyHtml: `
+					<h1>Software Engineer</h1>
+					<div class="company-info">Example Corp</div>
+					<article>
+						<p>We are hiring software engineers with JavaScript experience.</p>
+					</article>
+				`,
+				headHtml: `
+					<meta property="og:title" content="Software Engineer at Example Corp">
+					<meta property="og:description" content="Join our engineering team">
+				`,
+				url: "https://example.com/jobs/12345",
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: "Software Engineer",
+				expectedDescriptionContains: null,
+				expectedUrl: "https://example.com/jobs/12345",
+				expectNull: false,
+				positionMatcher: "toContain",
+				companyMatcher: "toBe",
+				additionalAssertions: (result) => {
+					expect(result.company).toBeDefined();
 				},
-				writable: true,
-			});
-		});
+			},
+			{
+				name: "should extract company from page title with 'at' pattern",
+				bodyHtml: `
+					<h1>Product Designer</h1>
+				`,
+				headHtml: null,
+				url: "https://example.com/jobs/12345",
+				documentTitle: "Product Designer at Design Studio",
+				expectedCompany: "Design Studio",
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toContain",
+				additionalAssertions: null,
+			},
+			{
+				name: "should extract description from article tag",
+				bodyHtml: `
+					<h1>Data Analyst</h1>
+					<article>
+						<p>We need a data analyst proficient in SQL and Python.</p>
+						<p>Experience with data visualization required.</p>
+					</article>
+				`,
+				headHtml: null,
+				url: "https://example.com/jobs/12345",
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: null,
+				expectedDescriptionContains: "SQL and Python",
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should handle pages with minimal information gracefully",
+				bodyHtml: `<h1>Job Title</h1>`,
+				headHtml: null,
+				url: "https://example.com/jobs/12345",
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: "Job Title",
+				expectedDescriptionContains: null,
+				expectedUrl: "https://example.com/jobs/12345",
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: (result) => {
+					expect(result.company).toBeDefined();
+				},
+			},
+		];
 
-		it("should extract data from h1 and meta tags", () => {
-			document.head.innerHTML = `
-        <meta property="og:title" content="Software Engineer at Example Corp">
-        <meta property="og:description" content="Join our engineering team">
-      `;
-			document.body.innerHTML = `
-        <h1>Software Engineer</h1>
-        <div class="company-info">Example Corp</div>
-        <article>
-          <p>We are hiring software engineers with JavaScript experience.</p>
-        </article>
-      `;
-
-			const result = extractGeneric();
-
-			expect(result).toBeDefined();
-			expect(result.jobPostingUrl).toBe("https://example.com/jobs/12345");
-			expect(result.position).toContain("Software Engineer");
-			expect(result.company).toBeDefined();
-		});
-
-		it("should extract company from page title with 'at' pattern", () => {
-			document.title = "Product Designer at Design Studio";
-			document.body.innerHTML = `
-        <h1>Product Designer</h1>
-      `;
-
-			const result = extractGeneric();
-
-			expect(result).toBeDefined();
-			expect(result.company).toContain("Design Studio");
-		});
-
-		it("should extract description from article tag", () => {
-			document.body.innerHTML = `
-        <h1>Data Analyst</h1>
-        <article>
-          <p>We need a data analyst proficient in SQL and Python.</p>
-          <p>Experience with data visualization required.</p>
-        </article>
-      `;
-
-			const result = extractGeneric();
-
-			expect(result).toBeDefined();
-			expect(result.jobDescription).toContain("SQL and Python");
-		});
-
-		it("should handle pages with minimal information gracefully", () => {
-			document.body.innerHTML = `<h1>Job Title</h1>`;
-
-			const result = extractGeneric();
-
-			expect(result).toBeDefined();
-			expect(result.position).toBe("Job Title");
-			expect(result.company).toBeDefined(); // May be empty string but should exist
-			expect(result.jobPostingUrl).toBe("https://example.com/jobs/12345");
-		});
+		runExtractorTests(() => extractGeneric(), genericTests);
 	});
 
 	describe("extractJobData - Main Function", () => {
-		beforeEach(() => {
-			// Mock window.location
-			Object.defineProperty(window, "location", {
-				value: {
-					href: "https://www.linkedin.com/jobs/view/12345",
+		const extractJobDataTests: TestConfig[] = [
+			{
+				name: "should use LinkedIn extractor for linkedin.com URLs",
+				bodyHtml: `
+					<div class="job-details-jobs-unified-top-card__company-name">LinkedIn Test Co</div>
+					<div class="job-details-jobs-unified-top-card__job-title">Test Position</div>
+				`,
+				headHtml: null,
+				url: "https://www.linkedin.com/jobs/view/12345",
+				documentTitle: null,
+				expectedCompany: "LinkedIn Test Co",
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: (result) => {
+					expect(result.jobPostingUrl).toContain("linkedin.com");
 				},
-				writable: true,
-			});
-		});
-
-		it("should use LinkedIn extractor for linkedin.com URLs", () => {
-			document.body.innerHTML = `
-        <div class="job-details-jobs-unified-top-card__company-name">LinkedIn Test Co</div>
-        <div class="job-details-jobs-unified-top-card__job-title">Test Position</div>
-      `;
-
-			const result = extractJobData();
-
-			expect(result).toBeDefined();
-			expect(result.company).toBe("LinkedIn Test Co");
-			expect(result.jobPostingUrl).toContain("linkedin.com");
-		});
-
-		it("should use Indeed extractor for indeed.com URLs", () => {
-			Object.defineProperty(window, "location", {
-				value: {
-					href: "https://www.indeed.com/viewjob?jk=12345",
+			},
+			{
+				name: "should use Indeed extractor for indeed.com URLs",
+				bodyHtml: `
+					<div data-company-name="true">Indeed Test Co</div>
+					<h1 class="jobsearch-JobInfoHeader-title">Test Position</h1>
+				`,
+				headHtml: null,
+				url: "https://www.indeed.com/viewjob?jk=12345",
+				documentTitle: null,
+				expectedCompany: "Indeed Test Co",
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+			{
+				name: "should fall back to generic extractor for unknown sites",
+				bodyHtml: `
+					<h1>Unknown Site Position</h1>
+					<div class="company">Some Company</div>
+				`,
+				headHtml: null,
+				url: "https://careers.somecompany.com/job/12345",
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: null,
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: (result) => {
+					expect(result.jobPostingUrl).toContain("somecompany.com");
 				},
-				writable: true,
-			});
+			},
+			{
+				name: "should include URL in returned data",
+				bodyHtml: `
+					<div class="job-details-jobs-unified-top-card__company-name">Test Co</div>
+					<div class="job-details-jobs-unified-top-card__job-title">Test Role</div>
+				`,
+				headHtml: null,
+				url: "https://www.linkedin.com/jobs/view/12345",
+				documentTitle: null,
+				expectedCompany: null,
+				expectedPosition: null,
+				expectedDescriptionContains: null,
+				expectedUrl: "https://www.linkedin.com/jobs/view/12345",
+				expectNull: false,
+				positionMatcher: "toBe",
+				companyMatcher: "toBe",
+				additionalAssertions: null,
+			},
+		];
 
-			document.body.innerHTML = `
-        <div data-company-name="true">Indeed Test Co</div>
-        <h1 class="jobsearch-JobInfoHeader-title">Test Position</h1>
-      `;
-
-			const result = extractJobData();
-
-			expect(result).toBeDefined();
-			expect(result.company).toBe("Indeed Test Co");
-		});
-
-		it("should fall back to generic extractor for unknown sites", () => {
-			Object.defineProperty(window, "location", {
-				value: {
-					href: "https://careers.somecompany.com/job/12345",
-				},
-				writable: true,
-			});
-
-			document.body.innerHTML = `
-        <h1>Unknown Site Position</h1>
-        <div class="company">Some Company</div>
-      `;
-
-			const result = extractJobData();
-
-			expect(result).toBeDefined();
-			expect(result.jobPostingUrl).toContain("somecompany.com");
-		});
-
-		it("should include URL in returned data", () => {
-			document.body.innerHTML = `
-        <div class="job-details-jobs-unified-top-card__company-name">Test Co</div>
-        <div class="job-details-jobs-unified-top-card__job-title">Test Role</div>
-      `;
-
-			const result = extractJobData();
-
-			expect(result.jobPostingUrl).toBe(
-				"https://www.linkedin.com/jobs/view/12345",
-			);
-		});
+		runExtractorTests(() => extractJobData(), extractJobDataTests);
 	});
 });

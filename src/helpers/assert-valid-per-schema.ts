@@ -9,4 +9,5 @@ export function assertValidPerSchema<const ArkType extends Type<any, any>>(
 ) {
 	const res = toArkResult(arkType, input);
 	expect(res.isOk()).toBe(true);
+	return res._unsafeUnwrap();
 }
