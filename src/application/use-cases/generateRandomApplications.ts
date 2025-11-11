@@ -1,9 +1,9 @@
 import { faker } from "@faker-js/faker";
-import type { JobBoard } from "../../domain/entities/job-board.ts";
 import type {
 	JobApplicationForCreate,
 	SourceType,
 } from "../../domain/entities/job-application.ts";
+import type { JobBoard } from "../../domain/entities/job-board.ts";
 
 const SOURCE_TYPES: SourceType[] = [
 	"job_board",
@@ -49,9 +49,7 @@ export function generateRandomJobApplicationData(
 	const isRemote = faker.datatype.boolean();
 
 	// Generate application date in the past 90 days
-	const applicationDate = faker.date
-		.recent({ days: 90 })
-		.toISOString();
+	const applicationDate = faker.date.recent({ days: 90 }).toISOString();
 
 	// 60% chance of having an interest rating
 	const interestRating = faker.datatype.boolean({ probability: 0.6 })
