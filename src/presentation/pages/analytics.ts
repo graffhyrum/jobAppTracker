@@ -1,11 +1,16 @@
-import type { ApplicationsAnalytics } from "../../domain/use-cases/analytics.ts";
+import type {
+	ApplicationsAnalytics,
+	DateRange,
+} from "../../domain/use-cases/analytics.ts";
 import { type LayoutOptions, layout } from "../components/layout.ts";
 
 export const analyticsPage = (
 	analytics: ApplicationsAnalytics,
 	layoutOptions: LayoutOptions = {},
+	dateRange: DateRange = {},
 ): string => {
 	const { summary, responseRate } = analytics;
+	const { startDate = "", endDate = "" } = dateRange;
 
 	const content = `
 		<div class="analytics-page">
@@ -15,6 +20,45 @@ export const analyticsPage = (
 					<p>Insights and visualizations for your job application tracking</p>
 				</div>
 			</div>
+
+			<!-- Date Range Filter -->
+			<div class="date-range-filter">
+				<form hx-get="/analytics" hx-target="body" hx-swap="innerHTML" hx-push-url="true" hx-trigger="change">
+					<div class="date-range-inputs">
+						<div class="date-input-group">
+							<label for="startDate">Start Date</label>
+							<input
+								type="date"
+								id="startDate"
+								name="startDate"
+								value="${startDate}"
+								placeholder="Start date"
+							/>
+						</div>
+						<div class="date-input-group">
+							<label for="endDate">End Date</label>
+							<input
+								type="date"
+								id="endDate"
+								name="endDate"
+								value="${endDate}"
+								placeholder="End date"
+							/>
+						</div>
+						<button type="button" class="clear-filters-btn" onclick="clearDateFilters()">
+							Clear Filters
+						</button>
+					</div>
+				</form>
+			</div>
+
+			<script>
+				function clearDateFilters() {
+					document.getElementById('startDate').value = '';
+					document.getElementById('endDate').value = '';
+					window.location.href = '/analytics';
+				}
+			</script>
 
 			<!-- Summary Cards -->
 			<div class="analytics-summary">

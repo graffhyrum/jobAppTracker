@@ -74,6 +74,43 @@ export type ApplicationsAnalytics = {
 };
 
 /**
+ * Date range for filtering analytics
+ */
+export type DateRange = {
+	startDate?: string; // ISO date string (YYYY-MM-DD)
+	endDate?: string; // ISO date string (YYYY-MM-DD)
+};
+
+/**
+ * Filter applications by date range based on applicationDate
+ */
+export function filterApplicationsByDateRange(
+	applications: JobApplication[],
+	dateRange: DateRange,
+): JobApplication[] {
+	const { startDate, endDate } = dateRange;
+
+	// If no date range specified, return all applications
+	if (!startDate && !endDate) {
+		return applications;
+	}
+
+	return applications.filter((app) => {
+		const appDate = String(app.applicationDate).split("T")[0] ?? "";
+
+		if (startDate && appDate < startDate) {
+			return false;
+		}
+
+		if (endDate && appDate > endDate) {
+			return false;
+		}
+
+		return true;
+	});
+}
+
+/**
  * Analytics computation functions
  */
 

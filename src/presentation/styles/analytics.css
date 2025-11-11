@@ -6,6 +6,75 @@
 	margin: 0 auto;
 }
 
+/* Date Range Filter */
+.date-range-filter {
+	background: var(--color-bg-container);
+	border: 1px solid var(--color-border-primary);
+	border-radius: var(--radius-md);
+	padding: var(--space-lg);
+	margin-bottom: var(--space-xl);
+	box-shadow: var(--shadow-sm);
+}
+
+.date-range-inputs {
+	display: flex;
+	gap: var(--space-md);
+	align-items: flex-end;
+	flex-wrap: wrap;
+}
+
+.date-input-group {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-xs);
+	flex: 1;
+	min-width: 200px;
+}
+
+.date-input-group label {
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.date-input-group input[type="date"] {
+	padding: var(--space-sm) var(--space-md);
+	border: 1px solid var(--color-border-primary);
+	border-radius: var(--radius-sm);
+	font-size: var(--font-size-base);
+	color: var(--color-text-primary);
+	background: var(--color-bg-base);
+	transition: border-color 0.2s;
+}
+
+.date-input-group input[type="date"]:focus {
+	outline: none;
+	border-color: var(--color-primary);
+	box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.clear-filters-btn {
+	padding: var(--space-sm) var(--space-lg);
+	background: var(--color-bg-base);
+	border: 1px solid var(--color-border-primary);
+	border-radius: var(--radius-sm);
+	font-size: var(--font-size-sm);
+	font-weight: 600;
+	color: var(--color-text-secondary);
+	cursor: pointer;
+	transition: all 0.2s;
+	white-space: nowrap;
+	height: fit-content;
+}
+
+.clear-filters-btn:hover {
+	background: var(--color-bg-container);
+	color: var(--color-text-primary);
+	border-color: var(--color-text-secondary);
+}
+
 .analytics-summary {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
@@ -76,6 +145,23 @@
 @media (max-width: 768px) {
 	.analytics-page {
 		padding: var(--space-md);
+	}
+
+	.date-range-filter {
+		padding: var(--space-md);
+	}
+
+	.date-range-inputs {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.date-input-group {
+		min-width: 100%;
+	}
+
+	.clear-filters-btn {
+		width: 100%;
 	}
 
 	.analytics-summary {
