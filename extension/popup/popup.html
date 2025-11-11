@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Application Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Job Application Tracker</h1>
+    </header>
+
+    <div id="status-message" class="status-message hidden"></div>
+
+    <form id="job-form">
+      <div class="form-group">
+        <label for="company">Company *</label>
+        <input type="text" id="company" name="company" required>
+      </div>
+
+      <div class="form-group">
+        <label for="position">Position *</label>
+        <input type="text" id="position" name="position" required>
+      </div>
+
+      <div class="form-group">
+        <label for="jobPostingUrl">Job Posting URL</label>
+        <input type="url" id="jobPostingUrl" name="jobPostingUrl">
+      </div>
+
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select id="status" name="status">
+          <option value="applied">Applied</option>
+          <option value="screening interview">Screening Interview</option>
+          <option value="interview">Interview</option>
+          <option value="onsite">Onsite</option>
+          <option value="online test">Online Test</option>
+          <option value="take-home assignment">Take-home Assignment</option>
+          <option value="offer">Offer</option>
+          <option value="rejected">Rejected</option>
+          <option value="no response">No Response</option>
+          <option value="no longer interested">No Longer Interested</option>
+          <option value="hiring freeze">Hiring Freeze</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="interestRating">Interest Rating</label>
+        <select id="interestRating" name="interestRating">
+          <option value="">Not set</option>
+          <option value="1">1 - Low</option>
+          <option value="2">2 - Medium</option>
+          <option value="3">3 - High</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="jobDescription">Job Description</label>
+        <textarea id="jobDescription" name="jobDescription" rows="4"></textarea>
+      </div>
+
+      <div class="button-group">
+        <button type="button" id="extract-btn" class="btn btn-secondary">
+          Extract from Page
+        </button>
+        <button type="submit" id="submit-btn" class="btn btn-primary">
+          Save Application
+        </button>
+      </div>
+    </form>
+
+    <footer>
+      <a href="../options/options.html" target="_blank" class="settings-link">
+        Settings
+      </a>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

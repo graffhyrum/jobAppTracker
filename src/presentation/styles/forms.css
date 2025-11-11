@@ -29,6 +29,12 @@ label[aria-required="true"]::after,
 }
 
 /* Form visibility toggle - specific to add application form */
+#form-container,
+details[open],
+summary[data-testid="add-application-form-visibility-toggle"] {
+	text-decoration: none;
+}
+
 #form-container summary[data-testid="add-application-form-visibility-toggle"] {
 	color: var(--color-text-primary);
 	font-weight: 600;
@@ -45,10 +51,4 @@ summary[data-testid="add-application-form-visibility-toggle"]:hover {
 #form-container,
 summary[data-testid="add-application-form-visibility-toggle"]::-webkit-details-marker {
 	color: var(--color-text-primary);
-}
-
-#form-container,
-details[open],
-summary[data-testid="add-application-form-visibility-toggle"] {
-	text-decoration: none;
 }

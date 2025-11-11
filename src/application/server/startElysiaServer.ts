@@ -12,6 +12,7 @@ import {
 	createContactsPlugin,
 } from "./plugins/contacts.plugin.ts";
 import { createDevToolsPlugin } from "./plugins/dev-tools.plugin.ts";
+import { createExtensionApiPlugin } from "./plugins/extension-api.plugin.ts";
 import {
 	createInterviewStageOperationsPlugin,
 	createInterviewStagesPlugin,
@@ -131,7 +132,9 @@ export function startElysiaServer() {
 		.use(createInterviewStageOperationsPlugin)
 		.use(createContactsPlugin)
 		.use(createContactOperationsPlugin)
-		.use(createAnalyticsPlugin);
+		.use(createAnalyticsPlugin)
+		// Browser extension API
+		.use(createExtensionApiPlugin);
 
 	// Conditionally add dev tools plugin in development mode
 	if (isDevelopment()) {
