@@ -12,32 +12,54 @@
 		return;
 	}
 
-	// Color palette for charts
+	// Read theme colors from CSS custom properties for theme-aware, accessible charts
+	const getThemeColor = (colorVar) => {
+		return getComputedStyle(document.documentElement)
+			.getPropertyValue(colorVar)
+			.trim();
+	};
+
+	// WCAG AA compliant color palette using theme colors
+	const themeColors = {
+		textPrimary: getThemeColor("--color-text-primary"),
+		textSecondary: getThemeColor("--color-text-secondary"),
+		blueBase: getThemeColor("--color-accent-blue"),
+		blueLight: getThemeColor("--color-accent-blue-light"),
+		blueMedium: getThemeColor("--color-accent-blue-medium"),
+		blueDark: getThemeColor("--color-accent-blue-dark"),
+		success: getThemeColor("--color-status-success"),
+		error: getThemeColor("--color-status-error"),
+		errorLight: getThemeColor("--color-status-error-lighter"),
+		purple: getThemeColor("--color-accent-purple"),
+		purpleDark: getThemeColor("--color-accent-purple-dark"),
+	};
+
+	// Accessible color palette for charts - using theme colors
 	const colors = {
 		active: {
-			applied: "#3b82f6",
-			"screening interview": "#60a5fa",
-			interview: "#93c5fd",
-			onsite: "#bfdbfe",
-			"online test": "#dbeafe",
-			"take-home assignment": "#eff6ff",
-			offer: "#10b981",
+			applied: themeColors.blueBase,
+			"screening interview": themeColors.blueLight,
+			interview: themeColors.blueMedium,
+			onsite: themeColors.blueDark,
+			"online test": themeColors.blueLight,
+			"take-home assignment": themeColors.blueMedium,
+			offer: themeColors.success,
 		},
 		inactive: {
-			rejected: "#ef4444",
-			"no response": "#f87171",
-			"no longer interested": "#fca5a5",
-			"hiring freeze": "#fecaca",
+			rejected: themeColors.error,
+			"no response": themeColors.errorLight,
+			"no longer interested": themeColors.errorLight,
+			"hiring freeze": themeColors.errorLight,
 		},
 	};
 
 	const getStatusColor = (label, category) => {
-		return colors[category]?.[label] ?? "#6b7280";
+		return colors[category]?.[label] ?? themeColors.textSecondary;
 	};
 
-	// Chart.js default configuration
+	// Chart.js default configuration with theme-aware text color
 	Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
-	Chart.defaults.color = "#374151";
+	Chart.defaults.color = themeColors.textPrimary;
 
 	// 1. Status Distribution Pie Chart
 	const statusLabels = analyticsData.statusDistribution.map((s) => s.label);
@@ -55,7 +77,7 @@
 					data: statusCounts,
 					backgroundColor: statusColors,
 					borderWidth: 2,
-					borderColor: "#fff",
+					borderColor: getThemeColor("--color-bg-container"),
 				},
 			],
 		},
@@ -65,6 +87,9 @@
 			plugins: {
 				legend: {
 					position: "right",
+					labels: {
+						color: themeColors.textPrimary,
+					},
 				},
 				tooltip: {
 					callbacks: {
@@ -93,8 +118,8 @@
 				{
 					label: "Applications",
 					data: counts,
-					borderColor: "#3b82f6",
-					backgroundColor: "rgba(59, 130, 246, 0.1)",
+					borderColor: themeColors.blueBase,
+					backgroundColor: `${themeColors.blueBase}15`,
 					fill: true,
 					tension: 0.4,
 				},
@@ -108,6 +133,18 @@
 					beginAtZero: true,
 					ticks: {
 						stepSize: 1,
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
+					},
+				},
+				x: {
+					ticks: {
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
 					},
 				},
 			},
@@ -134,8 +171,8 @@
 				{
 					label: "Success Rate (%)",
 					data: sourceSuccessRates,
-					backgroundColor: "#10b981",
-					borderColor: "#059669",
+					backgroundColor: themeColors.success,
+					borderColor: themeColors.success,
 					borderWidth: 1,
 				},
 			],
@@ -149,6 +186,18 @@
 					max: 100,
 					ticks: {
 						callback: (value) => `${value}%`,
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
+					},
+				},
+				x: {
+					ticks: {
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
 					},
 				},
 			},
@@ -180,12 +229,12 @@
 				{
 					label: "Average Days",
 					data: averageDays,
-					backgroundColor: "#3b82f6",
+					backgroundColor: themeColors.blueBase,
 				},
 				{
 					label: "Median Days",
 					data: medianDays,
-					backgroundColor: "#60a5fa",
+					backgroundColor: themeColors.blueLight,
 				},
 			],
 		},
@@ -196,9 +245,28 @@
 			scales: {
 				x: {
 					beginAtZero: true,
+					ticks: {
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
+					},
+				},
+				y: {
+					ticks: {
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
+					},
 				},
 			},
 			plugins: {
+				legend: {
+					labels: {
+						color: themeColors.textPrimary,
+					},
+				},
 				tooltip: {
 					callbacks: {
 						label: (context) =>
@@ -226,8 +294,8 @@
 				{
 					label: "Success Rate (%)",
 					data: ratingSuccessRates,
-					backgroundColor: "#8b5cf6",
-					borderColor: "#7c3aed",
+					backgroundColor: themeColors.purple,
+					borderColor: themeColors.purpleDark,
 					borderWidth: 1,
 				},
 			],
@@ -241,6 +309,18 @@
 					max: 100,
 					ticks: {
 						callback: (value) => `${value}%`,
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
+					},
+				},
+				x: {
+					ticks: {
+						color: themeColors.textPrimary,
+					},
+					grid: {
+						color: `${themeColors.textSecondary}20`,
 					},
 				},
 			},
@@ -273,9 +353,9 @@
 			datasets: [
 				{
 					data: responseCounts,
-					backgroundColor: ["#10b981", "#ef4444"],
+					backgroundColor: [themeColors.success, themeColors.error],
 					borderWidth: 2,
-					borderColor: "#fff",
+					borderColor: getThemeColor("--color-bg-container"),
 				},
 			],
 		},
@@ -285,6 +365,9 @@
 			plugins: {
 				legend: {
 					position: "bottom",
+					labels: {
+						color: themeColors.textPrimary,
+					},
 				},
 				tooltip: {
 					callbacks: {

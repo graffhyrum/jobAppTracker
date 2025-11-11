@@ -6,11 +6,7 @@ export function addApplicationForm(
 ): string {
 	return `
 		<div class="add-application-container">
-			${
-				errorMessage
-					? `<div class="error-message" style="color: red; padding: 10px; margin-bottom: 20px; border: 1px solid red; border-radius: 4px; background-color: #ffebee;">${errorMessage}</div>`
-					: ""
-			}
+			${errorMessage ? `<div class="error-alert">${errorMessage}</div>` : ""}
 			<form
 				hx-post="/applications"
 				hx-trigger="submit"
