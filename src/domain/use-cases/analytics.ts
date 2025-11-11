@@ -169,8 +169,10 @@ function computeApplicationsByDate(
 	const dateMap = new Map<string, number>();
 
 	for (const app of applications) {
-		const date = app.applicationDate.split("T")[0]; // Extract YYYY-MM-DD
-		dateMap.set(date, (dateMap.get(date) ?? 0) + 1);
+		const date = String(app.applicationDate).split("T")[0] ?? ""; // Extract YYYY-MM-DD
+		if (date) {
+			dateMap.set(date, (dateMap.get(date) ?? 0) + 1);
+		}
 	}
 
 	return Array.from(dateMap.entries())
@@ -231,11 +233,17 @@ function computeTimeInStatus(applications: JobApplication[]): TimeInStatus[] {
 		const statusLog = app.statusLog;
 
 		for (let i = 0; i < statusLog.length; i++) {
-			const [startTime, status] = statusLog[i];
-			const endTime =
-				i < statusLog.length - 1
-					? statusLog[i + 1][0]
-					: new Date().toISOString();
+			const entry = statusLog[i];
+			if (!entry) continue;
+
+			const startTime = String(entry[0]);
+			const status = entry[1];
+			if (!status || typeof status === "string") continue;
+
+			const nextEntry = statusLog[i + 1];
+			const endTime = nextEntry
+				? String(nextEntry[0])
+				: new Date().toISOString();
 
 			const durationMs =
 				new Date(endTime).getTime() - new Date(startTime).getTime();
@@ -250,19 +258,29 @@ function computeTimeInStatus(applications: JobApplication[]): TimeInStatus[] {
 	return Array.from(statusDurations.entries()).map(([label, durations]) => {
 		const sorted = [...durations].sort((a, b) => a - b);
 		const sum = sorted.reduce((acc, val) => acc + val, 0);
-		const median =
-			sorted.length > 0
-				? sorted.length % 2 === 0
-					? (sorted[sorted.length / 2 - 1] + sorted[sorted.length / 2]) / 2
-					: sorted[Math.floor(sorted.length / 2)]
-				: 0;
+
+		let median = 0;
+		if (sorted.length > 0) {
+			if (sorted.length % 2 === 0) {
+				const mid1 = sorted[sorted.length / 2 - 1];
+				const mid2 = sorted[sorted.length / 2];
+				if (mid1 !== undefined && mid2 !== undefined) {
+					median = (mid1 + mid2) / 2;
+				}
+			} else {
+				const mid = sorted[Math.floor(sorted.length / 2)];
+				if (mid !== undefined) {
+					median = mid;
+				}
+			}
+		}
 
 		return {
 			label,
 			averageDays: sorted.length > 0 ? sum / sorted.length : 0,
 			medianDays: median,
-			minDays: sorted.length > 0 ? sorted[0] : 0,
-			maxDays: sorted.length > 0 ? sorted[sorted.length - 1] : 0,
+			minDays: sorted.length > 0 ? (sorted[0] ?? 0) : 0,
+			maxDays: sorted.length > 0 ? (sorted[sorted.length - 1] ?? 0) : 0,
 			sampleSize: sorted.length,
 		};
 	});
