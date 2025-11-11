@@ -22,6 +22,7 @@ export const layout = (
 	<link rel="stylesheet" href="/styles/forms.css">
 	<link rel="stylesheet" href="/styles/pages.css">
 	<link rel="stylesheet" href="/styles/pipeline.css">
+	<link rel="stylesheet" href="/styles/analytics.css">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<link rel="alternate icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<script>

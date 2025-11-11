@@ -9,7 +9,7 @@ export function navbar(options: NavbarOptions = {}): string {
 	const { isDev = false, currentDb = "prod" } = options;
 	const {
 		brand,
-		links: { home, health, api },
+		links: { home, analytics, health, api },
 	} = PAGE_CONFIG;
 
 	const dbSelector = `
@@ -44,6 +44,9 @@ export function navbar(options: NavbarOptions = {}): string {
 		<ul class="navbar-nav">
 			<li class="nav-item">
 				<a href=${home.href} class="nav-link" data-testid=${home.testId}>${home.text}</a>
+			</li>
+			<li class="nav-item">
+				<a href=${analytics.href} class="nav-link" data-testid=${analytics.testId}>${analytics.text}</a>
 			</li>
 			<li class="nav-item">
 				<a href=${health.href} class="nav-link" data-testid=${health.testId}>${health.text}</a>

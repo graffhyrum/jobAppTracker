@@ -1,0 +1,114 @@
+/* Analytics Dashboard Styles */
+
+.analytics-page {
+	padding: var(--spacing-lg);
+	max-width: 1400px;
+	margin: 0 auto;
+}
+
+.analytics-summary {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+	gap: var(--spacing-md);
+	margin-bottom: var(--spacing-xl);
+}
+
+.summary-card {
+	background: var(--surface-color);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	padding: var(--spacing-lg);
+	text-align: center;
+	transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-card:hover {
+	transform: translateY(-2px);
+	box-shadow: var(--shadow-md);
+}
+
+.summary-card h3 {
+	font-size: var(--font-size-sm);
+	font-weight: 500;
+	color: var(--text-secondary);
+	margin: 0 0 var(--spacing-sm) 0;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+.summary-value {
+	font-size: var(--font-size-2xl);
+	font-weight: 700;
+	color: var(--text-primary);
+	line-height: 1.2;
+}
+
+.analytics-charts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+	gap: var(--spacing-xl);
+}
+
+.chart-container {
+	background: var(--surface-color);
+	border: 1px solid var(--border-color);
+	border-radius: var(--border-radius-md);
+	padding: var(--spacing-lg);
+	box-shadow: var(--shadow-sm);
+}
+
+.chart-container h2 {
+	font-size: var(--font-size-lg);
+	font-weight: 600;
+	color: var(--text-primary);
+	margin: 0 0 var(--spacing-lg) 0;
+	padding-bottom: var(--spacing-sm);
+	border-bottom: 2px solid var(--border-color);
+}
+
+.chart-container canvas {
+	max-height: 400px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+	.analytics-page {
+		padding: var(--spacing-md);
+	}
+
+	.analytics-summary {
+		grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+		gap: var(--spacing-sm);
+	}
+
+	.summary-card {
+		padding: var(--spacing-md);
+	}
+
+	.summary-value {
+		font-size: var(--font-size-xl);
+	}
+
+	.analytics-charts {
+		grid-template-columns: 1fr;
+		gap: var(--spacing-lg);
+	}
+
+	.chart-container {
+		padding: var(--spacing-md);
+	}
+}
+
+@media (max-width: 480px) {
+	.analytics-summary {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	.summary-card h3 {
+		font-size: var(--font-size-xs);
+	}
+
+	.summary-value {
+		font-size: var(--font-size-lg);
+	}
+}
