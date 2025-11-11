@@ -9,6 +9,11 @@ try {
 	// Already registered, ignore
 }
 
+// Type-narrowing wrapper around expect().toBeDefined()
+function expectDefined<T>(value: T): asserts value is NonNullable<T> {
+	expect(value).toBeDefined();
+}
+
 type AssertionMatcher = "toBe" | "toContain";
 
 type TestConfig = {
@@ -51,13 +56,13 @@ const runExtractorTests = (
 				return;
 			}
 
-			expect(extractResult).toBeDefined();
+			expectDefined(extractResult);
 
 			// Only validate schema for extractJobData tests (which return complete JobData)
 			// Individual extractors don't include jobPostingUrl field
 			const result = validateSchema
 				? getAndAssertJobData(extractResult)
-				: (extractResult as any);
+				: extractResult;
 
 			if (test.expectedCompany) {
 				if (test.companyMatcher === "toBe") {
