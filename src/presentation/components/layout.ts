@@ -18,10 +18,16 @@ export const layout = (
 	<script src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.6/dist/htmx.min.js"></script>
 	<link rel="stylesheet" href="/styles/themes.css">
 	<link rel="stylesheet" href="/styles/base.css">
+	<link rel="stylesheet" href="/styles/utilities.css">
+	<link rel="stylesheet" href="/styles/buttons.css">
+	<link rel="stylesheet" href="/styles/badges.css">
+	<link rel="stylesheet" href="/styles/cards.css">
+	<link rel="stylesheet" href="/styles/tables.css">
 	<link rel="stylesheet" href="/styles/navbar.css">
 	<link rel="stylesheet" href="/styles/forms.css">
 	<link rel="stylesheet" href="/styles/pages.css">
 	<link rel="stylesheet" href="/styles/pipeline.css">
+	<link rel="stylesheet" href="/styles/analytics.css">
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<link rel="alternate icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<script>

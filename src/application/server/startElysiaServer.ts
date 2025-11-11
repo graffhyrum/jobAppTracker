@@ -5,12 +5,14 @@ import { Elysia } from "elysia";
 import { jobAppManagerRegistry } from "#src/domain/use-cases/create-sqlite-job-app-manager.ts";
 import { createSQLiteJobBoardRepo } from "#src/domain/use-cases/create-sqlite-job-board-repo.ts";
 import { isDevelopment } from "../../infrastructure/utils/environment-detector.ts";
+import { createAnalyticsPlugin } from "./plugins/analytics.plugin.ts";
 import { createApplicationsPlugin } from "./plugins/applications.plugin.ts";
 import {
 	createContactOperationsPlugin,
 	createContactsPlugin,
 } from "./plugins/contacts.plugin.ts";
 import { createDevToolsPlugin } from "./plugins/dev-tools.plugin.ts";
+import { createExtensionApiPlugin } from "./plugins/extension-api.plugin.ts";
 import {
 	createInterviewStageOperationsPlugin,
 	createInterviewStagesPlugin,
@@ -129,7 +131,10 @@ export function startElysiaServer() {
 		.use(createInterviewStagesPlugin)
 		.use(createInterviewStageOperationsPlugin)
 		.use(createContactsPlugin)
-		.use(createContactOperationsPlugin);
+		.use(createContactOperationsPlugin)
+		.use(createAnalyticsPlugin)
+		// Browser extension API
+		.use(createExtensionApiPlugin);
 
 	// Conditionally add dev tools plugin in development mode
 	if (isDevelopment()) {

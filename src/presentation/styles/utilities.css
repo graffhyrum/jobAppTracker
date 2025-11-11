@@ -1,0 +1,181 @@
+/* Utility Classes - Theme-based Helpers */
+
+/* ============================================
+   TEXT COLOR UTILITIES
+   ============================================ */
+
+.text-primary {
+	color: var(--color-text-primary);
+}
+
+.text-secondary {
+	color: var(--color-text-secondary);
+}
+
+.text-tertiary {
+	color: var(--color-text-tertiary);
+}
+
+.text-error {
+	color: var(--color-status-error);
+}
+
+.text-success {
+	color: var(--color-status-success);
+}
+
+.text-inverse {
+	color: var(--color-text-inverse);
+}
+
+/* ============================================
+   BACKGROUND COLOR UTILITIES
+   ============================================ */
+
+.bg-error {
+	background-color: var(--color-status-error-light);
+}
+
+.bg-success {
+	background-color: var(--color-accent-primary-light);
+}
+
+.bg-warning {
+	background-color: var(--color-accent-yellow-lighter);
+}
+
+.bg-info {
+	background-color: var(--color-accent-blue-lighter);
+}
+
+/* ============================================
+   BORDER COLOR UTILITIES
+   ============================================ */
+
+.border-error {
+	border-color: var(--color-status-error);
+}
+
+.border-success {
+	border-color: var(--color-status-success);
+}
+
+.border-primary {
+	border-color: var(--color-border-primary);
+}
+
+.border-secondary {
+	border-color: var(--color-border-secondary);
+}
+
+/* ============================================
+   ALERT/MESSAGE BOX UTILITIES
+   ============================================ */
+
+.alert {
+	padding: 12px 16px;
+	margin-bottom: 16px;
+	border-radius: var(--radius-md);
+	border: 1px solid;
+}
+
+.error-alert {
+	color: var(--color-status-error-text);
+	background-color: var(--color-status-error-light);
+	border-color: var(--color-status-error);
+}
+
+.success-alert {
+	color: var(--color-accent-primary-text-dark);
+	background-color: var(--color-accent-primary-light);
+	border-color: var(--color-status-success);
+}
+
+.warning-alert {
+	color: var(--color-accent-yellow-text);
+	background-color: var(--color-accent-yellow-lighter);
+	border-color: var(--color-accent-yellow);
+}
+
+.info-alert {
+	color: var(--color-accent-blue-dark);
+	background-color: var(--color-accent-blue-lighter);
+	border-color: var(--color-accent-blue);
+}
+
+/* ============================================
+   CURSOR UTILITIES
+   ============================================ */
+
+.cursor-pointer {
+	cursor: pointer;
+}
+
+.cursor-default {
+	cursor: default;
+}
+
+.cursor-not-allowed {
+	cursor: not-allowed;
+}
+
+/* ============================================
+   VISIBILITY UTILITIES
+   ============================================ */
+
+.hidden {
+	display: none;
+}
+
+.visible {
+	display: block;
+}
+
+/* ============================================
+   FOCUS UTILITIES
+   ============================================ */
+
+.focus-ring:focus-visible {
+	outline: 2px solid var(--color-accent-blue-focus);
+	outline-offset: 2px;
+}
+
+/* ============================================
+   SHADOW UTILITIES
+   ============================================ */
+
+.shadow-sm {
+	box-shadow: var(--shadow-sm);
+}
+
+.shadow-md {
+	box-shadow: var(--shadow-md);
+}
+
+.shadow-lg {
+	box-shadow: var(--shadow-lg);
+}
+
+.shadow-xl {
+	box-shadow: var(--shadow-xl);
+}
+
+.shadow-none {
+	box-shadow: none;
+}
+
+/* ============================================
+   RESPONSIVE UTILITIES
+   ============================================ */
+
+@media (max-width: 768px) {
+	.hidden-mobile {
+		display: none;
+	}
+}
+
+@media (min-width: 769px) {
+	.visible-mobile {
+		display: none;
+	}
+}

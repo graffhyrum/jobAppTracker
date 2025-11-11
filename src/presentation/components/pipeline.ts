@@ -138,11 +138,10 @@ function pipelineHeaderComponent(
 			.map(
 				(key) => `
 <th
-    class="sortable"
+    class="sortable cursor-pointer"
     hx-get="${getSortUrl(key, sortColumn, sortDirection)}"
     hx-target="#pipeline-container"
 	hx-swap="outerHTML"
-	style="cursor: pointer;"
 	title="Click to sort by ${camelCaseToSpaceSeparatedLower(key)}"
 	data-testid="${camelCaseToHyphenated(key)}-header"
 	>
