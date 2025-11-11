@@ -330,4 +330,86 @@ export const createApplicationsPlugin = (
 			{
 				query: searchQuerySchema,
 			},
+		)
+		// POST /applications/delete-all - Deletes all applications
+		.post(
+			"/delete-all",
+			async ({ jobApplicationManager, jobBoardRepository, set }) => {
+				const result = await jobApplicationManager.clearAllJobApplications();
+
+				if (result.isErr()) {
+					set.status = 500;
+					set.headers["Content-Type"] = "text/html";
+					return `<div class="error-message">Error: ${result.error}</div>`;
+				}
+
+				// Get job boards to refresh the form
+				const jobBoardsResult = await jobBoardRepository.getAll();
+				const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
+
+				// Return updated pipeline with empty applications
+				set.headers["Content-Type"] = "text/html";
+				return formAndPipelineContent([], jobBoards);
+			},
+		)
+		// POST /applications/generate - Generates random applications
+		.post(
+			"/generate",
+			async ({ jobApplicationManager, jobBoardRepository, body, set }) => {
+				try {
+					const count = Number.parseInt(body.count || "10", 10);
+					if (Number.isNaN(count) || count < 1 || count > 100) {
+						set.status = 400;
+						set.headers["Content-Type"] = "text/html";
+						return `<div class="error-message">Error: Count must be between 1 and 100</div>`;
+					}
+
+					// Import the generator function
+					const { generateRandomJobApplicationData } = await import(
+						"../../use-cases/generateRandomApplications.ts"
+					);
+
+					// Get job boards for potential linking
+					const jobBoardsResult = await jobBoardRepository.getAll();
+					const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
+
+					// Generate and create applications
+					for (let i = 0; i < count; i++) {
+						const data = generateRandomJobApplicationData(jobBoards);
+						await jobApplicationManager.createJobApplication(data);
+					}
+
+					// Get all applications to refresh the pipeline view
+					const applicationsResult =
+						await jobApplicationManager.getAllJobApplications();
+					const applications = applicationsResult.isOk()
+						? applicationsResult.value
+						: [];
+
+					set.headers["Content-Type"] = "text/html";
+					return formAndPipelineContent(applications, jobBoards);
+				} catch (error) {
+					console.error("Error generating applications:", error);
+					const jobBoardsResult = await jobBoardRepository.getAll();
+					const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
+					const applicationsResult =
+						await jobApplicationManager.getAllJobApplications();
+					const applications = applicationsResult.isOk()
+						? applicationsResult.value
+						: [];
+
+					set.status = 500;
+					set.headers["Content-Type"] = "text/html";
+					return formAndPipelineContent(
+						applications,
+						jobBoards,
+						`Error generating applications: ${error instanceof Error ? error.message : String(error)}`,
+					);
+				}
+			},
+			{
+				body: type({
+					count: "string",
+				}),
+			},
 		);

@@ -35,7 +35,7 @@ export function pipelineComponent(
 				</div>
 			</div>
 
-			
+
 			<div class="table-tools" data-testid="table-tools">
 				<div class="search">
 					<input
@@ -54,6 +54,50 @@ export function pipelineComponent(
 						inputmode="search"
 					/>
 					<span id="search-indicator" class="htmx-indicator" aria-hidden="true">Loading…</span>
+				</div>
+				<div class="bulk-actions">
+					<form
+						class="generate-form"
+						hx-post="/applications/generate"
+						hx-target="#form-and-pipeline-container"
+						hx-swap="innerHTML"
+						hx-indicator="#generate-indicator"
+						data-testid="generate-form"
+					>
+						<input
+							type="number"
+							name="count"
+							id="generate-count"
+							data-testid="generate-count"
+							value="10"
+							min="1"
+							max="100"
+							aria-label="Number of applications to generate"
+							class="count-input"
+						/>
+						<button
+							type="submit"
+							class="btn btn-secondary"
+							data-testid="generate-btn"
+							aria-label="Generate random applications"
+						>
+							Generate Random
+						</button>
+						<span id="generate-indicator" class="htmx-indicator" aria-hidden="true">Generating…</span>
+					</form>
+					<button
+						class="btn btn-danger"
+						data-testid="delete-all-btn"
+						hx-post="/applications/delete-all"
+						hx-target="#form-and-pipeline-container"
+						hx-swap="innerHTML"
+						hx-confirm="Are you sure you want to delete ALL job applications? This action cannot be undone."
+						hx-indicator="#delete-all-indicator"
+						aria-label="Delete all applications"
+					>
+						Delete All
+					</button>
+					<span id="delete-all-indicator" class="htmx-indicator" aria-hidden="true">Deleting…</span>
 				</div>
 			</div>
 			<div class="table-container">
