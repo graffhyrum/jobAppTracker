@@ -68,6 +68,16 @@ export function createSQLiteContactRepository(db: Database): ContactRepository {
 			).andThen(parseContact);
 		},
 
+		getAll(): ResultAsync<Contact[], string> {
+			return ResultAsync.fromPromise(
+				(async () => {
+					const query = db.prepare("SELECT * FROM contacts ORDER BY outreachDate DESC");
+					return query.all();
+				})(),
+				(err) => `Failed to query all contacts: ${err}`,
+			).andThen(parseContactArray);
+		},
+
 		getByJobApplicationId(
 			jobAppId: JobApplicationId,
 		): ResultAsync<Contact[], string> {

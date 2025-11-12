@@ -76,6 +76,18 @@ export function createSQLiteInterviewStageRepository(
 			).andThen(parseInterviewStage);
 		},
 
+		getAll(): ResultAsync<InterviewStage[], string> {
+			return ResultAsync.fromPromise(
+				(async () => {
+					const query = db.prepare(
+						"SELECT * FROM interview_stages ORDER BY jobApplicationId, round ASC",
+					);
+					return query.all();
+				})(),
+				(err) => `Failed to query all interview stages: ${err}`,
+			).andThen(parseInterviewStageArray);
+		},
+
 		getByJobApplicationId(
 			jobAppId: JobApplicationId,
 		): ResultAsync<InterviewStage[], string> {

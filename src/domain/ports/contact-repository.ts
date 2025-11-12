@@ -12,6 +12,8 @@ export interface ContactRepository {
 
 	getById(id: ContactId): ResultAsync<Contact, string>;
 
+	getAll(): ResultAsync<Contact[], string>;
+
 	getByJobApplicationId(
 		jobAppId: JobApplicationId,
 	): ResultAsync<Contact[], string>;
