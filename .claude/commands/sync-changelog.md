@@ -190,7 +190,6 @@ After completion, provide:
 
 **New Changelog Entries**:
 [Preview the new entries from CHANGELOG.md]
-
 **Next Steps**:
 1. Review the changes in CHANGELOG.md
 2. Commit the updated files:
