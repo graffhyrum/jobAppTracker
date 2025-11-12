@@ -12,6 +12,8 @@ export interface InterviewStageRepository {
 
 	getById(id: InterviewStageId): ResultAsync<InterviewStage, string>;
 
+	getAll(): ResultAsync<InterviewStage[], string>;
+
 	getByJobApplicationId(
 		jobAppId: JobApplicationId,
 	): ResultAsync<InterviewStage[], string>;
