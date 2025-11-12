@@ -1,18 +1,22 @@
 import { describe, expect, it } from "bun:test";
 import { assertDefined } from "#helpers/assertDefined.ts";
-import type { ForUpdate } from "../../infrastructure/storage/storage-provider-interface.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
 	JobApplicationId,
-} from "../entities/job-application.ts";
-import type { JobApplicationManager } from "../ports/job-application-manager.ts";
-import { jobAppManagerRegistry } from "./create-sqlite-job-app-manager.ts";
+} from "../../domain/entities/job-application.ts";
+import type { JobApplicationManager } from "../../domain/ports/job-application-manager.ts";
+import { jobAppManagerRegistry } from "../../domain/use-cases/create-sqlite-job-app-manager.ts";
+import type { ForUpdate } from "../storage/storage-provider-interface.ts";
 
 // Get the test manager for testing
 const jobApplicationManager = jobAppManagerRegistry.getManager("test");
 
-describe("createSQLiteJobAppManager", () => {
+/**
+ * Integration tests for SQLite JobApplicationManager implementation.
+ * These tests verify that the SQLite adapter correctly persists and retrieves data.
+ */
+describe("SQLite JobApplicationManager (Integration Tests)", () => {
 	// Test data that represents realistic job application scenarios
 	const validJobApplicationData = {
 		company: "Test Company",
