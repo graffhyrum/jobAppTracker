@@ -234,7 +234,7 @@
 				{
 					label: "Median Days",
 					data: medianDays,
-					backgroundColor: themeColors.blueLight,
+					backgroundColor: themeColors.purple,
 				},
 			],
 		},
