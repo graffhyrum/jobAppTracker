@@ -26,7 +26,7 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 - **Runtime**: Bun
 - **Language**: TypeScript
 - **Database**: SQLite (using Bun's built-in driver)
-- **Web Framework**: Bun.serve with HTMX
+- **Web Framework**: ElysiaJS with HTMX
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
 - **PDF Processing**: PDF-lib
@@ -110,22 +110,52 @@ For detailed installation and usage instructions, see [extension/README.md](exte
 
 ```
 src/
-├── domain/           # Core business logic
-├── application/      # Use cases and application services
-├── presentation/     # Web routes and HTMX templates
-└── index.ts         # Application entry point
+├── domain/                    # Core business logic
+│   ├── entities/             # Rich domain objects with behavior
+│   ├── ports/                # Interfaces for infrastructure
+│   └── use-cases/            # Application workflows
+├── application/              # Use cases and application services
+│   └── server/               # ElysiaJS server setup
+│       ├── plugins/          # Route plugins for modularity
+│       └── utils/            # Server utilities
+├── infrastructure/           # External system adapters
+│   ├── adapters/            # Concrete implementations of ports
+│   ├── config/              # Configuration files
+│   ├── di/                  # Dependency injection
+│   ├── file-io/             # File system operations
+│   ├── storage/             # Storage provider interfaces
+│   ├── uuid-generation/     # UUID generation
+│   └── utils/               # Infrastructure utilities
+├── presentation/             # Web interface
+│   ├── assets/              # Static assets (images, etc.)
+│   ├── components/          # HTML rendering functions
+│   ├── pages/               # Full page templates
+│   ├── schemas/             # ArkType validation schemas
+│   ├── scripts/             # Client-side JavaScript
+│   ├── styles/              # CSS files
+│   ├── types/               # Presentation layer types
+│   └── utils/               # Presentation utilities
+├── forms/                    # PDF form templates and mappings
+├── helpers/                  # General utility functions
+└── index.ts                 # Application entry point
 
-extension/           # Browser extension for quick job capture
-├── manifest.json    # Extension configuration
-├── content/         # Page data extraction scripts
-├── popup/           # Extension popup UI
-├── options/         # Settings page
-└── background/      # Background service worker
+extension/                    # Browser extension for quick job capture
+├── manifest.json            # Extension configuration
+├── content/                 # Page data extraction scripts
+├── popup/                   # Extension popup UI
+├── options/                 # Settings page
+├── background/              # Background service worker
+└── icons/                   # Extension icons
 
 docs/
-└── PRD.md           # Product Requirements Document
+├── PRD.md                   # Product Requirements Document
+├── THEME_GUIDE.md           # UI theming guidelines
+├── TEST_PLAN.md             # Testing strategy
+└── ai/                      # AI assistant guides
+    ├── HTML_GUIDE.md        # HTML conventions
+    └── PAGE_OBJECT_GUIDE.md # E2E test patterns
 
-tests/               # Test files
+tests/                        # Test files (colocated with source)
 ```
 
 ## Development Status
