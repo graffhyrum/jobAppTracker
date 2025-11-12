@@ -1,9 +1,11 @@
 import { describe, expect, it } from "bun:test";
 import {
+	type ApplicationStatus,
 	createJobApplication,
 	createJobApplicationId,
 	createJobApplicationWithInitialStatus,
 	type JobApplication,
+	updateJobApplicationStatus,
 } from "../entities/job-application.ts";
 import {
 	computeDefaultDateRange,
@@ -149,10 +151,10 @@ describe("Analytics Use Cases", () => {
 	describe("computeDefaultDateRange", () => {
 		const createMockApplicationWithStatus = (
 			applicationDate: string,
-			status: { category: "active" | "inactive"; label: string },
+			status: ApplicationStatus,
 			seed = 1000,
 		): JobApplication => {
-			return createJobApplicationWithInitialStatus(
+			const app = createJobApplicationWithInitialStatus(
 				{
 					company: "Test Company",
 					positionTitle: "Software Engineer",
@@ -161,9 +163,9 @@ describe("Analytics Use Cases", () => {
 					sourceType: "job_board" as const,
 					isRemote: false,
 				},
-				status,
-				createJobApplicationId(mockUuidGenerator(seed)),
+				mockUuidGenerator(seed),
 			);
+			return updateJobApplicationStatus(app, status);
 		};
 
 		it("should return date range from oldest active application to today", () => {

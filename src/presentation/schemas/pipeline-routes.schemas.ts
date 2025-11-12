@@ -3,6 +3,6 @@ import { type } from "arktype";
 // Pipeline query parameter validation
 export const pipelineQuerySchema = type({
 	"sortColumn?":
-		"'company'|'position'|'applicationDate'|'status'|'interestRating'|'nextEventDate'|'lastUpdated'",
+		"'company'|'positionTitle'|'applicationDate'|'status'|'interestRating'|'nextEventDate'|'updatedAt'",
 	"sortDirection?": "'asc'|'desc'",
 });

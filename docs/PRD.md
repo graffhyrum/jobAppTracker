@@ -15,7 +15,7 @@ A single-user, lightweight job application tracking system built with TypeScript
   - Job description (text)
   - Timestamped, mutable notes list
   - Last updated timestamp (auto-calculated)
-- **Data Persistence**: JSON flat files using Bun.file I/O with hexagonal architecture.
+- **Data Persistence**: SQLite database using Bun's built-in `bun:sqlite` driver with hexagonal architecture.
 
 ### 2. Customizable Pipeline Workflow
 - **Status Categories**: 
@@ -49,8 +49,8 @@ A single-user, lightweight job application tracking system built with TypeScript
 ### Stack
 - **Runtime**: Bun
 - **Language**: TypeScript
-- **Storage**: Flat file and Bun file I/O
-- **Web Framework**: Bun.serve with HTMX frontend
+- **Database**: SQLite using Bun's built-in `bun:sqlite` driver
+- **Web Framework**: ElysiaJS with HTMX frontend
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
 - **PDF Processing**: PDF-lib

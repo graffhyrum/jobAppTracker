@@ -1,5 +1,12 @@
 # jobapptracker
 
+## 0.2.1
+
+### Patch Changes
+
+- Fix validation error when sorting by Updated At or Position Title columns. Previously, sorting by these columns would result in a 400 Bad Request error due to a schema mismatch in the validation layer.
+- Update project documentation to accurately reflect the current implementation, including web framework (ElysiaJS), database (SQLite), and detailed project structure.
+
 ## 0.2.0
 
 ### Minor Changes
