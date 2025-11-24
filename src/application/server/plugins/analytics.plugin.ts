@@ -8,6 +8,7 @@ import {
 } from "#src/domain/use-cases/analytics.ts";
 import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
 import { analyticsPage } from "#src/presentation/pages/analytics.ts";
+import { processEnv } from "../../../../processEnvFacade.ts";
 
 /**
  * Analytics plugin - provides analytics dashboard and visualizations
@@ -58,6 +59,7 @@ export const createAnalyticsPlugin = new Elysia()
 				navbar: {
 					isDev: isDevelopment(),
 					currentDb: getCurrentDbFromCookie(cookie),
+					jobAppManagerType: processEnv.JOB_APP_MANAGER_TYPE,
 				},
 			},
 			{

@@ -48,6 +48,7 @@ export const createPagesPlugin = (jobBoardRepository: JobBoardRepository) =>
 					navbar: {
 						isDev: isDevelopment(),
 						currentDb: getCurrentDbFromCookie(cookie),
+						jobAppManagerType: processEnv.JOB_APP_MANAGER_TYPE,
 					},
 				});
 			},
@@ -59,6 +60,7 @@ export const createPagesPlugin = (jobBoardRepository: JobBoardRepository) =>
 				navbar: {
 					isDev: isDevelopment(),
 					currentDb: getCurrentDbFromCookie(cookie),
+					jobAppManagerType: processEnv.JOB_APP_MANAGER_TYPE,
 				},
 			});
 		});

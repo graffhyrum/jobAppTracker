@@ -3,10 +3,15 @@ import { PAGE_CONFIG } from "./pageConfig.ts";
 export type NavbarOptions = {
 	isDev?: boolean;
 	currentDb?: "test" | "prod";
+	jobAppManagerType?: "test" | "prod";
 };
 
 export function navbar(options: NavbarOptions = {}): string {
-	const { isDev = false, currentDb = "prod" } = options;
+	const {
+		isDev = false,
+		currentDb = "prod",
+		jobAppManagerType = "test",
+	} = options;
 	const {
 		brand,
 		links: { home, analytics, health, api },
@@ -60,7 +65,7 @@ export function navbar(options: NavbarOptions = {}): string {
 				</button>
 			</li>
 		</ul>
-		${isDev ? dbSelector : ""}
+		${isDev && jobAppManagerType !== "prod" ? dbSelector : ""}
 	</div>
 </nav>`;
 }

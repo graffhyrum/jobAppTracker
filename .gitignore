@@ -52,4 +52,4 @@ playwright-report
 # Automatic Workspace Config
 **/.well-known/appspecific/com.chrome.devtools.json
 !/plans/
-/src/domain/entities/pathrise-schema.ts
+/src/domain/entities/baseData-schema.ts

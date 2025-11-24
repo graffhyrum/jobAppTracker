@@ -107,6 +107,10 @@
 	vertical-align: top;
 }
 
+.status-badge {
+	padding: 2%;
+}
+
 /* Status badges in pipeline table - uses component styles from badges.css */
 .status-badge.active {
 	background-color: var(--color-accent-primary-light);
