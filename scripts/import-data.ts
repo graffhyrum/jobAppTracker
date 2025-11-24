@@ -665,7 +665,9 @@ function logImportSummary(statistics: ImportStatistics): void {
 }
 
 // Run the import
-importData().catch((error) => {
+try {
+	await importData();
+} catch (error) {
 	console.error("Fatal error during import:", error);
 	process.exit(1);
-});
+}
