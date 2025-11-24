@@ -167,7 +167,7 @@ class ChangesetSyncAgent {
 		}
 
 		const content = `---
-"job-app-tracker": ${changeType}
+"jobapptracker": ${changeType}
 ---
 
 ${description}
