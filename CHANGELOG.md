@@ -1,5 +1,17 @@
 # jobapptracker
 
+## 0.3.0
+
+### Minor Changes
+
+- 364854f: Refactor theme management system with modular architecture and bundled theme manager for improved performance and maintainability.
+- 364854f: Add import data script for bulk data migration and initialization capabilities.
+- 364854f: Add changeset synchronization agent for automated changelog management and git change tracking.
+
+### Patch Changes
+
+- 364854f: Update project dependencies to latest versions including security patches and performance improvements.
+
 ## 0.2.1
 
 ### Patch Changes

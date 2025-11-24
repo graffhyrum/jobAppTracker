@@ -1,6 +1,6 @@
 {
 	"name": "jobapptracker",
-	"version": "0.2.1",
+	"version": "0.3.0",
 	"module": "src/index.ts",
 	"repository": "https://github.com/graffhyrum/jobapptracker",
 	"dependencies": {
