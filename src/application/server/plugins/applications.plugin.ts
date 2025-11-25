@@ -10,7 +10,6 @@ import {
 } from "#src/application/server/utils/application-route-helpers.ts";
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
-import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
 import {
 	renderApplicationDetailsEdit,
 	renderApplicationDetailsView,
@@ -107,7 +106,6 @@ export const createApplicationsPlugin = (
 				return needsFullPage
 					? applicationDetailsPage(result.value, {
 							navbar: {
-								isDev: isDevelopment(),
 								currentDb: getCurrentDbFromCookie(cookie),
 							},
 						})
@@ -352,6 +350,78 @@ export const createApplicationsPlugin = (
 				return formAndPipelineContent([], jobBoards);
 			},
 		)
+		// POST /applications/import-data - Executes data import script
+		.post("/import-data", async ({ set }) => {
+			try {
+				// Execute the import script in a child process
+				const { spawn } = await import("node:child_process");
+
+				const childProcess = spawn("bun", ["./scripts/import-data.ts"], {
+					stdio: ["ignore", "pipe", "pipe"],
+					cwd: process.cwd(),
+				});
+
+				let stdout = "";
+				let stderr = "";
+
+				// Collect stdout and stderr
+				childProcess.stdout?.on("data", (data) => {
+					stdout += data.toString();
+				});
+
+				childProcess.stderr?.on("data", (data) => {
+					stderr += data.toString();
+				});
+
+				// Wait for process to complete
+				await new Promise<void>((resolve, reject) => {
+					childProcess.on("close", (code) => {
+						if (code === 0) {
+							resolve();
+						} else {
+							reject(new Error(`Process exited with code ${code}`));
+						}
+					});
+					childProcess.on("error", reject);
+				});
+
+				// Return HTML with console output script
+				set.headers["Content-Type"] = "text/html";
+				return `
+						<script>
+							console.log("=== BaseData Import Script Output ===");
+							console.log("STDOUT:");
+							console.log(${JSON.stringify(stdout)});
+							if (${JSON.stringify(stderr)}) {
+								console.log("STDERR:");
+								console.log(${JSON.stringify(stderr)});
+							}
+							console.log("=== End Import Output ===");
+							// Refresh the page after a short delay to show updated data
+							setTimeout(() => {
+								window.location.reload();
+							}, 2000);
+						</script>
+						<div class="success-message">
+							Import script executed successfully. Check browser console for output. Page will refresh in 2 seconds...
+						</div>
+					`;
+			} catch (error) {
+				console.error("Error executing import script:", error);
+				set.status = 500;
+				set.headers["Content-Type"] = "text/html";
+				return `
+						<script>
+							console.error("=== BaseData Import Script Error ===");
+							console.error(${JSON.stringify(error instanceof Error ? error.message : String(error))});
+							console.error("=== End Import Error ===");
+						</script>
+						<div class="error-message">
+							Error executing import script: ${error instanceof Error ? error.message : String(error)}. Check browser console for details.
+						</div>
+					`;
+			}
+		})
 		// POST /applications/generate - Generates random applications
 		.post(
 			"/generate",

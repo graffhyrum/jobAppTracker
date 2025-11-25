@@ -6,7 +6,6 @@ import {
 	computeDefaultDateRange,
 	filterApplicationsByDateRange,
 } from "#src/domain/use-cases/analytics.ts";
-import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
 import { analyticsPage } from "#src/presentation/pages/analytics.ts";
 
 /**
@@ -56,7 +55,6 @@ export const createAnalyticsPlugin = new Elysia()
 			analytics,
 			{
 				navbar: {
-					isDev: isDevelopment(),
 					currentDb: getCurrentDbFromCookie(cookie),
 				},
 			},

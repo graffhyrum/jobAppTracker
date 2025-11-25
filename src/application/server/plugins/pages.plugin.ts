@@ -3,7 +3,6 @@ import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selec
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import { createJobBoardRepositoryPlugin } from "#src/application/server/plugins/jobBoardRepository.plugin.ts";
 import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
-import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
 import { healthcheckPage } from "#src/presentation/pages/healthcheck.ts";
 import { homepagePage } from "#src/presentation/pages/homepage.ts";
 import { processEnv } from "../../../../processEnvFacade.ts";
@@ -46,7 +45,6 @@ export const createPagesPlugin = (jobBoardRepository: JobBoardRepository) =>
 				set.headers["Content-Type"] = "text/html";
 				return homepagePage(applications, jobBoards, {
 					navbar: {
-						isDev: isDevelopment(),
 						currentDb: getCurrentDbFromCookie(cookie),
 					},
 				});
@@ -57,7 +55,6 @@ export const createPagesPlugin = (jobBoardRepository: JobBoardRepository) =>
 			set.headers["Content-Type"] = "text/html";
 			return healthcheckPage(dbStatus, processEnv, {
 				navbar: {
-					isDev: isDevelopment(),
 					currentDb: getCurrentDbFromCookie(cookie),
 				},
 			});

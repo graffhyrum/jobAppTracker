@@ -1,3 +1,4 @@
+import { getEntries } from "#rootTypes/entries.ts";
 import { type LayoutOptions, layout } from "../components/layout";
 
 export const healthcheckPage = (
@@ -6,6 +7,24 @@ export const healthcheckPage = (
 	layoutOptions: LayoutOptions = {},
 ): string => {
 	const content = `
+		<style>
+			.env-vars-section {
+				margin-bottom: 20px;
+				padding-bottom: 15px;
+				border-bottom: 1px solid #eee;
+			}
+			.env-vars-section:last-child {
+				border-bottom: none;
+				margin-bottom: 0;
+			}
+			.env-vars-section h4 {
+				margin: 0 0 10px 0;
+				color: #666;
+				font-size: 14px;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+			}
+		</style>
 		<div class="health-status">
 			<h1 data-testid="page-title">System Health Check</h1>
 
@@ -30,7 +49,14 @@ export const healthcheckPage = (
 			<h3>Environment Variables</h3>
 				<details>
 					<summary>Click to toggle</summary>
-					${recordToHtml(exposedProcessVariables)}
+					<div class="env-vars-section">
+						<h4>Application Variables</h4>
+						${recordToHtml(filterApplicationVars(exposedProcessVariables))}
+					</div>
+					<div class="env-vars-section">
+						<h4>Other Variables</h4>
+						${recordToHtml(filterOtherVars(exposedProcessVariables))}
+					</div>
 				</details>
 
 			</div>
@@ -49,4 +75,33 @@ function recordToHtml(record: Record<string, unknown>): string {
 	return Object.entries(record)
 		.map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
 		.join("");
+}
+
+const applicationVars = [
+	"BASE_URL",
+	"PORT",
+	"JOB_APP_MANAGER_TYPE",
+	"BROWSER_EXTENSION_API_KEY",
+	"NODE_ENV",
+] as const;
+const appVarsSet = new Set(applicationVars);
+
+function filterApplicationVars(
+	record: Record<string, unknown>,
+): Record<string, unknown> {
+	return Object.fromEntries(
+		getEntries(record).filter(([key]) =>
+			appVarsSet.has(key as (typeof applicationVars)[number]),
+		),
+	);
+}
+
+function filterOtherVars(
+	record: Record<string, unknown>,
+): Record<string, unknown> {
+	return Object.fromEntries(
+		getEntries(record).filter(
+			([key]) => !appVarsSet.has(key as (typeof applicationVars)[number]),
+		),
+	);
 }

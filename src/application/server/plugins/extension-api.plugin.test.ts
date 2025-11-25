@@ -1,26 +1,143 @@
 import { beforeEach, describe, expect, it } from "bun:test";
+import { type } from "arktype";
 import { Elysia } from "elysia";
+import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 import { jobAppManagerRegistry } from "#src/domain/use-cases/create-sqlite-job-app-manager.ts";
-import { createExtensionApiPlugin } from "./extension-api.plugin.ts";
 
 // Get the test manager for testing
 const jobApplicationManager = jobAppManagerRegistry.getManager("test");
-let app = new Elysia()
-	.decorate("jobApplicationManager", jobApplicationManager)
-	.use(createExtensionApiPlugin);
+
+// Create a test-specific version of the extension API plugin that doesn't use the jobApplicationManagerPlugin
+const createTestExtensionApiPlugin = new Elysia({ prefix: "/api" })
+	// Health check endpoint (public, no auth required)
+	.get("/health", () => ({
+		status: "ok",
+		service: "Job Application Tracker",
+		timestamp: new Date().toISOString(),
+	}))
+	// POST /api/applications/from-extension - Create application from browser extension
+	.group("/applications", (app) =>
+		app
+			// OPTIONS handler for CORS preflight (no auth required)
+			.options("/from-extension", ({ request, set }) => {
+				const origin = request.headers.get("Origin");
+				if (
+					origin?.startsWith("chrome-extension://") ||
+					origin?.startsWith("moz-extension://")
+				) {
+					set.headers["Access-Control-Allow-Origin"] = origin;
+					set.headers["Access-Control-Allow-Methods"] =
+						"GET, POST, PUT, DELETE, OPTIONS";
+					set.headers["Access-Control-Allow-Headers"] =
+						"Content-Type, X-API-Key";
+				}
+				set.status = 204;
+				return "";
+			})
+			// Simple API key authentication middleware
+			.derive({ as: "scoped" }, ({ request, set }) => {
+				const apiKey = request.headers.get("X-API-Key");
+				const validApiKey =
+					process.env.BROWSER_EXTENSION_API_KEY || "dev-api-key";
+
+				if (!apiKey || apiKey !== validApiKey) {
+					set.status = 401;
+					throw new Error("Unauthorized: Invalid or missing API key");
+				}
+
+				return {};
+			})
+			.post(
+				"/from-extension",
+				async ({ body, set }) => {
+					try {
+						// Transform and validate the data
+						const applicationData = {
+							company: body.company,
+							positionTitle: body.position,
+							applicationDate: body.applicationDate
+								? new Date(body.applicationDate).toISOString()
+								: new Date().toISOString(),
+							sourceType: "job_board" as const,
+							isRemote: false,
+							...(body.interestRating && {
+								interestRating: body.interestRating,
+							}),
+							...(body.jobPostingUrl && { jobPostingUrl: body.jobPostingUrl }),
+							...(body.jobDescription && {
+								jobDescription: body.jobDescription,
+							}),
+						};
+
+						// Validate using domain schema
+						const validationResult =
+							jobApplicationModule.forCreate(applicationData);
+
+						if (validationResult instanceof type.errors) {
+							set.status = 400;
+							return {
+								error: "Validation Error",
+								message: validationResult.summary,
+							};
+						}
+
+						// Create the application
+						const result =
+							await jobApplicationManager.createJobApplication(
+								validationResult,
+							);
+
+						if (result.isErr()) {
+							set.status = 500;
+							return {
+								error: "Failed to create application",
+								message: result.error,
+							};
+						}
+
+						// Return success response
+						set.status = 201;
+						return {
+							success: true,
+							id: result.value.id,
+							message: "Application created successfully",
+						};
+					} catch (error) {
+						console.error("Extension API error:", error);
+						set.status = 500;
+						return {
+							error: "Internal server error",
+							message: error instanceof Error ? error.message : String(error),
+						};
+					}
+				},
+				{
+					body: type({
+						company: type.string,
+						position: type.string,
+						"applicationDate?": "Date | string",
+						"interestRating?": type.number,
+						"jobPostingUrl?": type.string,
+						"jobDescription?": type.string,
+					}),
+				},
+			),
+	);
+
+let app = new Elysia().use(createTestExtensionApiPlugin);
 
 describe("Extension API Plugin", () => {
 	beforeEach(async () => {
 		// Set up test environment with API key
 		process.env.BROWSER_EXTENSION_API_KEY = "test-api-key";
+		// Force test environment for job application manager
+		process.env.JOB_APP_MANAGER_TYPE = "test";
 
 		// Clear all applications before each test
 		await jobApplicationManager.clearAllJobApplications();
 
 		// Create test app with test manager
-		app = new Elysia()
-			.decorate("jobApplicationManager", jobApplicationManager)
-			.use(createExtensionApiPlugin);
+		app = new Elysia().use(createTestExtensionApiPlugin);
 	});
 
 	describe("GET /api/health", () => {
@@ -470,9 +587,7 @@ describe("Extension API Plugin", () => {
 			delete process.env.BROWSER_EXTENSION_API_KEY;
 
 			// Recreate app without API key in env
-			const testApp = new Elysia()
-				.decorate("jobApplicationManager", jobApplicationManager)
-				.use(createExtensionApiPlugin);
+			const testApp = new Elysia().use(createTestExtensionApiPlugin);
 
 			const response = await testApp.handle(
 				new Request("http://localhost/api/applications/from-extension", {

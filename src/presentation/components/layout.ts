@@ -31,6 +31,7 @@ export const layout = (
 	<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<link rel="alternate icon" href="/assets/favicon.svg" type="image/svg+xml">
 	<script>
+		// Early theme application to prevent flash
 		(function() {
 			const THEME_STORAGE_KEY = "job-app-tracker-theme";
 			const DARK_THEME = "dark";
@@ -60,6 +61,7 @@ export const layout = (
 	<div class="main-content">
 		${content}
 	</div>
-	<script src="/scripts/theme-client.js"></script>
+	<script src="/scripts/feature-flags.js"></script>
+	<script src="/scripts/theme-manager-bundled.js"></script>
 </body>
 </html>`;

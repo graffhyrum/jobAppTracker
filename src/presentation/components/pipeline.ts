@@ -42,6 +42,7 @@ export function pipelineComponent(
 						type="search"
 						id="search-filter"
 						name="q"
+						class="filter-input"
 						data-testid="search-filter"
 						placeholder="Search applications..."
 						aria-label="Search applications"
@@ -85,6 +86,18 @@ export function pipelineComponent(
 						</button>
 						<span id="generate-indicator" class="htmx-indicator" aria-hidden="true">Generating…</span>
 					</form>
+					<button
+						class="btn btn-primary"
+						data-testid="import-data-btn"
+						hx-post="/applications/import-data"
+						hx-target="#form-and-pipeline-container"
+						hx-swap="innerHTML"
+						hx-indicator="#import-data-indicator"
+						aria-label="Import data"
+					>
+						Import Data
+					</button>
+					<span id="import-data-indicator" class="htmx-indicator" aria-hidden="true">Importing…</span>
 					<button
 						class="btn btn-danger"
 						data-testid="delete-all-btn"
