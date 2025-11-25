@@ -108,7 +108,9 @@
 }
 
 .status-badge {
-	padding: 2%;
+	padding: 4px 8px;
+	display: inline-block;
+	white-space: nowrap;
 }
 
 /* Status badges in pipeline table - uses component styles from badges.css */
