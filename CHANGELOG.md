@@ -1,5 +1,15 @@
 # jobapptracker
 
+## 0.4.0
+
+### Minor Changes
+
+- Add comprehensive browser-based feature flags system with localStorage persistence and console API for runtime configuration. Include minified pipeline client script for improved performance and enhanced test tool visibility controls.
+
+### Patch Changes
+
+- Improve test coverage and add database selector functionality for enhanced development testing capabilities. Update project documentation and screenshots to reflect current application state.
+
 ## 0.3.0
 
 ### Minor Changes
