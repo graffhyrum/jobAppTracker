@@ -53,8 +53,7 @@ src/
 │   ├── entities/
 │   └── use-cases/
 ├── infrastructure/
-│   ├── repositories/
-│   └── pdf/
+│   └── repositories/
 └── presentation/
     ├── routes/
     └── templates/
@@ -74,7 +73,6 @@ tests/
 
 ### Infrastructure Layer Tests
 - **Repository Implementation**: Data persistence, querying, error handling
-- **PDF Form Filler**: Template validation, field mapping, form generation
 
 ## Integration Test Plan
 
@@ -90,11 +88,7 @@ tests/
 - Response format consistency
 - Authentication and authorization (future)
 
-### PDF Generation Integration
-- End-to-end form filling with real templates
-- Complex field mapping scenarios
-- Output PDF validation
-- Performance with large datasets
+
 
 ## End-to-End Test Plan
 
@@ -112,11 +106,7 @@ tests/
 - Verify status changes reflect in dashboard
 - Test pipeline customization functionality
 
-#### PDF Generation
-- Upload PDF template and configure mappings
-- Generate filled PDF from application data
-- Download and validate PDF content
-- Handle multiple template scenarios
+
 
 #### Dashboard & Task Management
 - View overdue applications prominently
@@ -133,7 +123,7 @@ tests/
 
 ### Fixtures
 - **Sample Applications**: Basic, with notes, overdue, and inactive scenarios
-- **PDF Templates**: Standard form templates with field mappings
+
 - **Pipeline Configurations**: Default and custom pipeline setups
 - **Notes Data**: Various note content and timestamp scenarios
 
@@ -151,11 +141,7 @@ tests/
 - Monitor memory usage and resource consumption
 - Test database performance with realistic data volumes
 
-### PDF Generation Performance  
-- Generate PDFs within acceptable time limits (<5 seconds)
-- Test with various template sizes and complexity
-- Measure memory usage during PDF operations
-- Validate performance with concurrent PDF generation
+
 
 ## Test Execution Strategy
 
@@ -218,7 +204,6 @@ jobs:
 
 ### Test Doubles
 - **Repository Mocks**: Mock data persistence layer
-- **PDF Service Mocks**: Mock form filling operations
 - **Time Mocks**: Consistent timestamp generation
 - **File System Mocks**: Simulate file operations
 

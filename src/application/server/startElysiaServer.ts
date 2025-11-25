@@ -74,7 +74,7 @@ export function startElysiaServer() {
 						title: "Job Application Tracker API",
 						version: "1.0.0",
 						description:
-							"A single-user job application tracking system with customizable pipelines and PDF form filling support",
+							"A single-user job application tracking system with customizable pipelines",
 					},
 					tags: [
 						{

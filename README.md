@@ -1,24 +1,27 @@
 # Job Application Tracker
 
-A lightweight, single-user job application tracking system built with TypeScript and Bun. Features customizable pipeline workflows, PDF form filling capabilities, and integrated task management.
+A lightweight, single-user job application tracking system built with TypeScript and Bun. Features customizable pipeline workflows and integrated task management.
 
 ![Screenshot of the application](./docs/screenshots/home.png)
 
 ## Features
 
-- **Application Management**: Track job applications with custom fields including company, position, status, interest rating, and timestamped notes
+- **Application Management**: Track job applications with company, position, status, interest rating, and timestamped notes
 - **Customizable Pipeline**: Two-category status system (active/inactive) with configurable workflow stages
+- **Contact Management**: Track contacts associated with job applications
+- **Interview Stages**: Monitor interview progress through customizable stages
+- **Analytics Dashboard**: Visual insights into job search metrics and trends
 - **Browser Extension**: Quick-capture job postings from LinkedIn, Indeed, Greenhouse, Lever and other job boards
-- **PDF Integration**: Fill PDF forms automatically using application data with extensible template system
-- **Task Management**: Dashboard with due/overdue items and integrated todo functionality
-- **Standalone Executable**: Compiles to a single executable file for easy distribution
+
+- **Feature Flags**: Browser-based feature toggles for testing and development tools
+- **Comprehensive Testing**: Unit tests with coverage and E2E tests using Playwright
 
 ## Architecture
 
 Built using hexagonal architecture principles with clean separation of concerns:
 - **Domain Layer**: Core business logic and entities
 - **Application Layer**: Use cases and API routes
-- **Infrastructure Layer**: Database, PDF processing, file system
+- **Infrastructure Layer**: Database, file system
 - **Presentation Layer**: HTMX-powered web interface
 
 See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diagrams.
@@ -31,7 +34,10 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 - **Web Framework**: ElysiaJS with HTMX
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
-- **PDF Processing**: PDF-lib
+
+- **Testing**: Playwright (E2E), Bun Test (unit)
+- **Code Quality**: Biome (linting, formatting)
+- **Git Hooks**: Husky with lint-staged
 
 ## Getting Started
 
@@ -42,7 +48,7 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/graffhyrum/jobapptracker.git
 cd jobAppTracker
 
 # Install dependencies
@@ -55,31 +61,41 @@ cp .env.example .env
 
 ### Environment Variables
 
-The following environment variables are required:
+The following environment variables are available:
 
-| Variable | Type | Description | Example |
+| Variable | Type | Description | Default |
 |----------|------|-------------|---------|
 | `BASE_URL` | string | Base URL for the application | `http://localhost` |
 | `PORT` | number | Port number for the server | `3000` |
+| `JOB_APP_MANAGER_TYPE` | string | Database mode (`prod` or `test`) | `prod` |
 | `BROWSER_EXTENSION_API_KEY` | string | API key for browser extension authentication | `dev-api-key` |
 
 ### Development
 
 ```bash
-# Run in development mode
+# Run in development mode with watch
 bun dev
 
-# Run tests
-bun test
+# Run all tests (unit + E2E)
+bun test:all
+
+# Run unit tests only
+bun test:unit
+
+# Run E2E tests
+bun test:e2e
 
 # Build for production
 bun build
+
+# Full code quality check
+bun vet
 ```
 
 ### Usage
 
-1. Start the application: `bun run src/index.ts`
-2. Open your browser to the host and port defined in `.env`
+1. Start the application: `bun dev`
+2. Open your browser to the mapped host and port.
 3. Begin tracking your job applications!
 
 ## Feature Flags
@@ -191,7 +207,7 @@ src/
 │   ├── styles/              # CSS files
 │   ├── types/               # Presentation layer types
 │   └── utils/               # Presentation utilities
-├── forms/                    # PDF form templates and mappings
+
 ├── helpers/                  # General utility functions
 └── index.ts                 # Application entry point
 
@@ -216,8 +232,21 @@ tests/                        # Test files (colocated with source)
 
 ## Development Status
 
-This project is currently in development. See [docs/PRD.md](./docs/PRD.md) for the complete roadmap and feature specifications.
+**Current Version**: 0.4.0
+
+This project is actively developed with regular releases. See [CHANGELOG.md](./CHANGELOG.md) for version history and [docs/PRD.md](./docs/PRD.md) for the complete roadmap and feature specifications.
 
 ## License
 
 Private project - not licensed for distribution.
+
+## Contributing
+
+This project uses conventional development workflows:
+
+- **Code Style**: Configured with Biome (see biome.json)
+- **Testing**: Place tests next to source files (*.test.ts)
+- **Git Hooks**: Pre-commit hooks run code formatting and linting
+- **Changesets**: Use `@changesets/cli` for version management
+
+See [AGENTS.md](./AGENTS.md) for detailed development guidelines and available commands.

@@ -418,6 +418,52 @@ class SQLiteConnection {
             CREATE INDEX IF NOT EXISTS idx_job_boards_domain
                 ON job_boards(rootDomain)
         `);
+
+		// Analytics performance indexes
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_applications_remote
+                ON job_applications(isRemote)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_applications_source
+                ON job_applications(sourceType)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_applications_date_range
+                ON job_applications(applicationDate, updatedAt)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_contacts_channel
+                ON contacts(channel)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_contacts_role
+                ON contacts(role)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_contacts_response
+                ON contacts(responseReceived, outreachDate)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_interview_type
+                ON interview_stages(interviewType)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_interview_round
+                ON interview_stages(round)
+        `);
+
+		this.db.run(`
+            CREATE INDEX IF NOT EXISTS idx_interview_final
+                ON interview_stages(isFinalRound)
+        `);
 	}
 
 	async withConnection<T>(operation: (db: Database) => Promise<T>): Promise<T> {
