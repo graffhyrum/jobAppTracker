@@ -36,8 +36,10 @@
 	"private": true,
 	"scripts": {
 		"start": "bun run dist/jobapptracker",
-		"dev": "bun --watch run src/index.ts",
-		"build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
+		"dev": "bun run build:scripts && bun --watch run src/index.ts",
+		"build": "bun run build:scripts && bun build src/index.ts --target bun --outfile dist/jobapptracker",
+		"build:scripts": "bun build src/presentation/scripts/feature-flags.ts --target browser --outfile src/presentation/scripts/feature-flags.js --minify && bun build src/presentation/scripts/pipeline-client.ts --target browser --outfile src/presentation/scripts/pipeline-client.js --minify",
+		"watch:scripts": "bun --watch src/presentation/scripts/feature-flags.ts src/presentation/scripts/pipeline-client.ts --bun \"bun run build:scripts\"",
 		"test:all": "bun test:unit && bun test:e2e",
 		"test:unit": "bun test",
 		"test:unit:ai": "CLAUDECODE=1 bun test",

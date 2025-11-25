@@ -7,21 +7,13 @@
  * and creates missing changeset files as needed.
  */
 
-import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 interface GitChange {
 	file: string;
-	status: string;
+	status: "A" | "M" | "D" | "R";
 	type: "source" | "config" | "docs" | "test" | "infra";
-}
-
-interface ChangesetEntry {
-	file: string;
-	content: string;
-	changeType: "patch" | "minor" | "major";
-	description: string;
 }
 
 class ChangesetSyncAgent {
@@ -31,8 +23,8 @@ class ChangesetSyncAgent {
 	async run(): Promise<void> {
 		console.log("🔍 Analyzing changes for changeset sync...");
 
-		const changes = this.getGitChanges();
-		const existingChangesets = this.getExistingChangesets();
+		const changes = await this.getGitChanges();
+		const existingChangesets = await this.getExistingChangesets();
 		const changelogEntries = this.getChangelogEntries();
 
 		console.log(`📊 Found ${changes.length} changed files`);
@@ -60,25 +52,35 @@ class ChangesetSyncAgent {
 		console.log("🎉 Changeset sync complete!");
 	}
 
-	private getGitChanges(): GitChange[] {
+	private async getGitChanges(): Promise<GitChange[]> {
 		try {
-			// Get changes since last release tag or main branch
-			const gitOutput = execSync("git diff --name-status HEAD~1 HEAD", {
-				encoding: "utf8",
-			}).trim();
+			// Get changes since the last release tag or main branch
+			const proc = Bun.spawn(
+				["git", "diff", "--name-status", "HEAD~1", "HEAD"],
+				{
+					stdout: "pipe",
+					stderr: "ignore",
+				},
+			);
 
-			if (!gitOutput) return [];
+			await proc.exited;
+			const gitOutput = await new Response(proc.stdout).text();
 
-			return gitOutput.split("\n").map((line) => {
-				const [status, ...fileParts] = line.split("\t");
-				const file = fileParts.join("\t");
+			if (!gitOutput.trim()) return [];
 
-				return {
-					file,
-					status,
-					type: this.categorizeFile(file),
-				};
-			});
+			return gitOutput
+				.trim()
+				.split("\n")
+				.map((line) => {
+					const [status, ...fileParts] = line.split("\t");
+					const file = fileParts.join("\t");
+
+					return {
+						file,
+						status,
+						type: this.categorizeFile(file),
+					} as GitChange;
+				});
 		} catch (error) {
 			console.warn("Could not get git changes, assuming no changes:", error);
 			return [];
@@ -97,19 +99,32 @@ class ChangesetSyncAgent {
 		return "infra";
 	}
 
-	private getExistingChangesets(): string[] {
+	private async getExistingChangesets(): Promise<string[]> {
 		if (!existsSync(this.changesetDir)) return [];
 
 		try {
-			const files = execSync(
-				`find ${this.changesetDir} -name "*.md" -not -name "README.md"`,
+			const proc = Bun.spawn(
+				[
+					"find",
+					this.changesetDir,
+					"-name",
+					"*.md",
+					"-not",
+					"-name",
+					"README.md",
+				],
 				{
-					encoding: "utf8",
+					stdout: "pipe",
+					stderr: "ignore",
 				},
-			)
-				.trim()
-				.split("\n")
-				.filter(Boolean);
+			);
+
+			await proc.exited;
+			const output = await new Response(proc.stdout).text();
+
+			if (!output.trim()) return [];
+
+			const files = output.trim().split("\n").filter(Boolean);
 
 			return files.map((file) => {
 				const content = readFileSync(file, "utf8");
@@ -161,7 +176,7 @@ class ChangesetSyncAgent {
 		const fileName = `${timestamp}-${this.sanitizeFileName(change.file)}.md`;
 		const filePath = join(this.changesetDir, fileName);
 
-		// Ensure changeset directory exists
+		// Ensure the changeset directory exists
 		if (!existsSync(this.changesetDir)) {
 			mkdirSync(this.changesetDir, { recursive: true });
 		}
@@ -180,9 +195,13 @@ ${description}
 	private determineChangeType(change: GitChange): "patch" | "minor" | "major" {
 		// Major changes
 		if (change.file.includes("package.json") && change.status === "M") {
-			const packageContent = readFileSync("package.json", "utf8");
-			if (packageContent.includes('"version"')) {
-				return "major";
+			try {
+				const packageContent = readFileSync("package.json", "utf8");
+				if (packageContent.includes('"version"')) {
+					return "major";
+				}
+			} catch {
+				// File doesn't exist or can't be read
 			}
 		}
 
@@ -202,7 +221,7 @@ ${description}
 			R: "Renamed",
 		};
 
-		const action = actions[change.status as keyof typeof actions] || "Changed";
+		const action = actions[change.status] || "Changed";
 		const fileName = change.file.split("/").pop() || change.file;
 
 		return `${action} ${change.type} file: ${fileName}`;
@@ -217,9 +236,6 @@ ${description}
 }
 
 // Run the agent
-if (import.meta.main) {
-	const agent = new ChangesetSyncAgent();
-	await agent.run().catch(console.error);
-}
+await new ChangesetSyncAgent().run();
 
 export { ChangesetSyncAgent };

@@ -10,7 +10,6 @@ import {
 } from "#src/application/server/utils/application-route-helpers.ts";
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
-import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
 import {
 	renderApplicationDetailsEdit,
 	renderApplicationDetailsView,
@@ -26,7 +25,6 @@ import {
 	createApplicationBodySchema,
 	searchQuerySchema,
 } from "#src/presentation/schemas/application-routes.schemas.ts";
-import { processEnv } from "../../../../processEnvFacade.ts";
 
 /**
  * Factory function to create applications plugin with injected dependencies.
@@ -108,9 +106,7 @@ export const createApplicationsPlugin = (
 				return needsFullPage
 					? applicationDetailsPage(result.value, {
 							navbar: {
-								isDev: isDevelopment(),
 								currentDb: getCurrentDbFromCookie(cookie),
-								jobAppManagerType: processEnv.JOB_APP_MANAGER_TYPE,
 							},
 						})
 					: renderApplicationDetailsView(result.value);

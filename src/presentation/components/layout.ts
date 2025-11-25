@@ -61,6 +61,7 @@ export const layout = (
 	<div class="main-content">
 		${content}
 	</div>
+	<script src="/scripts/feature-flags.js"></script>
 	<script src="/scripts/theme-manager-bundled.js"></script>
 </body>
 </html>`;
