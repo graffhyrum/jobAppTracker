@@ -1,12 +1,11 @@
 import { PAGE_CONFIG } from "./pageConfig.ts";
 
 export type NavbarOptions = {
-	isDev?: boolean;
 	currentDb?: "test" | "prod";
 };
 
 export function navbar(options: NavbarOptions = {}): string {
-	const { isDev = false, currentDb = "prod" } = options;
+	const { currentDb = "prod" } = options;
 	const {
 		brand,
 		links: { home, analytics, health, api },
@@ -60,7 +59,7 @@ export function navbar(options: NavbarOptions = {}): string {
 				</button>
 			</li>
 		</ul>
-		${isDev ? dbSelector : ""}
+		${dbSelector}
 	</div>
 </nav>`;
 }

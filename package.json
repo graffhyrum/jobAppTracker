@@ -1,33 +1,34 @@
 {
 	"name": "jobapptracker",
-	"version": "0.2.1",
+	"version": "0.4.0",
 	"module": "src/index.ts",
 	"repository": "https://github.com/graffhyrum/jobapptracker",
 	"dependencies": {
 		"@elysiajs/html": "^1.4.0",
-		"@elysiajs/static": "^1.4.6",
+		"@elysiajs/static": "^1.4.7",
 		"@elysiajs/swagger": "^1.3.1",
-		"@typescript/native-preview": "^7.0.0-dev.20251111.1",
-		"arktype": "^2.1.26",
+		"arktype": "^2.1.27",
 		"dotenv": "^17.2.3",
-		"elysia": "^1.4.15"
+		"elysia": "^1.4.16"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.2.2",
 		"@changesets/cli": "^2.29.7",
 		"@faker-js/faker": "^10.1.0",
 		"@happy-dom/global-registrator": "^20.0.10",
-		"@playwright/test": "^1.56.1",
-		"@types/bun": "^1.3.2",
-		"@types/node": "^24.10.0",
+		"@playwright/test": "^1.57.0",
+		"@types/bun": "^1.3.3",
+		"@types/node": "^24.10.1",
 		"find-process": "^2.0.0",
 		"htmx.org": "^2.0.8",
 		"husky": "^9.1.7",
-		"lint-staged": "^16.2.6",
-		"memfs": "^4.50.0",
+		"lint-staged": "^16.2.7",
+		"memfs": "^4.51.0",
 		"neverthrow": "^8.2.0",
 		"pdf-lib": "^1.17.1",
-		"tree-kill": "^1.2.2"
+		"tree-kill": "^1.2.2",
+		"typescript": "^5.9.3",
+		"@typescript/native-preview": "^7.0.0-dev.20251125.1"
 	},
 	"lint-staged": {
 		"**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx,vue,astro,svelte}": "biome check --no-errors-on-unmatched --fix"
@@ -35,8 +36,10 @@
 	"private": true,
 	"scripts": {
 		"start": "bun run dist/jobapptracker",
-		"dev": "bun --watch run src/index.ts",
-		"build": "bun build src/index.ts --target bun --outfile dist/jobapptracker",
+		"dev": "bun run build:scripts && bun --watch run src/index.ts",
+		"build": "bun run build:scripts && bun build src/index.ts --target bun --outfile dist/jobapptracker",
+		"build:scripts": "bun build src/presentation/scripts/feature-flags.ts --target browser --outfile src/presentation/scripts/feature-flags.js --minify && bun build src/presentation/scripts/pipeline-client.ts --target browser --outfile src/presentation/scripts/pipeline-client.js --minify",
+		"watch:scripts": "bun --watch src/presentation/scripts/feature-flags.ts src/presentation/scripts/pipeline-client.ts --bun \"bun run build:scripts\"",
 		"test:all": "bun test:unit && bun test:e2e",
 		"test:unit": "bun test",
 		"test:unit:ai": "CLAUDECODE=1 bun test",
@@ -49,7 +52,7 @@
 		"check": "biome check",
 		"fix": "biome check --fix",
 		"fixx": "biome check --fix --unsafe",
-		"typecheck": "tsgo --noEmit",
+		"typecheck": "tsc --noEmit",
 		"vet": "bun fixx && bun typecheck && bun test:all",
 		"prepare": "husky"
 	},

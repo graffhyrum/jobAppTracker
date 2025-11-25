@@ -9,7 +9,10 @@ test.describe("Theme Toggle", () => {
 	test("should display theme toggle button in navbar", async ({ page }) => {
 		const themeToggle = page.getByTestId("theme-toggle");
 		await expect(themeToggle).toBeVisible();
-		await expect(themeToggle).toHaveAttribute("aria-label", "Toggle dark mode");
+		await expect(themeToggle).toHaveAttribute(
+			"aria-label",
+			"Switch to dark mode",
+		);
 	});
 
 	test("should toggle theme when button is clicked", async ({ page }) => {

@@ -179,12 +179,16 @@
 
 /* Database selector styles (dev mode only) */
 .db-selector {
-	display: flex;
+	display: none; /* Hidden by default, shown via feature flag */
 	align-items: center;
 	gap: 10px;
 	padding: 4px 12px;
 	border-radius: 4px;
 	background-color: var(--overlay-light);
+}
+
+.db-selector.visible {
+	display: flex;
 }
 
 .db-selector-label {

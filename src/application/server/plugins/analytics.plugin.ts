@@ -15,7 +15,11 @@ export const createAnalyticsPlugin = new Elysia()
 	.use(contactRepositoryPlugin)
 	.use(interviewStageRepositoryPlugin)
 	.derive(
-		({ jobApplicationManager, contactRepository, interviewStageRepository }) => {
+		({
+			jobApplicationManager,
+			contactRepository,
+			interviewStageRepository,
+		}) => {
 			return {
 				analyticsAggregator: createAnalyticsAggregator(
 					jobApplicationManager,
@@ -53,7 +57,6 @@ export const createAnalyticsPlugin = new Elysia()
 			analytics,
 			{
 				navbar: {
-					isDev: isDevelopment(),
 					currentDb: getCurrentDbFromCookie(cookie),
 				},
 			},

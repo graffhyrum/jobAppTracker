@@ -2,6 +2,8 @@
 
 A lightweight, single-user job application tracking system built with TypeScript and Bun. Features customizable pipeline workflows, PDF form filling capabilities, and integrated task management.
 
+![Screenshot of the application](./docs/screenshots/home.png)
+
 ## Features
 
 - **Application Management**: Track job applications with custom fields including company, position, status, interest rating, and timestamped notes
@@ -59,7 +61,6 @@ The following environment variables are required:
 |----------|------|-------------|---------|
 | `BASE_URL` | string | Base URL for the application | `http://localhost` |
 | `PORT` | number | Port number for the server | `3000` |
-| `JOB_APP_MANAGER_TYPE` | `"prod" \| "test"` | **Required**. Storage backend type:<br/>- `"prod"`: File-based SQLite database (production)<br/>- `"test"`: In-memory SQLite database (testing) | `"prod"` |
 | `BROWSER_EXTENSION_API_KEY` | string | API key for browser extension authentication | `dev-api-key` |
 
 ### Development
@@ -80,6 +81,61 @@ bun build
 1. Start the application: `bun run src/index.ts`
 2. Open your browser to the host and port defined in `.env`
 3. Begin tracking your job applications!
+
+## Feature Flags
+
+The application includes a feature flag system that allows you to enable developer tools and testing features directly from the browser console. By default, the application runs in production mode with all testing tools hidden.
+
+### Available Feature Flags
+
+| Flag | Description | Default |
+|-------|-------------|-----------|
+| `enableTestTools` | Shows database selector and other testing tools in the navigation bar | `false` |
+
+### Browser Console API
+
+Open your browser's developer console (F12) and use the following commands:
+
+```javascript
+// List all available feature flags
+featureFlags.list()
+
+// Get current flag values
+featureFlags.getFlags()
+
+// Enable a specific flag
+featureFlags.enable('enableTestTools')
+
+// Disable a specific flag
+featureFlags.disable('enableTestTools')
+
+// Toggle a flag (enable if disabled, disable if enabled)
+featureFlags.toggle('enableTestTools')
+
+// Reset all flags to defaults
+featureFlags.reset()
+```
+
+### Example Usage
+
+```javascript
+// Enable testing tools to see database selector
+featureFlags.enable('enableTestTools')
+
+// The database selector will now appear in the navigation bar
+// allowing you to switch between test and production databases
+
+// Disable testing tools when done
+featureFlags.disable('enableTestTools')
+```
+
+### Benefits
+
+- **Security by Default**: Production behavior is the default, ensuring no accidental exposure of testing tools
+- **User Control**: Individual users can enable testing tools when needed without server changes
+- **Persistent**: Your feature flag preferences are saved in browser localStorage
+- **Real-time**: Changes take effect immediately without page reload
+- **Extensible**: Easy to add new feature flags for future development tools
 
 ## Browser Extension
 
