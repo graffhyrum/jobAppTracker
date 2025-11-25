@@ -25,7 +25,6 @@
 		"lint-staged": "^16.2.7",
 		"memfs": "^4.51.0",
 		"neverthrow": "^8.2.0",
-		"pdf-lib": "^1.17.1",
 		"tree-kill": "^1.2.2",
 		"typescript": "^5.9.3",
 		"@typescript/native-preview": "^7.0.0-dev.20251125.1"

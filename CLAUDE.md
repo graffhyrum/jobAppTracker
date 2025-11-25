@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Project Overview
 
-A single-user job application tracking system built with TypeScript and Bun, following hexagonal architecture principles. The system tracks job applications through customizable pipelines, supports PDF form filling, and includes integrated task management.
+A single-user job application tracking system built with TypeScript and Bun, following hexagonal architecture principles. The system tracks job applications through customizable pipelines and includes integrated task management.
 
 # Development Commands
 
@@ -46,7 +46,6 @@ bun typecheck               # use Tsc to check for type errors
   - Contains business workflows and validation logic
 
 - **Infrastructure** (`src/infrastructure/`): External adapters
-  - PDF: Form filling using PDF-lib
   - File system operations
 
 - **Presentation** (`src/presentation/`): Web interface
@@ -153,7 +152,6 @@ Pipeline is customizable through admin interface.
   - `@elysiajs/swagger` - OpenAPI documentation
 - **Validation**: ArkType for schemas and type inference (via Standard Schema support)
 - **Error Handling**: NeverThrow Result types
-- **PDF**: PDF-lib for form filling
 - **Testing**: Built-in Bun test runner + Playwright for E2E
 - **Linting**: Biome (replaces ESLint/Prettier)
 
@@ -183,7 +181,6 @@ src/
 - Follows SOLID principles with dependency inversion
 - Entity methods automatically update `lastUpdated` timestamps
 - Status changes trigger category recalculation
-- PDF templates use field mapping configuration for extensibility
 - **IMPORTANT** Always check work at the end with `bun vet`
 
 ## Error Handling Patterns

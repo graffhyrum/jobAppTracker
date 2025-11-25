@@ -56,18 +56,8 @@ classDiagram
         +toJSON()
     }
 
-    class PDFTemplate {
-        +string id
-        +string name
-        +string filePath
-        +Record~string,string~ fieldMappings
-        +Date createdAt
-        +validateMappings()
-    }
-
 JobApplication *-- NotesCollection : contains
 JobApplication *-- ApplicationStatus : has many in statusLog
 NotesCollection *-- NoteCollectionOperations : has
 NotesCollection o-- Note : manages
 JobApplication --> PipelineConfig : uses
-PDFTemplate --> JobApplication : fills from

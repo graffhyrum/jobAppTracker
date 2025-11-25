@@ -1,7 +1,7 @@
 # Job Application Tracker - Product Requirements Document
 
 ## Product Overview
-A single-user, lightweight job application tracking system built with TypeScript and Bun, featuring customizable pipeline workflows, PDF form filling, and integrated task management. Compiles to a standalone executable.
+A single-user, lightweight job application tracking system built with TypeScript and Bun, featuring customizable pipeline workflows and integrated task management. Compiles to a standalone executable.
 
 ## Core Features
 
@@ -24,12 +24,7 @@ A single-user, lightweight job application tracking system built with TypeScript
 - **Pipeline Customization**: Admin interface to modify status lists
 - **Status Transitions**: Move applications between statuses with automatic timestamp tracking
 
-### 3. PDF Form Integration (Open-Closed Design)
-- **Generic Interface**: Extensible for different PDF form types
-- **Field Mapping**: Configure which application fields map to PDF form fields
-- **Template Management**: Store and manage PDF templates with their field mappings
-
-### 4. Integrated Task Management & Dashboard
+### 3. Integrated Task Management & Dashboard
 - **Dashboard View**: 
   - Applications by status (active vs inactive)
   - Due/overdue items prominently displayed on load
@@ -53,7 +48,6 @@ A single-user, lightweight job application tracking system built with TypeScript
 - **Web Framework**: ElysiaJS with HTMX frontend
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
-- **PDF Processing**: PDF-lib
 
 ### [Architecture Overview](architecture.mermaid)
 
@@ -61,7 +55,7 @@ A single-user, lightweight job application tracking system built with TypeScript
 ### [Data Model](dataModel.mermaid)
 
 
-### [PDF Form System Architecture](pdfFiller.mermaid)
+
 
 
 
@@ -125,27 +119,6 @@ type PipelineConfig = {
   toJSON: () => { active: string[], inactive: string[] }
 }
 
-type PDFTemplate = {
-  id: UUID
-  name: string
-  filePath: string
-  fieldMappings: Record<keyof JobApplication, string>
-  createdAt: Date
-}
-
-type PDFFieldInfo = {
-  fieldName: string
-  fieldType: 'text' | 'checkbox' | 'date'
-  required: boolean
-}
-```
-
-### PDF Form Interface
-```typescript
-interface PDFFormFiller {
-  fillForm(application: JobApplication, template: PDFTemplate): ResultAsync<Buffer, PDFError>
-  validateTemplate(templatePath: string): Result<PDFFieldInfo[], PDFError>
-}
 ```
 
 ## Development Phases
@@ -162,13 +135,7 @@ interface PDFFormFiller {
 3. Pipeline customization interface
 4. Advanced filtering
 
-### Phase 3: PDF Integration
-1. PDF form interface design
-2. Template management
-3. Field mapping configuration
-4. Form generation
-
-### Phase 4: Polish & Distribution
+### Phase 3: Polish & Distribution
 1. Executable compilation setup
 2. Import/export features
 3. Performance optimization
@@ -186,7 +153,7 @@ interface PDFFormFiller {
 - [x] Use cases for CRUD operations and pipeline management
 - [x] Click-to-edit functionality for job application fields
 - [x] Interactive job application table with sorting and filtering
-- [ ] Generate filled PDF forms from application data
+
 - [ ] Display due/overdue tasks on dashboard
 
 ### Non-Functional Requirements
@@ -197,7 +164,7 @@ interface PDFFormFiller {
 - [x] Dependency inversion with typed holes (ports & adapters)
 - [x] Responsive web interface with HTMX
 - [ ] Fast application startup (<2 seconds)
-- [ ] Reliable PDF generation
+
 
 ## Technical Constraints
 
@@ -270,5 +237,4 @@ interface PDFFormFiller {
 
 ### Next Phases: 
 - **Phase 2** (Remaining): Notes system, advanced task management dashboard
-- **Phase 3**: PDF Integration (form filling, template management)  
-- **Phase 4**: Polish & Distribution (executable compilation, import/export)
+- **Phase 3**: Polish & Distribution (executable compilation, import/export)

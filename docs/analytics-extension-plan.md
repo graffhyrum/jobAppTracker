@@ -486,7 +486,6 @@ interface JobApplicationWithAnalytics extends JobApplication {
 
 **Add export options:**
 - Export analytics data as JSON/CSV
-- Generate PDF report
 - Email scheduled analytics digest
 
 ### 5. Comparison Mode

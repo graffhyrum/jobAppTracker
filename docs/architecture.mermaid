@@ -5,18 +5,15 @@ graph TD
 
     C --> E[JobApplication Entity]
     C --> F[PipelineConfig Entity]
-    C --> G[PDF Template Entity]
     C --> L[Note Entity]
     C --> M[NotesCollection Entity]
 
     D --> H[Storage]
-    D --> I[PDF Form Filler]
     D --> J[File System]
 
     subgraph "Domain Layer"
         E
         F
-        G
         L
         M
         K[Use Cases]
@@ -24,6 +21,5 @@ graph TD
 
     subgraph "Infrastructure Layer"
         H
-        I
         J
     end

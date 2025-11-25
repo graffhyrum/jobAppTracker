@@ -1,6 +1,6 @@
 # Job Application Tracker
 
-A lightweight, single-user job application tracking system built with TypeScript and Bun. Features customizable pipeline workflows, PDF form filling capabilities, and integrated task management.
+A lightweight, single-user job application tracking system built with TypeScript and Bun. Features customizable pipeline workflows and integrated task management.
 
 ![Screenshot of the application](./docs/screenshots/home.png)
 
@@ -12,7 +12,7 @@ A lightweight, single-user job application tracking system built with TypeScript
 - **Interview Stages**: Monitor interview progress through customizable stages
 - **Analytics Dashboard**: Visual insights into job search metrics and trends
 - **Browser Extension**: Quick-capture job postings from LinkedIn, Indeed, Greenhouse, Lever and other job boards
-- **PDF Integration**: Fill PDF forms automatically using application data with extensible template system
+
 - **Feature Flags**: Browser-based feature toggles for testing and development tools
 - **Comprehensive Testing**: Unit tests with coverage and E2E tests using Playwright
 
@@ -21,7 +21,7 @@ A lightweight, single-user job application tracking system built with TypeScript
 Built using hexagonal architecture principles with clean separation of concerns:
 - **Domain Layer**: Core business logic and entities
 - **Application Layer**: Use cases and API routes
-- **Infrastructure Layer**: Database, PDF processing, file system
+- **Infrastructure Layer**: Database, file system
 - **Presentation Layer**: HTMX-powered web interface
 
 See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diagrams.
@@ -34,7 +34,7 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 - **Web Framework**: ElysiaJS with HTMX
 - **Validation**: ArkType
 - **Error Handling**: NeverThrow
-- **PDF Processing**: PDF-lib
+
 - **Testing**: Playwright (E2E), Bun Test (unit)
 - **Code Quality**: Biome (linting, formatting)
 - **Git Hooks**: Husky with lint-staged
@@ -207,7 +207,7 @@ src/
 │   ├── styles/              # CSS files
 │   ├── types/               # Presentation layer types
 │   └── utils/               # Presentation utilities
-├── forms/                    # PDF form templates and mappings
+
 ├── helpers/                  # General utility functions
 └── index.ts                 # Application entry point
 
