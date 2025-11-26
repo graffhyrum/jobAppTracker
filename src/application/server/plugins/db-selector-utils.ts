@@ -2,7 +2,7 @@ import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts
 import { DEV_DB_COOKIE_NAME } from "./db-selector-constants.ts";
 
 /**
- * Helper to get current database selection from cookie for navbar display.
+ * Helper to get the current database selection from cookie for navbar display.
  * In development mode, reads the cookie to determine which database is selected.
  * In production mode, always returns "prod".
  */

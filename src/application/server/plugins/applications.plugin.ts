@@ -183,7 +183,7 @@ export const createApplicationsPlugin = (
 					return `Error: ${updateResult.error}`;
 				}
 
-				// Return updated display row
+				// Return the updated display row
 				set.headers["Content-Type"] = "text/html";
 				return renderApplicationTableRow(updateResult.value);
 			},
@@ -211,7 +211,7 @@ export const createApplicationsPlugin = (
 					set.status = 500;
 					return `Error: ${result.error}`;
 				}
-				// If called from details page (check referer), redirect to homepage
+				// If called from the details page (check referer), redirect to the homepage
 				const referer = request.headers.get("referer") || "";
 				if (referer.includes("/details")) {
 					set.headers["HX-Redirect"] = "/";
@@ -345,7 +345,7 @@ export const createApplicationsPlugin = (
 				const jobBoardsResult = await jobBoardRepository.getAll();
 				const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
 
-				// Return updated pipeline with empty applications
+				// Return the updated pipeline with empty applications
 				set.headers["Content-Type"] = "text/html";
 				return formAndPipelineContent([], jobBoards);
 			},
@@ -373,7 +373,7 @@ export const createApplicationsPlugin = (
 					stderr += data.toString();
 				});
 
-				// Wait for process to complete
+				// Wait for a process to complete
 				await new Promise<void>((resolve, reject) => {
 					childProcess.on("close", (code) => {
 						if (code === 0) {
@@ -385,7 +385,7 @@ export const createApplicationsPlugin = (
 					childProcess.on("error", reject);
 				});
 
-				// Return HTML with console output script
+				// Return HTML with a console output script
 				set.headers["Content-Type"] = "text/html";
 				return `
 						<script>
@@ -403,7 +403,7 @@ export const createApplicationsPlugin = (
 							}, 2000);
 						</script>
 						<div class="success-message">
-							Import script executed successfully. Check browser console for output. Page will refresh in 2 seconds...
+							Import script executed successfully. Check the browser console for output. Page will refresh in 2 seconds...
 						</div>
 					`;
 			} catch (error) {
@@ -417,7 +417,7 @@ export const createApplicationsPlugin = (
 							console.error("=== End Import Error ===");
 						</script>
 						<div class="error-message">
-							Error executing import script: ${error instanceof Error ? error.message : String(error)}. Check browser console for details.
+							Error executing an import script: ${error instanceof Error ? error.message : String(error)}. Check browser console for details.
 						</div>
 					`;
 			}

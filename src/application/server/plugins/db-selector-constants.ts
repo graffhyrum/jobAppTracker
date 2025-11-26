@@ -1,5 +1,5 @@
 /**
- * Shared constants for database selector feature.
+ * Shared constants for the database selector feature.
  * Used across dev tools, middleware, and page rendering.
  */
 

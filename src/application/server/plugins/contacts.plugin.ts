@@ -48,7 +48,7 @@ export const createContactsPlugin = new Elysia({ prefix: "/applications" })
 			response: type.string,
 		},
 	)
-	// GET /applications/:id/contacts/new - Returns new contact form
+	// GET /applications/:id/contacts/new - Returns a new contact form
 	.get(
 		"/:id/contacts/new",
 		async ({ params: { id: appId }, set }) => {
@@ -60,7 +60,7 @@ export const createContactsPlugin = new Elysia({ prefix: "/applications" })
 			response: type.string,
 		},
 	)
-	// POST /applications/:id/contacts - Create new contact
+	// POST /applications/:id/contacts - Create a new contact
 	.post(
 		"/:id/contacts",
 		async ({ contactRepository, params: { id: appId }, body, set }) => {
@@ -125,7 +125,7 @@ export const createContactOperationsPlugin = new Elysia()
 			response: type.string,
 		},
 	)
-	// GET /contacts/:id/edit - Returns edit form for contact
+	// GET /contacts/:id/edit - Returns an edit form for contact
 	.get(
 		"/contacts/:id/edit",
 		async ({ contactRepository, params: { id }, set }) => {

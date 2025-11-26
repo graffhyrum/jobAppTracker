@@ -4,7 +4,6 @@ import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selec
 import { interviewStageRepositoryPlugin } from "#src/application/server/plugins/interviewStageRepository.plugin.ts";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import { createAnalyticsAggregator } from "#src/domain/use-cases/analytics-aggregator.ts";
-import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
 import { analyticsPage } from "#src/presentation/pages/analytics.ts";
 
 /**
