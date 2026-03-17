@@ -1,6 +1,8 @@
 import { describe, expect, test } from "bun:test";
+
 import { type as AT, scope } from "arktype";
 import { ok } from "neverthrow";
+
 import { toArkResult } from "./ark-results.ts";
 
 const arkTypeSting = AT.string;
@@ -81,7 +83,7 @@ describe("toArkResult", () => {
 			const key = "bis";
 			const testBis = 123;
 			const res = toArkResult(keyOfBarSchema, key)
-				.map((key) => testModule.bar.get(key))
+				.map((k) => testModule.bar.get(k))
 				.andThen((schemaFromGet) => toArkResult(schemaFromGet, testBis));
 			expect(res).toEqual(ok(testBis));
 		});

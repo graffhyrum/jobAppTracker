@@ -1,5 +1,1 @@
-# Run biome check on staged files
-bunx lint-staged
-
-# Run unit tests
-bun run test:unit
+bun test

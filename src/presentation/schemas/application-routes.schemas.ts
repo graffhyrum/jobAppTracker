@@ -1,4 +1,5 @@
 import { type } from "arktype";
+
 import { jobApplicationModule } from "../../domain/entities/job-application.ts";
 
 // Route parameter validation

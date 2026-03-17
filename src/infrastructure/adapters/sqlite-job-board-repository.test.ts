@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
+
 import type { JobBoardForCreate } from "../../domain/entities/job-board.ts";
 import { jobAppManagerRegistry } from "../../domain/use-cases/create-sqlite-job-app-manager.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
@@ -123,6 +125,15 @@ describe("SQLiteJobBoardRepository", () => {
 				expect(result.error).toContain("Failed to query job board");
 				expect(result.error).toContain("not found");
 			}
+		});
+
+		it("should preserve error message when board not found", async () => {
+			const nonExistentId = uuidProvider.generateUUID();
+			const result = await repository.getById(nonExistentId);
+
+			expect(result.isErr()).toBe(true);
+			// Verify error includes both message and board ID
+			expect(result.isErr() && result.error).toContain(nonExistentId);
 		});
 
 		it("should correctly parse JSON domains field", async () => {

@@ -1,4 +1,5 @@
 import { ArkErrors, type } from "arktype";
+
 import {
 	getJobAppCurrentStatusEntry,
 	type JobApplication,

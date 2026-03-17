@@ -1,4 +1,5 @@
 import { ResultAsync } from "neverthrow";
+
 import type { Fn } from "#rootTypes/generic-function.ts";
 
 export function wrapPromise<T, _E>(

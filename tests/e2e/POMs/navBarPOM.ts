@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page } from "@playwright/test";
+
 import type { Fn } from "#rootTypes/generic-function.ts";
 import {
 	LINK_KEYS,
@@ -6,6 +7,7 @@ import {
 	type PageConfig,
 	type PageLinkKeys,
 } from "#src/presentation/components/pageConfig.ts";
+
 import type {
 	ComponentFactory,
 	ComponentObject,

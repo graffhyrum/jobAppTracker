@@ -20,6 +20,7 @@ Icons generated from https://favicon.io/ and configured for browser extension us
 ## Usage
 
 Icons are referenced in `manifest.json`:
+
 - Extension toolbar and management UI use sizes 16, 32, 48, 128, 192
 - Chrome Web Store listing uses 512px icon
 - Where exact sizes aren't available, closest size is used and browser scales automatically

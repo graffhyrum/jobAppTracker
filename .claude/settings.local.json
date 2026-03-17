@@ -1,52 +1,17 @@
 {
+	"$schema": "https://json.schemastore.org/claude-code-settings.json",
 	"permissions": {
 		"allow": [
-			"Bash(bun test:e2e:*)",
-			"mcp__playwright__browser_*",
-			"mcp__playwright__browser_navigate",
-			"mcp__playwright__browser_console_messages",
-			"mcp__playwright__browser_close",
-			"Bash(git log:*)",
-			"Bash(bun test:*)",
-			"WebFetch(domain:arktype.io)",
-			"Bash(bun vet:*)",
-			"Bash(bunx surreal help:*)",
-			"Bash(bun run:*)",
-			"Bash(bun list:*)",
-			"WebSearch",
-			"Bash(bun check:*)",
-			"Bash(bun typecheck)",
-			"WebFetch(domain:surrealdb.com)",
-			"Bash(bun dev:*)",
-			"WebFetch(domain:htmx.org)",
-			"Bash(bun fix:*)",
-			"Bash(bun typecheck:*)",
-			"mcp__playwright__browser_snapshot",
-			"mcp__playwright__browser_take_screenshot",
-			"mcp__playwright__browser_click",
-			"mcp__playwright__browser_evaluate",
-			"mcp__playwright__browser_fill_form",
-			"Bash(cat:*)",
-			"WebFetch(domain:bun.sh)",
-			"mcp__playwright__browser_network_requests",
-			"Bash(bun test:all)",
-			"Bash(curl:*)",
-			"WebFetch(domain:elysiajs.com)",
-			"Bash(bun test:unit:*)",
-			"WebFetch(domain:standardschema.dev)",
-			"Bash(bun build)",
-			"Bash(find:*)",
-			"Bash(bun test:coverage:*)"
-		]
-	},
-	"enableAllProjectMcpServers": true,
-	"enabledMcpjsonServers": ["playwright"],
-	"additionalDirectories": [
-		{
-			"path": "C:/Users/graff/WebstormProjects/jobAppTracker/node_modules/arktype"
-		},
-		{
-			"path": "C:/Users/graff/WebstormProjects/jobAppTracker/node_modules/neverthrow"
-		}
-	]
+			"Bash(CLAUDECODE=1 bun test src/domain/use-cases/analytics.test.ts)",
+			"WebFetch(domain:biomejs.dev)",
+			"WebFetch(domain:www.jetbrains.com)",
+			"WebFetch(domain:eslint.org)",
+			"Bash(oxfmt:*)",
+			"Bash(oxlint --help)",
+			"Bash(CLAUDECODE=1 bun test)",
+			"Bash(cp src/domain/use-cases/analytics-aggregator.ts /tmp/ag-before.ts)",
+			"Read(//tmp/**)"
+		],
+		"defaultMode": "bypassPermissions"
+	}
 }

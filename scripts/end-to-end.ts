@@ -1,6 +1,7 @@
 import find from "find-process";
 import { ResultAsync } from "neverthrow";
 import kill from "tree-kill";
+
 import { processEnv } from "../processEnvFacade.ts";
 
 const baseURL = `${processEnv.BASE_URL}:${processEnv.PORT}`;
@@ -34,7 +35,7 @@ async function main() {
 
 function prepareEnvironment() {
 	Bun.spawnSync(["bun", "install"]);
-	Bun.spawnSync(["bunx", "playwright", "install", "--with-deps"]);
+	Bun.spawnSync(["bunx", "playwright", "install"]);
 }
 
 function findOrStartDevServer() {
@@ -63,7 +64,7 @@ function findOrStartDevServer() {
 }
 
 function startDevServer() {
-	return Bun.spawn(["bun", "start"], {
+	return Bun.spawn(["bun", "dev"], {
 		stdout: "inherit",
 		stderr: "inherit",
 		env: {
@@ -81,7 +82,9 @@ async function pollDevServer(
 		await fetch(baseURL);
 	} catch (e) {
 		if (Date.now() - startTime >= timeoutDuration) {
-			throw new Error(`Server did not connect within timeout. ${e}`);
+			throw new Error(`Server did not connect within timeout. ${e}`, {
+				cause: e,
+			});
 		}
 		await Bun.sleep(50);
 		return pollDevServer(startTime, timeoutDuration);

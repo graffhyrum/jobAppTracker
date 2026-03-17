@@ -1,5 +1,6 @@
 import { type } from "arktype";
 import { Elysia, NotFoundError } from "elysia";
+
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import { createJobBoardRepositoryPlugin } from "#src/application/server/plugins/jobBoardRepository.plugin.ts";
@@ -29,12 +30,10 @@ import {
 /**
  * Factory function to create applications plugin with injected dependencies.
  */
-export const createApplicationsPlugin = (
-	jobBoardRepository: JobBoardRepository,
-) =>
+export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 	new Elysia({ prefix: "/applications" })
 		.use(jobApplicationManagerPlugin)
-		.use(createJobBoardRepositoryPlugin(jobBoardRepository))
+		.use(createJobBoardRepositoryPlugin(jobBoardRepo))
 		// GET /applications/:id - Returns display row (for cancel and initial display)
 		.get(
 			"/:id",
@@ -313,9 +312,8 @@ export const createApplicationsPlugin = (
 				const all = applicationsResult.isOk() ? applicationsResult.value : [];
 
 				// Import filter function
-				const { filterApplications } = await import(
-					"../../use-cases/filterApplications.ts"
-				);
+				const { filterApplications } =
+					await import("../../use-cases/filterApplications.ts");
 				const filtered = filterApplications(searchQuery, all);
 
 				const rows = filtered.length
@@ -435,9 +433,8 @@ export const createApplicationsPlugin = (
 					}
 
 					// Import the generator function
-					const { generateRandomJobApplicationData } = await import(
-						"../../use-cases/generateRandomApplications.ts"
-					);
+					const { generateRandomJobApplicationData } =
+						await import("../../use-cases/generateRandomApplications.ts");
 
 					// Get job boards for potential linking
 					const jobBoardsResult = await jobBoardRepository.getAll();

@@ -1,5 +1,6 @@
 import { scope, type } from "arktype";
 import { Elysia, NotFoundError } from "elysia";
+
 import { contactRepositoryPlugin } from "#src/application/server/plugins/contactRepository.plugin.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
 import {

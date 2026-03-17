@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { Glob } from "bun";
 
 async function loadAllStyles(): Promise<string> {

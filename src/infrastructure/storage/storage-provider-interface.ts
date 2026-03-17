@@ -1,5 +1,6 @@
 import type { JsonObject } from "@ark/util";
 import type { ResultAsync } from "neverthrow";
+
 import type { UUID } from "../../domain/entities/uuid.ts";
 
 export type Storable<T extends JsonObject = JsonObject> = T & {

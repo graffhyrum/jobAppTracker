@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it } from "bun:test";
+
 import { type } from "arktype";
 import { Elysia } from "elysia";
+
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 import { jobAppManagerRegistry } from "#src/domain/use-cases/create-sqlite-job-app-manager.ts";
 
@@ -324,6 +326,7 @@ describe("Extension API Plugin", () => {
 			expect(getResult.isOk()).toBe(true);
 
 			if (getResult.isOk()) {
+				// oxlint-disable-next-line no-shadow
 				const app = getResult.value;
 				expect(app.company).toBe("Full Data Company");
 				expect(app.positionTitle).toBe("Senior Developer");

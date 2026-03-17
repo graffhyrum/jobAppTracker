@@ -11,6 +11,7 @@ The job application tracker has a **rich, well-designed data model** but **sever
 ## Current State Assessment
 
 ### What Works Well
+
 - 6 core metrics with professional Chart.js visualizations
 - Clean date range filtering
 - Status distribution and time-in-status analysis
@@ -30,6 +31,7 @@ The job application tracker has a **rich, well-designed data model** but **sever
 ### Current Entities
 
 **JobApplication** (`src/domain/entities/job-application.ts`)
+
 - Identity: `id`, `createdAt`, `updatedAt`
 - Core: `company`, `positionTitle`, `applicationDate`, `interestRating`, `nextEventDate`
 - Source: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
@@ -37,23 +39,27 @@ The job application tracker has a **rich, well-designed data model** but **sever
 - Notes: `notes` (array of [NoteId, Note] tuples)
 
 **Contact** (`src/domain/entities/contact.ts`)
+
 - Identity: `id`, `jobApplicationId`, `createdAt`, `updatedAt`
 - Info: `contactName`, `contactEmail`, `linkedInUrl`, `role`
 - Outreach: `channel`, `outreachDate`, `responseReceived`, `notes`
 
 **InterviewStage** (`src/domain/entities/interview-stage.ts`)
+
 - Identity: `id`, `jobApplicationId`, `createdAt`, `updatedAt`
 - Details: `round`, `interviewType`, `isFinalRound`
 - Timeline: `scheduledDate`, `completedDate`
 - Content: `notes`, `questions` (array of Question objects)
 
 **JobBoard** (`src/domain/entities/job-board.ts`)
+
 - Identity: `id`, `createdAt`
 - Info: `name`, `rootDomain`, `domains`
 
 ### Data Underutilization
 
 **Contact Data (ZERO analytics):**
+
 - `responseReceived` boolean - Could track contact effectiveness
 - `channel` - Could analyze which contact channels work best
 - `role` - Could correlate role contacted with outcomes
@@ -61,6 +67,7 @@ The job application tracker has a **rich, well-designed data model** but **sever
 - Contact count per application - Could measure networking effort
 
 **Interview Data (ZERO analytics):**
+
 - `round` - Could track average rounds to offer
 - `interviewType` - Could analyze which types lead to offers
 - `isFinalRound` - Could track success rate after final rounds
@@ -68,6 +75,7 @@ The job application tracker has a **rich, well-designed data model** but **sever
 - Time between rounds - Could identify process bottlenecks
 
 **Application Data Underutilized:**
+
 - `isRemote` - Could compare remote vs on-site success rates
 - `jobBoardId` - Only sourceType analyzed, not specific boards
 - `sourceNotes` - Not analyzed (qualitative data)
@@ -112,6 +120,7 @@ ContactAnalytics {
 ```
 
 **Visualizations:**
+
 - Bar chart: Response Rate by Channel (email, linkedin, phone, etc.)
 - Bar chart: Response Rate by Contact Role (recruiter, hiring manager, etc.)
 - Scatter plot: Contact Count vs Success Rate correlation
@@ -120,6 +129,7 @@ ContactAnalytics {
 **Data Source:** `src/domain/ports/contact-repository.ts`
 
 **Implementation Files:**
+
 - Domain: `src/domain/use-cases/analytics-contacts.ts`
 - Presentation: `src/presentation/pages/analytics-contacts.ts`
 - Scripts: `src/presentation/scripts/contact-charts.js`
@@ -168,6 +178,7 @@ InterviewAnalytics {
 ```
 
 **Visualizations:**
+
 - Funnel chart: Interview rounds → Offer conversion by round number
 - Bar chart: Success Rate by Interview Type
 - Line chart: Avg Days Between Interview Rounds
@@ -176,6 +187,7 @@ InterviewAnalytics {
 **Data Source:** `src/domain/ports/interview-stage-repository.ts`
 
 **Implementation Files:**
+
 - Domain: `src/domain/use-cases/analytics-interviews.ts`
 - Presentation: `src/presentation/pages/analytics-interviews.ts`
 - Scripts: `src/presentation/scripts/interview-charts.js`
@@ -212,6 +224,7 @@ FunnelAnalytics {
 ```
 
 **Visualizations:**
+
 - Sankey/Funnel chart showing progression through stages
 - Bar chart: Conversion rates between stages
 - Heatmap: Drop-off points in the pipeline
@@ -251,6 +264,7 @@ CorrelationAnalytics {
 ```
 
 **Visualizations:**
+
 - Grouped bar chart: Offer rate by contact count
 - Grouped bar chart: Remote vs On-site success rates
 - Correlation matrix showing relationships between variables
@@ -292,6 +306,7 @@ TrendAnalytics {
 ```
 
 **Visualizations:**
+
 - Line chart: Application velocity with moving average
 - Bar chart: Monthly metrics comparison
 - Heatmap: Day of week application patterns
@@ -329,6 +344,7 @@ PredictiveAnalytics {
 ```
 
 **Visualizations:**
+
 - Table: Active applications with predicted outcomes
 - Alert cards: Stalled applications needing follow-up
 - Timeline: Recommended follow-up schedule
@@ -363,6 +379,7 @@ JobBoardAnalytics {
 ```
 
 **Visualizations:**
+
 - Bar chart: Success rate by job board
 - Stacked bar chart: Source type with job board breakdown
 
@@ -428,13 +445,13 @@ CREATE INDEX IF NOT EXISTS idx_interview_final ON interview_stages(isFinalRound)
 ```typescript
 // Add to JobApplication entity (computed on read)
 interface JobApplicationWithAnalytics extends JobApplication {
-  readonly daysSinceApplication: number
-  readonly daysInCurrentStatus: number
-  readonly contactCount: number
-  readonly interviewCount: number
-  readonly noteCount: number
-  readonly hasJobDescription: boolean
-  readonly hasJobUrl: boolean
+	readonly daysSinceApplication: number;
+	readonly daysInCurrentStatus: number;
+	readonly contactCount: number;
+	readonly interviewCount: number;
+	readonly noteCount: number;
+	readonly hasJobDescription: boolean;
+	readonly hasJobUrl: boolean;
 }
 ```
 
@@ -458,6 +475,7 @@ interface JobApplicationWithAnalytics extends JobApplication {
 ```
 
 **Tabs:**
+
 - **Overview**: Current 6 metrics (status, time, source, interest, response rate, timeline)
 - **Contact Analysis**: Contact effectiveness, channel/role analysis, correlation
 - **Interview Pipeline**: Round analysis, type effectiveness, timeline, funnel
@@ -467,6 +485,7 @@ interface JobApplicationWithAnalytics extends JobApplication {
 ### 2. Interactive Filtering
 
 **Add filters:**
+
 - ✅ Date range (exists)
 - 🆕 Status category (active/inactive/all)
 - 🆕 Source type multi-select
@@ -478,6 +497,7 @@ interface JobApplicationWithAnalytics extends JobApplication {
 ### 3. Drill-Down Capability
 
 **Enable clicking chart elements to see details:**
+
 - Click status in pie chart → list of applications with that status
 - Click source in bar chart → applications from that source
 - Click interview round → applications at that round
@@ -485,12 +505,14 @@ interface JobApplicationWithAnalytics extends JobApplication {
 ### 4. Export & Reporting
 
 **Add export options:**
+
 - Export analytics data as JSON/CSV
 - Email scheduled analytics digest
 
 ### 5. Comparison Mode
 
 **Add period comparison:**
+
 - Compare current period vs previous period
 - Show delta indicators (↑ +15%, ↓ -5%)
 - Overlay previous period on charts
@@ -560,19 +582,19 @@ POST /analytics/export            # Export analytics data
 ```typescript
 // tests/domain/use-cases/analytics-contacts.test.ts
 describe("computeContactAnalytics", () => {
-  it("calculates response rate by channel correctly")
-  it("correlates contact count with success rate")
-  it("handles applications with no contacts")
-  it("calculates average days to response")
-})
+	it("calculates response rate by channel correctly");
+	it("correlates contact count with success rate");
+	it("handles applications with no contacts");
+	it("calculates average days to response");
+});
 
 // tests/domain/use-cases/analytics-interviews.test.ts
 describe("computeInterviewAnalytics", () => {
-  it("calculates average rounds to offer")
-  it("computes interview type effectiveness")
-  it("handles applications with no interviews")
-  it("tracks interview completion rates")
-})
+	it("calculates average rounds to offer");
+	it("computes interview type effectiveness");
+	it("handles applications with no interviews");
+	it("tracks interview completion rates");
+});
 ```
 
 ### E2E Tests (Presentation Layer)
@@ -580,15 +602,15 @@ describe("computeInterviewAnalytics", () => {
 ```typescript
 // tests/e2e/analytics-contacts.test.ts
 test("displays contact analytics tab", async ({ page }) => {
-  await page.goto("/analytics/contacts")
-  await expect(page.locator("#response-by-channel-chart")).toBeVisible()
-})
+	await page.goto("/analytics/contacts");
+	await expect(page.locator("#response-by-channel-chart")).toBeVisible();
+});
 
 // tests/e2e/analytics-interviews.test.ts
 test("displays interview analytics tab", async ({ page }) => {
-  await page.goto("/analytics/interviews")
-  await expect(page.locator("#interview-funnel-chart")).toBeVisible()
-})
+	await page.goto("/analytics/interviews");
+	await expect(page.locator("#interview-funnel-chart")).toBeVisible();
+});
 ```
 
 ---
@@ -596,22 +618,27 @@ test("displays interview analytics tab", async ({ page }) => {
 ## Implementation Timeline
 
 ### Phase 1: Foundation & Contact/Interview Analytics (2-3 weeks)
+
 - [ ] Week 1: Add database indexes, create analytics aggregator, implement tab navigation
 - [ ] Week 2: Implement contact analytics (domain + UI + tests)
 - [ ] Week 3: Implement interview analytics (domain + UI + tests)
 
 ### Phase 2: Funnel & Correlation Analytics (2 weeks)
+
 - [ ] Week 4: Implement funnel analytics (domain + UI + tests)
 - [ ] Week 5: Implement correlation analytics (domain + UI + tests)
 
 ### Phase 3: Trends & Predictions (2 weeks)
+
 - [ ] Week 6: Implement trend analytics (domain + UI + tests)
 - [ ] Week 7: Implement predictive analytics (domain + UI + tests)
 
 ### Phase 4: Job Board & Quality Analytics (1 week)
+
 - [ ] Week 8: Implement job board and quality analytics
 
 ### Phase 5: Polish & Export (1 week)
+
 - [ ] Week 9: Enhanced filtering, export functionality, drill-down, comparison mode
 
 **Total: 8-9 weeks for complete implementation**
@@ -621,6 +648,7 @@ test("displays interview analytics tab", async ({ page }) => {
 ## Success Metrics
 
 **Measure success by:**
+
 1. **Coverage**: Analytics utilizing 90%+ of stored data fields
 2. **Actionability**: At least 3 new actionable insights per user
 3. **Performance**: Analytics page loads in <500ms
@@ -631,13 +659,13 @@ test("displays interview analytics tab", async ({ page }) => {
 
 ## Risks & Mitigations
 
-| Risk | Impact | Mitigation |
-|------|--------|------------|
-| Performance degradation with large datasets | High | Add database indexes, implement pagination, add caching layer |
-| Chart.js bundle size increase | Medium | Use tree-shaking, lazy-load chart types, consider alternatives |
-| Breaking existing analytics | High | Comprehensive test coverage, feature flags for new analytics |
-| Complex calculations slow page load | Medium | Move heavy calculations to background job, show loading states |
-| UI becomes cluttered | Medium | Thoughtful tab organization, progressive disclosure |
+| Risk                                        | Impact | Mitigation                                                     |
+| ------------------------------------------- | ------ | -------------------------------------------------------------- |
+| Performance degradation with large datasets | High   | Add database indexes, implement pagination, add caching layer  |
+| Chart.js bundle size increase               | Medium | Use tree-shaking, lazy-load chart types, consider alternatives |
+| Breaking existing analytics                 | High   | Comprehensive test coverage, feature flags for new analytics   |
+| Complex calculations slow page load         | Medium | Move heavy calculations to background job, show loading states |
+| UI becomes cluttered                        | Medium | Thoughtful tab organization, progressive disclosure            |
 
 ---
 

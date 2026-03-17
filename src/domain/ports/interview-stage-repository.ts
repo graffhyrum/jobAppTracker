@@ -1,4 +1,5 @@
 import type { ResultAsync } from "neverthrow";
+
 import type { ForUpdate } from "../../infrastructure/storage/storage-provider-interface.ts";
 import type {
 	InterviewStage,

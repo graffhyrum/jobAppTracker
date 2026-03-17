@@ -1,4 +1,5 @@
 # Project Guidelines
+
 # Project Overview
 
 A single-user job application tracking system built with TypeScript and Bun, following hexagonal architecture principles. The system tracks job applications through customizable pipelines, supports PDF form filling, and includes integrated task management.
@@ -21,7 +22,7 @@ bun test:e2e:ui               # Headed E2E tests (Playwright)
 
 # Code Quality
 bun vet                     # An all-inclusive check for linting, styling, compiling, and tests
-bun lint                    # Lint code with biome
+bun lint                    # Lint code with oxlint
 bun format                  # Format code
 bun check                   # Check code (lint + format)
 bun fix                     # Fix issues automatically
@@ -34,21 +35,21 @@ bun typecheck               # use Tsc to check for type errors
 ## Hexagonal Architecture Layers
 
 - **Domain** (`src/domain/`): Core business logic, entities, and types
-    - Entities: JobApplication, Note, PipelineConfig with rich behavior methods
-    - Types: StatusCategory, ApplicationStatus, InterestRating
-    - Pure functions and domain logic, no external dependencies
+  - Entities: JobApplication, Note, PipelineConfig with rich behavior methods
+  - Types: StatusCategory, ApplicationStatus, InterestRating
+  - Pure functions and domain logic, no external dependencies
 
 - **Application** (`src/application/`): Use cases and application services
-    - Orchestrates domain entities and infrastructure adapters
-    - Contains business workflows and validation logic
+  - Orchestrates domain entities and infrastructure adapters
+  - Contains business workflows and validation logic
 
 - **Infrastructure** (`src/infrastructure/`): External adapters
-    - PDF: Form filling using PDF-lib
-    - File system operations
+  - PDF: Form filling using PDF-lib
+  - File system operations
 
 - **Presentation** (`src/presentation/`): Web interface
-    - HTMX-powered frontend with server-rendered templates
-    - RESTful routes served via Bun.serve
+  - HTMX-powered frontend with server-rendered templates
+  - RESTful routes served via Bun.serve
 
 ## Hexagonal Architecture & Dependency Inversion
 
@@ -61,39 +62,49 @@ This project strictly follows hexagonal architecture (ports & adapters) with typ
 When adding functionality that requires external dependencies:
 
 1. **Define a typed hole (port)** in `src/domain/ports/`:
+
    ```typescript
    // Domain defines the interface
    export interface JobApplicationRepository {
-     save: (app: JobApplication) => ResultAsync<void, DatabaseError>
-     findById: (id: UUID) => ResultAsync<JobApplication | null, DatabaseError>
+   	save: (app: JobApplication) => ResultAsync<void, DatabaseError>;
+   	findById: (id: UUID) => ResultAsync<JobApplication | null, DatabaseError>;
    }
    ```
 
 2. **Create BOTH implementations**:
+
    ```typescript
    // Real implementation in src/infrastructure/
    export const SurrealJobApplicationRepository: JobApplicationRepository = {
-     save: async (app) => { /* SurrealDB operations */ },
-     findById: async (id) => { /* SurrealQL queries */ }
-   }
+   	save: async (app) => {
+   		/* SurrealDB operations */
+   	},
+   	findById: async (id) => {
+   		/* SurrealQL queries */
+   	},
+   };
 
    // Test implementation in tests/
    export const InMemoryJobApplicationRepository: JobApplicationRepository = {
-     save: async (app) => { /* in-memory operations */ },
-     findById: async (id) => { /* mock data */ }
-   }
+   	save: async (app) => {
+   		/* in-memory operations */
+   	},
+   	findById: async (id) => {
+   		/* mock data */
+   	},
+   };
    ```
 
 3. **Inject via use cases**:
    ```typescript
    // Use case accepts the interface, not concrete implementation
    export const saveJobApplication = (
-     data: CreateJobApplicationData,
-     repo: JobApplicationRepository
+   	data: CreateJobApplicationData,
+   	repo: JobApplicationRepository,
    ): ResultAsync<JobApplication, Error> => {
-     const app = createJobApplication(data)
-     return repo.save(app).map(() => app)
-   }
+   	const app = createJobApplication(data);
+   	return repo.save(app).map(() => app);
+   };
    ```
 
 #### Why This Matters
@@ -115,25 +126,29 @@ When adding functionality that requires external dependencies:
 ### Status System
 
 Two-tier status system:
+
 - **Status Categories**: `active` | `inactive`
 - **Statuses**: Auto-categorized based on predefined lists
-    - Active: applied, screening interview, interview, onsite, online test, take-home assignment, offer
-    - Inactive: rejected, no response, no longer interested, hiring freeze
+  - Active: applied, screening interview, interview, onsite, online test, take-home assignment, offer
+  - Inactive: rejected, no response, no longer interested, hiring freeze
 
 Pipeline is customizable through admin interface.
 
 ## Key Domain Models
 
 ### JobApplication Entity
+
 - Rich entity with behavior methods: `updateStatus()`, `addNote()`, `updateNote()`, `removeNote()`, `isOverdue()`
 - Immutable ID, mutable state with automatic lastUpdated tracking
 - Factory functions: `createJobApplication()`, `jobApplicationFromData()`
 
 ### Note Entity
+
 - Timestamped content with `update()` method
 - Tracks creation and modification dates
 
 ### Data Flow
+
 1. Input validation with ArkType schemas
 2. Domain entity creation/updates
 3. Infrastructure persistence via adapters
@@ -148,7 +163,7 @@ Pipeline is customizable through admin interface.
 - **Error Handling**: NeverThrow Result types
 - **PDF**: PDF-lib for form filling
 - **Testing**: Built-in Bun test runner + Playwright for E2E
-- **Linting**: Biome (replaces ESLint/Prettier)
+- **Linting**: OXC (oxlint + oxfmt, replaces ESLint/Prettier)
 
 ## File Structure Conventions
 
@@ -166,7 +181,7 @@ src/
 ## Development Notes
 
 - Server runs on the host and port defined in `.env` by default
-- Uses indentation configured in `biome.json`
+- Uses indentation configured in `.oxfmtrc.json`
 - Follows SOLID principles with dependency inversion
 - Entity methods automatically update `lastUpdated` timestamps
 - Status changes trigger category recalculation
@@ -179,20 +194,24 @@ This project uses NeverThrow's Result types instead of throwing exceptions:
 
 ```typescript
 // Good - Return Result types
-export const validateApplication = (data: unknown): Result<JobApplication, ValidationError> => {
-  const validation = ApplicationSchema(data)
-  if (validation instanceof type.errors) {
-    return Result.err(new ValidationError(validation.summary))
-  }
-  return Result.ok(validation)
-}
+export const validateApplication = (
+	data: unknown,
+): Result<JobApplication, ValidationError> => {
+	const validation = ApplicationSchema(data);
+	if (validation instanceof type.errors) {
+		return Result.err(new ValidationError(validation.summary));
+	}
+	return Result.ok(validation);
+};
 
 // Good - Chain operations with map/andThen
-export const processApplication = (data: unknown): ResultAsync<string, Error> => {
-  return validateApplication(data)
-    .asyncAndThen(app => repository.save(app))
-    .map(() => "Application saved successfully")
-}
+export const processApplication = (
+	data: unknown,
+): ResultAsync<string, Error> => {
+	return validateApplication(data)
+		.asyncAndThen((app) => repository.save(app))
+		.map(() => "Application saved successfully");
+};
 ```
 
 **Rule**: Never throw exceptions in business logic. Always return Result<T, E> or ResultAsync<T, E>.
@@ -204,30 +223,31 @@ Use ArkType schemas for validation at system boundaries:
 ```typescript
 // Define runtime validators that also provide types
 export const CreateJobApplicationSchema = type({
-  company: CompanyName,
-  position: PositionTitle,
-  applicationDate: "Date",
-  status: ApplicationStatus,
-  interestRating: InterestRating,
-  "nextEventDate?": "Date",
-  "jobPostingUrl?": "string",
-  "jobDescription?": "string"
-})
+	company: CompanyName,
+	position: PositionTitle,
+	applicationDate: "Date",
+	status: ApplicationStatus,
+	interestRating: InterestRating,
+	"nextEventDate?": "Date",
+	"jobPostingUrl?": "string",
+	"jobDescription?": "string",
+});
 
-export type CreateJobApplicationData = typeof CreateJobApplicationSchema.infer
+export type CreateJobApplicationData = typeof CreateJobApplicationSchema.infer;
 
 // Use in validation functions
 const validateInput = (input: unknown) => {
-  const result = CreateJobApplicationSchema(input)
-  return result instanceof type.errors 
-    ? Result.err(new ValidationError(result.summary))
-    : Result.ok(result)
-}
+	const result = CreateJobApplicationSchema(input);
+	return result instanceof type.errors
+		? Result.err(new ValidationError(result.summary))
+		: Result.ok(result);
+};
 ```
 
 # Code Style
 
 ## Typed Holes for Dependency Inversion
+
 - Use TypeScript's type system to define 'holes' (interfaces or types) for dependencies and inject implementations at composition root.
 - This enforces dependency inversion and makes code more testable and modular.
 - Example:
@@ -235,29 +255,33 @@ const validateInput = (input: unknown) => {
 ```typescript
 // Define a typed hole (port)
 export interface Clock {
-  now(): Date;
+	now(): Date;
 }
 
 // Inject implementation
 function logCurrentTime(clock: Clock) {
-  console.log(clock.now());
+	console.log(clock.now());
 }
 
 // In production
-const systemClock: Clock = { 
-  now() { return new Date() } 
+const systemClock: Clock = {
+	now() {
+		return new Date();
+	},
 };
 logCurrentTime(systemClock);
 
 // In tests
-const fixedClock: Clock = { 
-  now() {
-    new Date('2000-01-01')
-  } };
+const fixedClock: Clock = {
+	now() {
+		new Date("2000-01-01");
+	},
+};
 logCurrentTime(fixedClock);
 ```
 
 ## Hexagonal Architecture
+
 - Structure code to separate core business logic (domain) from external concerns (infrastructure, APIs, UI).
 - Use interfaces (ports) for dependencies; implement adapters for infrastructure.
 - When creating a new interface, expect to always make at least two adapters, one for testing and one (or more) for production use/injection.
@@ -268,32 +292,31 @@ logCurrentTime(fixedClock);
 type PullRequest = {};
 
 export interface PRRepository {
-  getOpenPRs(repo: string): Promise<PullRequest[]>;
+	getOpenPRs(repo: string): Promise<PullRequest[]>;
 }
 
 // Production Adapter (infrastructure)
 function createGitHubPRRepository(): PRRepository {
-  return {
-    async getOpenPRs(repo) {
-      return [] as PullRequest[]; /* call GitHub API */
-    },
-  };
+	return {
+		async getOpenPRs(repo) {
+			return [] as PullRequest[]; /* call GitHub API */
+		},
+	};
 }
 
 // Test Adapter
 function createTestPRRepository(): PRRepository {
-  return {
-    async getOpenPRs(repo: string): Promise<PullRequest[]> {
-      return [] as PullRequest[]; /* create mock */
-    },
-  };
+	return {
+		async getOpenPRs(repo: string): Promise<PullRequest[]> {
+			return [] as PullRequest[]; /* create mock */
+		},
+	};
 }
 
 // Use in core
 function listOpenPRs(repo: string, prRepo: PRRepository) {
-  return prRepo.getOpenPRs(repo);
+	return prRepo.getOpenPRs(repo);
 }
-
 ```
 
 ## ts-js-guidelines
@@ -307,198 +330,241 @@ function listOpenPRs(repo: string, prRepo: PRRepository) {
 - Prefer using nullish coalescing operator (`??`) instead of logical or (`||`), as it is a safer operator.
 
 # Unit Test Guidelines
+
 - Create unit test files 'next to' the files they test. EG: for `someFeature.ts`, create `someFeature.test.ts`
 - Only test the API contract of a module, never the implementation.
 - Create as few tests as possible to reach the coverage target (95%)
-- Before adding tests, always check if the system under test could be refactored to improve testability without changing functionality. If you think it can, propose the changes to the user but *DO NOT* apply them.
+- Before adding tests, always check if the system under test could be refactored to improve testability without changing functionality. If you think it can, propose the changes to the user but _DO NOT_ apply them.
 
 # Utility Types
 
 ## Core Utility Types
 
 ### `Awaited<Type>`
+
 Extract the resolved type of Promise types recursively. Use for modeling async operations and Promise unwrapping.
 
-```typescript  
-type A = Awaited<Promise<string>>; // string  
-type B = Awaited<Promise<Promise<number>>>; // number  
-```  
+```typescript
+type A = Awaited<Promise<string>>; // string
+type B = Awaited<Promise<Promise<number>>>; // number
+```
 
 ### `Partial<Type>`
+
 Make all properties optional. Use for update operations and partial object construction.
 
-```typescript  
-interface Todo {  
-  title: string;  description: string;}  
-type PartialTodo = Partial<Todo>; // { title?: string; description?: string; }  
-```  
+```typescript
+interface Todo {
+	title: string;
+	description: string;
+}
+type PartialTodo = Partial<Todo>; // { title?: string; description?: string; }
+```
 
 ### `Required<Type>`
+
 Make all properties required. Opposite of Partial. Use when enforcing complete object structures.
 
-```typescript  
-interface Props {  
-  a?: number;  b?: string;}  
-type RequiredProps = Required<Props>; // { a: number; b: string; }  
-```  
+```typescript
+interface Props {
+	a?: number;
+	b?: string;
+}
+type RequiredProps = Required<Props>; // { a: number; b: string; }
+```
 
 ### `Readonly<Type>`
+
 Make all properties readonly. Use for immutable data structures and preventing reassignment.
 
-```typescript  
-interface Todo {  
-  title: string;}  
-type ReadonlyTodo = Readonly<Todo>; // { readonly title: string; }  
-```  
+```typescript
+interface Todo {
+	title: string;
+}
+type ReadonlyTodo = Readonly<Todo>; // { readonly title: string; }
+```
 
 ### `Record<Keys, Type>`
+
 Create object type with specified keys and value types. Use for mapping and dictionary structures.
 
-```typescript  
-type CatName = "miffy" | "boris" | "mordred";interface CatInfo {  
-  age: number;  
-  breed: string;  
-}  
-type Cats = Record<CatName, CatInfo>;  
-```  
+```typescript
+type CatName = "miffy" | "boris" | "mordred";
+interface CatInfo {
+	age: number;
+	breed: string;
+}
+type Cats = Record<CatName, CatInfo>;
+```
 
 ### `Pick<Type, Keys>`
+
 Select specific properties from a type. Use for creating focused interfaces.
 
-```typescript  
-interface Todo {  
-  title: string;  description: string;  completed: boolean;}  
-type TodoPreview = Pick<Todo, "title" | "completed">;  
-```  
+```typescript
+interface Todo {
+	title: string;
+	description: string;
+	completed: boolean;
+}
+type TodoPreview = Pick<Todo, "title" | "completed">;
+```
 
 ### `Omit<Type, Keys>`
+
 Remove specific properties from a type. Opposite of Pick. Use for excluding unwanted properties.
 
-```typescript  
-interface Todo {  
-  title: string;  description: string;  completed: boolean;  createdAt: number;}  
-type TodoPreview = Omit<Todo, "description">;  
-```  
+```typescript
+interface Todo {
+	title: string;
+	description: string;
+	completed: boolean;
+	createdAt: number;
+}
+type TodoPreview = Omit<Todo, "description">;
+```
 
 ## Union Manipulation Types
 
 ### `Exclude<UnionType, ExcludedMembers>`
+
 Remove types from union. Use for filtering union members.
 
-```typescript  
-type T0 = Exclude<"a" | "b" | "c", "a">; // "b" | "c"  
-type T1 = Exclude<string | number | (() => void), Function>; // string | number  
-```  
+```typescript
+type T0 = Exclude<"a" | "b" | "c", "a">; // "b" | "c"
+type T1 = Exclude<string | number | (() => void), Function>; // string | number
+```
 
 ### `Extract<Type, Union>`
+
 Extract matching types from union. Use for selecting specific union members.
 
-```typescript  
-type T0 = Extract<"a" | "b" | "c", "a" | "f">; // "a"  
-type T1 = Extract<string | number | (() => void), Function>; // () => void  
-```  
+```typescript
+type T0 = Extract<"a" | "b" | "c", "a" | "f">; // "a"
+type T1 = Extract<string | number | (() => void), Function>; // () => void
+```
 
 ### `NonNullable<Type>`
+
 Remove null and undefined from type. Use for ensuring non-null values.
 
-```typescript  
-type T0 = NonNullable<string | number | undefined>; // string | number  
-type T1 = NonNullable<string[] | null | undefined>; // string[]  
-```  
+```typescript
+type T0 = NonNullable<string | number | undefined>; // string | number
+type T1 = NonNullable<string[] | null | undefined>; // string[]
+```
 
 ## Function Type Utilities
 
 ### `Parameters<Type>`
+
 Extract parameter types as tuple. Use for function parameter analysis.
 
-```typescript  
-declare function f1(arg: { a: number; b: string }): void;  
-type T0 = Parameters<() => string>; // []  
-type T1 = Parameters<(s: string) => void>; // [s: string]  
-type T3 = Parameters<typeof f1>; // [arg: { a: number; b: string }]  
-```  
+```typescript
+declare function f1(arg: { a: number; b: string }): void;
+type T0 = Parameters<() => string>; // []
+type T1 = Parameters<(s: string) => void>; // [s: string]
+type T3 = Parameters<typeof f1>; // [arg: { a: number; b: string }]
+```
 
 ### `ConstructorParameters<Type>`
+
 Extract constructor parameter types. Use for class instantiation analysis.
 
-```typescript  
-class C {  
-  constructor(a: number, b: string) {}}  
-type T0 = ConstructorParameters<ErrorConstructor>; // [message?: string]  
-type T3 = ConstructorParameters<typeof C>; // [a: number, b: string]  
-```  
+```typescript
+class C {
+	constructor(a: number, b: string) {}
+}
+type T0 = ConstructorParameters<ErrorConstructor>; // [message?: string]
+type T3 = ConstructorParameters<typeof C>; // [a: number, b: string]
+```
 
 ### `ReturnType<Type>`
+
 Extract function return type. Use for function result analysis.
 
-```typescript  
-declare function f1(): { a: number; b: string };  
-type T0 = ReturnType<() => string>; // string  
-type T1 = ReturnType<(s: string) => void>; // void  
-type T4 = ReturnType<typeof f1>; // { a: number; b: string }  
-```  
+```typescript
+declare function f1(): { a: number; b: string };
+type T0 = ReturnType<() => string>; // string
+type T1 = ReturnType<(s: string) => void>; // void
+type T4 = ReturnType<typeof f1>; // { a: number; b: string }
+```
 
 ### `InstanceType<Type>`
+
 Extract instance type from constructor. Use for class instance analysis.
 
-```typescript  
-class C {  
-  x = 0;  y = 0;}  
-type T0 = InstanceType<typeof C>; // C  
-```  
+```typescript
+class C {
+	x = 0;
+	y = 0;
+}
+type T0 = InstanceType<typeof C>; // C
+```
 
 ## Advanced Utilities
 
 ### `NoInfer<Type>`
+
 Block type inference. Use to prevent unwanted type inference in generics.
 
-```typescript  
-function createStreetLight<C extends string>(  
-  colors: C[],  defaultColor?: NoInfer<C>) {  
-  // ...
-}  
-```  
+```typescript
+function createStreetLight<C extends string>(
+	colors: C[],
+	defaultColor?: NoInfer<C>,
+) {
+	// ...
+}
+```
 
 ### `ThisParameterType<Type>`
+
 Extract 'this' parameter type. Use for analyzing this-bound functions.
 
-```typescript  
-function toHex(this: Number) {  
-  return this.toString(16);}  
-type T = ThisParameterType<typeof toHex>; // Number  
-```  
+```typescript
+function toHex(this: Number) {
+	return this.toString(16);
+}
+type T = ThisParameterType<typeof toHex>; // Number
+```
 
 ### `OmitThisParameter<Type>`
+
 Remove 'this' parameter from function type. Use for converting methods to functions.
 
-```typescript  
-function toHex(this: Number) {  
-  return this.toString(16);}  
-const fiveToHex: OmitThisParameter<typeof toHex> = toHex.bind(5);  
-```  
+```typescript
+function toHex(this: Number) {
+	return this.toString(16);
+}
+const fiveToHex: OmitThisParameter<typeof toHex> = toHex.bind(5);
+```
 
 ### `ThisType<Type>`
+
 Mark contextual 'this' type. Use with noImplicitThis flag for typed method contexts.
 
-```typescript  
-type ObjectDescriptor<D, M> = {  
-  data?: D;  
-  methods?: M & ThisType<D & M>;  
-};  
-```  
+```typescript
+type ObjectDescriptor<D, M> = {
+	data?: D;
+	methods?: M & ThisType<D & M>;
+};
+```
 
 ## String Manipulation Types
 
 ### `Uppercase<StringType>`
+
 Convert string literal to uppercase.
 
 ### `Lowercase<StringType>`
+
 Convert string literal to lowercase.
 
 ### `Capitalize<StringType>`
+
 Capitalize first character of string literal.
 
 ### `Uncapitalize<StringType>`
+
 Uncapitalize first character of string literal.
 
 Use these with template literal types for compile-time string transformations.
@@ -513,5 +579,6 @@ Use these with template literal types for compile-time string transformations.
 6. **Error handling**: Use conditional types with utility types for robust type definitions
 
 # Memories
+
 - If there are linter errors in unit tests where `expect(something).toBeDefined()` is called, but TS has `TS2532: Object is possibly undefined` errors because `expect()` doesn't narrow the type, for each place in the tests where `expect(x).toBeDefined()` is used, instead use `expectDefined` as a type-narrowing wrapper around bun's `expect`.
 - When working with HTML, reference [THIS GUIDE FILE](docs/ai/HTML_GUIDE.md) for instructions on HTML conventions for the project.

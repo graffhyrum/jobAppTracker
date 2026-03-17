@@ -1,5 +1,6 @@
 import { ArkErrors, scope } from "arktype";
 import { err, ok, type Result } from "neverthrow";
+
 import { uuidSchema } from "./uuid.ts";
 
 export const contactScope = scope({

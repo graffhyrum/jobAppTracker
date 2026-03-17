@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { jobAppManagerRegistry } from "./create-sqlite-job-app-manager";
 
 describe("JobAppManagerRegistry", () => {

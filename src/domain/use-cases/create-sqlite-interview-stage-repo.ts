@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+
 import { processEnv } from "../../../processEnvFacade.ts";
 import { createSQLiteInterviewStageRepository } from "../../infrastructure/adapters/sqlite-interview-stage-repository.ts";
 import { getDatabasePath } from "../../infrastructure/config/sqlite-config.ts";
@@ -9,6 +10,5 @@ function getDatabase() {
 	return new Database(dbPath, { create: true });
 }
 
-export const interviewStageRepository = createSQLiteInterviewStageRepository(
-	getDatabase(),
-);
+export const interviewStageRepository =
+	createSQLiteInterviewStageRepository(getDatabase());

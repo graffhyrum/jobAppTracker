@@ -1,4 +1,5 @@
 import { errAsync, okAsync, type ResultAsync } from "neverthrow";
+
 import type {
 	JobApplication,
 	JobApplicationForCreate,

@@ -1,4 +1,5 @@
 import { errAsync, okAsync, type ResultAsync } from "neverthrow";
+
 import type {
 	Contact,
 	ContactForCreate,
@@ -44,6 +45,10 @@ export function createInMemoryContactRepository(
 						new Date(a.outreachDate).getTime(),
 				);
 			return okAsync(filtered);
+		},
+
+		getAll(): ResultAsync<Contact[], string> {
+			return okAsync(Array.from(contacts.values()));
 		},
 
 		update(

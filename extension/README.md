@@ -49,6 +49,7 @@ BROWSER_EXTENSION_API_KEY=your-secure-api-key-here
 ```
 
 **Security Note**: Generate a strong random string for production use. You can use:
+
 ```bash
 # Generate a random API key
 openssl rand -hex 32
@@ -163,23 +164,29 @@ To add extraction support for a new job board:
 
 1. Edit `extension/content/extractor.js`
 2. Add a new extractor function:
+
    ```javascript
    function extractNewSiteJob() {
-     const company = document.querySelector('.company-selector')?.textContent?.trim();
-     const position = document.querySelector('.job-title')?.textContent?.trim();
-     const description = document.querySelector('.job-description')?.textContent?.trim();
+   	const company = document
+   		.querySelector(".company-selector")
+   		?.textContent?.trim();
+   	const position = document.querySelector(".job-title")?.textContent?.trim();
+   	const description = document
+   		.querySelector(".job-description")
+   		?.textContent?.trim();
 
-     if (company && position) {
-       return { company, position, jobDescription: description };
-     }
-     return null;
+   	if (company && position) {
+   		return { company, position, jobDescription: description };
+   	}
+   	return null;
    }
    ```
+
 3. Register it in the `extractors` object:
    ```javascript
    const extractors = {
-     'newsite.com': extractNewSiteJob,
-     // ... existing extractors
+   	"newsite.com": extractNewSiteJob,
+   	// ... existing extractors
    };
    ```
 

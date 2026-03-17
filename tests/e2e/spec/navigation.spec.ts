@@ -1,4 +1,5 @@
 import type { PageLinkKeys } from "#src/presentation/components/pageConfig.ts";
+
 import { type PagePOMRegistry, test } from "../fixtures/base.ts";
 
 const pageMatrix = [

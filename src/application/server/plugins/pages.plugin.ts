@@ -1,19 +1,21 @@
 import { Elysia } from "elysia";
+
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import { createJobBoardRepositoryPlugin } from "#src/application/server/plugins/jobBoardRepository.plugin.ts";
 import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
 import { healthcheckPage } from "#src/presentation/pages/healthcheck.ts";
 import { homepagePage } from "#src/presentation/pages/homepage.ts";
+
 import { processEnv } from "../../../../processEnvFacade.ts";
 
 /**
  * Factory function to create pages plugin with injected dependencies.
  */
-export const createPagesPlugin = (jobBoardRepository: JobBoardRepository) =>
+export const createPagesPlugin = (jobBoardRepo: JobBoardRepository) =>
 	new Elysia()
 		.use(jobApplicationManagerPlugin)
-		.use(createJobBoardRepositoryPlugin(jobBoardRepository))
+		.use(createJobBoardRepositoryPlugin(jobBoardRepo))
 		.get(
 			"/",
 			async ({ jobApplicationManager, jobBoardRepository, set, cookie }) => {

@@ -1,4 +1,5 @@
 import { errAsync, okAsync, type ResultAsync } from "neverthrow";
+
 import type {
 	InterviewStage,
 	InterviewStageForCreate,
@@ -45,6 +46,10 @@ export function createInMemoryInterviewStageRepository(
 				.filter((stage) => stage.jobApplicationId === jobAppId)
 				.sort((a, b) => a.round - b.round);
 			return okAsync(filtered);
+		},
+
+		getAll(): ResultAsync<InterviewStage[], string> {
+			return okAsync(Array.from(stages.values()));
 		},
 
 		update(

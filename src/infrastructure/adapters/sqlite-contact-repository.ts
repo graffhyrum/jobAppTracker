@@ -1,6 +1,8 @@
 import type { Database } from "bun:sqlite";
+
 import { ArkErrors } from "arktype";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import type {
 	Contact,
 	ContactForCreate,
@@ -71,7 +73,9 @@ export function createSQLiteContactRepository(db: Database): ContactRepository {
 		getAll(): ResultAsync<Contact[], string> {
 			return ResultAsync.fromPromise(
 				(async () => {
-					const query = db.prepare("SELECT * FROM contacts ORDER BY outreachDate DESC");
+					const query = db.prepare(
+						"SELECT * FROM contacts ORDER BY outreachDate DESC",
+					);
 					return query.all();
 				})(),
 				(err) => `Failed to query all contacts: ${err}`,

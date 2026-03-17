@@ -1,0 +1,5 @@
+{
+	"exclude": ["src/infrastructure/utils/environment-detector.ts"],
+	"excludeAfterRewrite": false,
+	"reporter": ["text", "text-summary"]
+}

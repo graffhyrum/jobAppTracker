@@ -2,6 +2,7 @@ import { type } from "arktype";
 import { Elysia } from "elysia";
 import type { HTTPHeaders } from "elysia/types";
 import type { ResultAsync } from "neverthrow";
+
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import type {
 	JobApplication,
@@ -86,7 +87,7 @@ const createCorsModule = () => {
 	const isExtensionOrigin = (origin: string | null): boolean =>
 		Boolean(
 			origin?.startsWith("chrome-extension://") ||
-				origin?.startsWith("moz-extension://"),
+			origin?.startsWith("moz-extension://"),
 		);
 
 	const setAllowedOrigin = (

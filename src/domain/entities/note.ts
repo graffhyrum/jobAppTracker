@@ -1,5 +1,6 @@
 import { ArkErrors } from "arktype";
 import { err, ok, type Result } from "neverthrow";
+
 import { getEntries } from "../../../types/entries.ts";
 import { uuidProvider } from "../../infrastructure/di/uuid-provider.ts";
 import {

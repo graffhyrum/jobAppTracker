@@ -93,7 +93,13 @@ class ChangesetSyncAgent {
 		if (file.startsWith("tests/") || file.endsWith(".test.ts")) return "test";
 		if (file.startsWith("docs/") || file === "README.md") return "docs";
 		if (
-			["package.json", "tsconfig.json", "bun.lock", "biome.json"].includes(file)
+			[
+				"package.json",
+				"tsconfig.json",
+				"bun.lock",
+				".oxlintrc.json",
+				".oxfmtrc.json",
+			].includes(file)
 		)
 			return "config";
 		return "infra";

@@ -1,23 +1,19 @@
 import type { ResultAsync } from "neverthrow";
-import type { Contact } from "../entities/contact.ts";
-import type { InterviewStage } from "../entities/interview-stage.ts";
+
 import type { JobApplication } from "../entities/job-application.ts";
 import type { ContactRepository } from "../ports/contact-repository.ts";
 import type { InterviewStageRepository } from "../ports/interview-stage-repository.ts";
 import type { JobApplicationManager } from "../ports/job-application-manager.ts";
-import type {
-	ApplicationsAnalytics,
-	DateRange,
-} from "./analytics.ts";
+import type { ContactAnalytics } from "./analytics-contacts.ts";
+import { computeContactAnalytics } from "./analytics-contacts.ts";
+import type { InterviewAnalytics } from "./analytics-interviews.ts";
+import { computeInterviewAnalytics } from "./analytics-interviews.ts";
+import type { ApplicationsAnalytics, DateRange } from "./analytics.ts";
 import {
 	computeAnalytics,
 	computeDefaultDateRange,
 	filterApplicationsByDateRange,
 } from "./analytics.ts";
-import type { ContactAnalytics } from "./analytics-contacts.ts";
-import { computeContactAnalytics } from "./analytics-contacts.ts";
-import type { InterviewAnalytics } from "./analytics-interviews.ts";
-import { computeInterviewAnalytics } from "./analytics-interviews.ts";
 
 /**
  * Combined analytics result including all analytics modules

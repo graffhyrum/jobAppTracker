@@ -3,6 +3,7 @@
 ---
 
 Remove PDF form filling functionality from the project. This includes:
+
 - Remove pdf-lib dependency from package.json
 - Delete PDF-related documentation and architecture diagrams
 - Update PRD to remove PDF integration phase and requirements

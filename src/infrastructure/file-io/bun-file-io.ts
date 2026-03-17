@@ -1,4 +1,5 @@
 import { ResultAsync } from "neverthrow";
+
 import type { FileIO, FileIOError } from "./file-io.ts";
 import { createFileIOError } from "./file-io.ts";
 
@@ -20,8 +21,8 @@ export function createBunFileIO(): FileIO {
 		return ResultAsync.fromPromise(
 			(async () => {
 				const file = Bun.file(filePath);
-				const exists = await file.exists();
-				if (!exists) {
+				const fileExists = await file.exists();
+				if (!fileExists) {
 					throw new Error("File not found");
 				}
 				return await file.text();

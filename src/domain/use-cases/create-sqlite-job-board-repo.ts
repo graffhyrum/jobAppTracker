@@ -1,4 +1,5 @@
 import type { Database } from "bun:sqlite";
+
 import { createSQLiteJobBoardRepository } from "../../infrastructure/adapters/sqlite-job-board-repository.ts";
 
 /**

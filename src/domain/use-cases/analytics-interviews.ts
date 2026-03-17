@@ -185,7 +185,7 @@ function computeAverageDaysToFirstInterview(
 		const interviews = interviewsByApp.get(app.id) ?? [];
 		if (interviews.length > 0) {
 			const firstInterview = interviews[0];
-			if (firstInterview && firstInterview.scheduledDate) {
+			if (firstInterview?.scheduledDate) {
 				const appTime = new Date(app.applicationDate).getTime();
 				const interviewTime = new Date(firstInterview.scheduledDate).getTime();
 				const days = (interviewTime - appTime) / (1000 * 60 * 60 * 24);
@@ -207,7 +207,7 @@ function computeMedianDaysToFirstInterview(
 		const interviews = interviewsByApp.get(app.id) ?? [];
 		if (interviews.length > 0) {
 			const firstInterview = interviews[0];
-			if (firstInterview && firstInterview.scheduledDate) {
+			if (firstInterview?.scheduledDate) {
 				const appTime = new Date(app.applicationDate).getTime();
 				const interviewTime = new Date(firstInterview.scheduledDate).getTime();
 				const days = (interviewTime - appTime) / (1000 * 60 * 60 * 24);
@@ -249,7 +249,7 @@ function computeAverageDaysBetweenRounds(
 function computeInterviewTypeEffectiveness(
 	applications: JobApplication[],
 	interviewStages: InterviewStage[],
-	interviewsByApp: Map<string, InterviewStage[]>,
+	_interviewsByApp: Map<string, InterviewStage[]>,
 ): InterviewTypeEffectiveness[] {
 	const typeMap = new Map<
 		InterviewType,
@@ -384,7 +384,7 @@ function computeRoundAnalysis(
 function computeFinalRoundSuccess(
 	applications: JobApplication[],
 	interviewStages: InterviewStage[],
-	interviewsByApp: Map<string, InterviewStage[]>,
+	_interviewsByApp: Map<string, InterviewStage[]>,
 ): FinalRoundSuccess {
 	const finalRounds = interviewStages.filter((i) => i.isFinalRound);
 	const appIdsWithFinalRound = new Set(
@@ -413,8 +413,7 @@ function computeFinalRoundSuccess(
 		totalFinalRounds: finalRounds.length,
 		offers,
 		rejections,
-		conversionRate:
-			finalRounds.length > 0 ? offers / finalRounds.length : 0,
+		conversionRate: finalRounds.length > 0 ? offers / finalRounds.length : 0,
 	};
 }
 

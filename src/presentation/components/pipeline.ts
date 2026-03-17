@@ -3,6 +3,7 @@ import {
 	camelCaseToSpaceSeparatedLower,
 	camelCaseToSpaceSeparatedUpper,
 } from "#src/presentation/utils/string-conversions.ts";
+
 import type { JobApplication } from "../../domain/entities/job-application";
 import { processApplicationData } from "../utils/pipeline-utils";
 import { renderApplicationTableRow } from "./table-row-renderer";
@@ -209,7 +210,6 @@ function sortApplications(
 				aVal = a.nextEventDate ? new Date(a.nextEventDate).getTime() : 0;
 				bVal = b.nextEventDate ? new Date(b.nextEventDate).getTime() : 0;
 				break;
-			// biome-ignore lint: explicitness
 			case "updatedAt":
 			default:
 				aVal = new Date(a.updatedAt).getTime();

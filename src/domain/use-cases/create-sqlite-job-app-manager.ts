@@ -1,6 +1,8 @@
 import { Database } from "bun:sqlite";
+
 import { ArkErrors } from "arktype";
 import { errAsync, okAsync, ResultAsync } from "neverthrow";
+
 import {
 	type ProcessEnvSchema,
 	processEnv,

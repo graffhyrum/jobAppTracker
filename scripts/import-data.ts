@@ -10,14 +10,16 @@
  * 4. Inserts all data into the production database
  */
 
-import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import { ArkErrors } from "arktype";
-import type {
-	BaseDataJobApplication,
-	Result,
-} from "../src/domain/entities/baseData-schema.ts";
-import { baseDataModule } from "../src/domain/entities/baseData-schema.ts";
+
+import type { JobApplicationResult } from "#src/domain/entities/base-data-schema.ts";
+import {
+	type BaseDataJobApplication,
+	baseDataModule,
+} from "#src/domain/entities/base-data-schema.ts";
+
 import type {
 	ContactChannel,
 	ContactForCreate,
@@ -135,7 +137,7 @@ function isValidInterestRating(
 // Map BaseData status/outcome to application status
 function mapBaseDataStatusToAppStatus(
 	status: BaseDataJobApplication["status"],
-	outcome: Result["outcome"],
+	outcome: JobApplicationResult["outcome"],
 ): ApplicationStatus {
 	if (status === "Applied") {
 		return {
@@ -431,7 +433,7 @@ async function updateJobApplicationStatus(
 ): Promise<void> {
 	const baseDataStatus = mapBaseDataStatusToAppStatus(
 		baseDataApp.status,
-		baseDataApp.result?.outcome ?? undefined,
+		(baseDataApp.result as JobApplicationResult | undefined)?.outcome ?? null,
 	);
 	const correctStatusLog: [string, ApplicationStatus] = [
 		baseDataApp.created_at,
@@ -556,8 +558,7 @@ async function importData(): Promise<void> {
 
 	const jsonPath = join(process.cwd(), "data", "job-applications.json");
 	console.log(`📖 Reading data from: ${jsonPath}`);
-	const jsonContent = readFileSync(jsonPath, "utf-8");
-	const rawData: unknown = JSON.parse(jsonContent);
+	const rawData = await import(jsonPath);
 
 	console.log("🔍 Validating JSON structure...");
 	const baseDataData = await validateBaseDataData(rawData);

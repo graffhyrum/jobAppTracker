@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
 import type { JobApplicationForCreate } from "#src/domain/entities/job-application.ts";
+
 import { createInMemoryJobApplicationManager } from "./in-memory-job-application-manager.ts";
 
 describe("InMemoryJobApplicationManager", () => {

@@ -8,6 +8,7 @@
 ## Overview
 
 Expanded the job application tracker with three major feature additions based on analysis of a reference system:
+
 1. **Job Source & Board Tracking** - Track where applications came from
 2. **Networking & Contacts** - Track recruiters, employees, and outreach efforts
 3. **Interview Stages** - Detailed tracking of interview rounds and questions
@@ -21,17 +22,20 @@ Expanded the job application tracker with three major feature additions based on
 #### New Domain Entities Created
 
 **JobBoard Entity** (`src/domain/entities/job-board.ts`)
+
 - Tracks job boards with domain matching capabilities
 - Pre-seeded with 8 common job boards (LinkedIn, Indeed, Glassdoor, ZipRecruiter, Monster, CareerBuilder, AngelList, Dice)
 - Fields: `id`, `name`, `rootDomain`, `domains[]`, `createdAt`
 
 **Contact Entity** (`src/domain/entities/contact.ts`)
+
 - Tracks networking contacts (recruiters, employees, hiring managers)
 - Fields: `id`, `jobApplicationId`, `contactName`, `contactEmail?`, `linkedInUrl?`, `role?`, `channel`, `outreachDate`, `responseReceived`, `notes?`, `createdAt`, `updatedAt`
 - Supported roles: recruiter, hiring manager, employee, referral, other
 - Supported channels: email, linkedin, phone, referral, other
 
 **InterviewStage Entity** (`src/domain/entities/interview-stage.ts`)
+
 - Tracks individual interview rounds with questions
 - Fields: `id`, `jobApplicationId`, `round`, `interviewType`, `isFinalRound`, `scheduledDate?`, `completedDate?`, `notes?`, `questions[]`, `createdAt`, `updatedAt`
 - Interview types: phone screening, technical, behavioral, onsite, panel, other
@@ -40,21 +44,25 @@ Expanded the job application tracker with three major feature additions based on
 #### Enhanced JobApplication Entity
 
 Added new required fields:
+
 - `sourceType`: 'job_board' | 'referral' | 'company_website' | 'recruiter' | 'networking' | 'other'
 - `isRemote`: boolean flag for remote positions
 
 Added new optional fields:
+
 - `jobBoardId?`: UUID linking to job board (when sourceType = 'job_board')
 - `sourceNotes?`: string for additional source context
 
 #### Repository Layer (Hexagonal Architecture)
 
 **Port Interfaces Created:**
+
 - `InterviewStageRepository` - CRUD operations for interview stages
 - `ContactRepository` - CRUD operations for contacts
 - `JobBoardRepository` - CRUD + seed operations for job boards
 
 **SQLite Adapter Implementations:**
+
 - `createSQLiteInterviewStageRepository()` - Full CRUD with JSON serialization for questions array
 - `createSQLiteContactRepository()` - Full CRUD with proper type conversions
 - `createSQLiteJobBoardRepository()` - CRUD + `findByDomain()` + `seedCommonBoards()`
@@ -62,6 +70,7 @@ Added new optional fields:
 #### Database Schema Updates
 
 **New Tables:**
+
 ```sql
 -- Job boards table
 CREATE TABLE job_boards (
@@ -110,6 +119,7 @@ CREATE TABLE contacts (
 Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
 
 **Indexes Created:**
+
 - `idx_interview_stages_job_app` on `interview_stages(jobApplicationId)`
 - `idx_contacts_job_app` on `contacts(jobApplicationId)`
 - `idx_job_boards_domain` on `job_boards(rootDomain)`
@@ -117,10 +127,12 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
 #### Dependency Injection & Plugins
 
 **Created:**
+
 - `jobBoardRepository` singleton (`src/domain/use-cases/create-sqlite-job-board-repo.ts`)
 - `jobBoardRepositoryPlugin` Elysia plugin (`src/application/server/plugins/jobBoardRepository.plugin.ts`)
 
 **Integrated into:**
+
 - Homepage route (fetches job boards for form dropdown)
 - Applications POST route (fetches job boards for error handling)
 
@@ -133,6 +145,7 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
 **Updated:** `src/presentation/components/add-application-form.ts`
 
 **New Form Fields:**
+
 1. **Source Type Dropdown** (required)
    - Options: Other, Job Board, Referral, Company Website, Recruiter, Networking
    - Default: "Other"
@@ -149,21 +162,25 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
    - Optional field for additional context about how job was found
 
 **JavaScript Enhancement:**
+
 - Dynamic show/hide logic for job board dropdown based on source type selection
 
 #### Form Data Flow Updates
 
 **Schema Updates:**
+
 - Created `FormForCreate` schema accepting HTML form data types (strings/booleans)
 - Updated `createApplicationBodySchema` to use `FormForCreate`
 
 **Data Transformation:**
+
 - Enhanced `extractApplicationData()` to handle:
   - String-to-boolean conversion for `isRemote` checkbox
   - String validation for `sourceType`
   - Optional `jobBoardId` and `sourceNotes` fields
 
 **Component Chain:**
+
 - `addApplicationForm(jobBoards[], errorMessage?)` - Renders form with job board options
 - `formAndPipelineContent(applications[], jobBoards[], errorMessage?)` - Wraps form + pipeline
 - `homepagePage(applications[], jobBoards[])` - Full page with both datasets
@@ -176,6 +193,7 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
 #### All Tests Passing ✅
 
 **Unit Tests:**
+
 - ✅ 98/98 tests passing
 - Updated all test fixtures with new required fields (`sourceType`, `isRemote`)
 - Files updated:
@@ -186,12 +204,14 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
   - `tests/e2e/fixtures/base.ts`
 
 **End-to-End Tests:**
+
 - ✅ 18/18 Playwright tests passing
 - All application table editing tests passing
 - Navigation tests passing
 - Deletion tests passing
 
 **Code Quality:**
+
 - ✅ No TypeScript compilation errors
 - ✅ No Biome linting errors
 - ✅ All imports properly typed
@@ -206,6 +226,7 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
 **Location:** Application Details Page
 
 **Features to Implement:**
+
 1. **Display Section:**
    - List all interview stages for an application
    - Show: round number, type, date, final round indicator
@@ -225,6 +246,7 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
    - Stage reordering if needed
 
 **Files to Create/Update:**
+
 - `src/presentation/components/interview-stage-list.ts` (new)
 - `src/presentation/components/interview-stage-form.ts` (new)
 - `src/presentation/components/application-details-renderer.ts` (update)
@@ -239,6 +261,7 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
 **Location:** Application Details Page
 
 **Features to Implement:**
+
 1. **Display Section:**
    - List all contacts for an application
    - Show: name, role, channel, outreach date, response status
@@ -259,6 +282,7 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
    - Delete confirmation
 
 **Files to Create/Update:**
+
 - `src/presentation/components/contact-list.ts` (new)
 - `src/presentation/components/contact-form.ts` (new)
 - `src/presentation/components/application-details-renderer.ts` (update)
@@ -273,6 +297,7 @@ Added columns: `sourceType`, `jobBoardId`, `sourceNotes`, `isRemote`
 ### Hexagonal Architecture Maintained
 
 All new features follow the project's hexagonal architecture:
+
 1. **Domain Layer** - Pure entities with ArkType validation
 2. **Ports** - TypeScript interfaces defining repository contracts
 3. **Adapters** - SQLite implementations of repositories
@@ -282,21 +307,25 @@ All new features follow the project's hexagonal architecture:
 ### Key Technical Patterns Used
 
 **1. ArkType Validation:**
+
 - Runtime type validation at system boundaries
 - Type inference for TypeScript types
 - Separate schemas for forms vs. domain entities
 
 **2. NeverThrow Error Handling:**
+
 - All repository operations return `Result<T, E>` or `ResultAsync<T, E>`
 - No thrown exceptions in business logic
 - Explicit error handling throughout
 
 **3. Dependency Injection:**
+
 - Singleton repository instances
 - Elysia plugin system for dependency decoration
 - Clear composition roots
 
 **4. Database Design:**
+
 - Foreign keys with CASCADE delete for referential integrity
 - JSON serialization for complex types (arrays)
 - Proper indexes for query performance
@@ -343,42 +372,50 @@ All new features follow the project's hexagonal architecture:
 ### New Files (10 total)
 
 **Domain Entities:**
+
 - `src/domain/entities/interview-stage.ts`
 - `src/domain/entities/contact.ts`
 - `src/domain/entities/job-board.ts`
 
 **Ports:**
+
 - `src/domain/ports/interview-stage-repository.ts`
 - `src/domain/ports/contact-repository.ts`
 - `src/domain/ports/job-board-repository.ts`
 
 **Infrastructure:**
+
 - `src/infrastructure/adapters/sqlite-interview-stage-repository.ts`
 - `src/infrastructure/adapters/sqlite-contact-repository.ts`
 - `src/infrastructure/adapters/sqlite-job-board-repository.ts`
 
 **Application Layer:**
+
 - `src/domain/use-cases/create-sqlite-job-board-repo.ts`
 - `src/application/server/plugins/jobBoardRepository.plugin.ts`
 
 ### Modified Files (15+ total)
 
 **Domain:**
+
 - `src/domain/entities/job-application.ts` - Added source/remote fields
 - `src/domain/use-cases/create-sqlite-job-app-manager.ts` - Updated schema with new tables
 
 **Application:**
+
 - `src/application/server/plugins/applications.plugin.ts` - Added job board integration
 - `src/application/server/plugins/pages.plugin.ts` - Fetch job boards for homepage
 - `src/application/server/utils/application-route-helpers.ts` - Handle new form fields
 
 **Presentation:**
+
 - `src/presentation/components/add-application-form.ts` - New fields + JavaScript
 - `src/presentation/components/formAndPipelineContent.ts` - Pass job boards
 - `src/presentation/pages/homepage.ts` - Accept job boards parameter
 - `src/presentation/schemas/application-routes.schemas.ts` - Use FormForCreate
 
 **Tests:**
+
 - `src/domain/entities/job-application.test.ts`
 - `src/domain/use-cases/create-sqlite-job-app-manager.test.ts`
 - `src/presentation/utils/pipeline-utils.test.ts`
@@ -390,17 +427,20 @@ All new features follow the project's hexagonal architecture:
 ## 🎯 Next Steps Recommendations
 
 ### Option A: Ship Current Features
+
 - Current implementation is production-ready
 - All tests passing
 - Core source tracking functional
 - Users can start using immediately
 
 ### Option B: Complete Phase 2
+
 - Add interview stage UI (4-6 hours)
 - Add contact management UI (3-5 hours)
 - Provides full feature parity with reference system
 
 ### Option C: Incremental Enhancement
+
 - Ship current features
 - Gather user feedback
 - Prioritize Interview vs. Contact UI based on usage patterns
@@ -411,15 +451,18 @@ All new features follow the project's hexagonal architecture:
 ## 📝 Notes
 
 ### Database Migration Strategy
+
 - Current approach: Fresh schema creation (acceptable for single-user system)
 - Old database files need to be deleted for new schema
 - No migration scripts created (not needed per user preference)
 
 ### Backward Compatibility
+
 - **Breaking Change:** New required fields (`sourceType`, `isRemote`) mean old data won't load
 - **Solution:** Delete old database files or run `clearAllJobApplications()` before using
 
 ### Performance Considerations
+
 - All foreign key indexes created
 - JSON fields used sparingly (only for arrays)
 - Query patterns optimized for common use cases

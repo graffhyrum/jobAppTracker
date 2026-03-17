@@ -1,6 +1,8 @@
 import { type } from "arktype";
 import { Elysia } from "elysia";
+
 import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
+
 import { COOKIE_MAX_AGE, DEV_DB_COOKIE_NAME } from "./db-selector-constants.ts";
 
 const switchDbBodySchema = type({

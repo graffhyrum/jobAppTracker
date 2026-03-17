@@ -1,5 +1,6 @@
 import { scope } from "arktype";
 import type { Result } from "neverthrow";
+
 import { NonEmptyString } from "./non-empty-string.ts";
 import { uuidSchema } from "./uuid.ts";
 

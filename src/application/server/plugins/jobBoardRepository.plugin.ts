@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+
 import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
 
 /**

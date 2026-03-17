@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+
 import { wrapAsyncOperation, wrapPromise } from "./utils";
 
 describe("Utils", () => {

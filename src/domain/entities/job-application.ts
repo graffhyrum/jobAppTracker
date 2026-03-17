@@ -1,5 +1,6 @@
 import { ArkErrors, scope, type } from "arktype";
 import { err, ok, type Result } from "neverthrow";
+
 import { noteScope } from "./noteScope.ts";
 import { uuidSchema } from "./uuid.ts";
 

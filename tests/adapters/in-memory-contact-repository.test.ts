@@ -1,7 +1,9 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
 import type { ContactForCreate } from "#src/domain/entities/contact.ts";
 import type { JobApplicationId } from "#src/domain/entities/job-application.ts";
+
 import { createInMemoryContactRepository } from "./in-memory-contact-repository.ts";
 
 describe("InMemoryContactRepository", () => {

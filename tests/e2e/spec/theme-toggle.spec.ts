@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+
 import { test } from "../fixtures/base.ts";
 
 test.describe("Theme Toggle", () => {

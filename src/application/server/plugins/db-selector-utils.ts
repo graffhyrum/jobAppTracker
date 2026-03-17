@@ -1,4 +1,5 @@
 import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
+
 import { DEV_DB_COOKIE_NAME } from "./db-selector-constants.ts";
 
 /**

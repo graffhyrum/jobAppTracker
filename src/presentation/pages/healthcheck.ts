@@ -1,4 +1,5 @@
 import { getEntries } from "#rootTypes/entries.ts";
+
 import { type LayoutOptions, layout } from "../components/layout";
 
 export const healthcheckPage = (

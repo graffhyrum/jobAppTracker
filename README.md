@@ -19,6 +19,7 @@ A lightweight, single-user job application tracking system built with TypeScript
 ## Architecture
 
 Built using hexagonal architecture principles with clean separation of concerns:
+
 - **Domain Layer**: Core business logic and entities
 - **Application Layer**: Use cases and API routes
 - **Infrastructure Layer**: Database, file system
@@ -36,12 +37,13 @@ See [docs/PRD.md](./docs/PRD.md) for detailed requirements and architecture diag
 - **Error Handling**: NeverThrow
 
 - **Testing**: Playwright (E2E), Bun Test (unit)
-- **Code Quality**: Biome (linting, formatting)
+- **Code Quality**: OXC (oxlint + oxfmt)
 - **Git Hooks**: Husky with lint-staged
 
 ## Getting Started
 
 ### Prerequisites
+
 - [Bun](https://bun.sh/) v1.2.21 or later
 
 ### Installation
@@ -63,12 +65,12 @@ cp .env.example .env
 
 The following environment variables are available:
 
-| Variable | Type | Description | Default |
-|----------|------|-------------|---------|
-| `BASE_URL` | string | Base URL for the application | `http://localhost` |
-| `PORT` | number | Port number for the server | `3000` |
-| `JOB_APP_MANAGER_TYPE` | string | Database mode (`prod` or `test`) | `prod` |
-| `BROWSER_EXTENSION_API_KEY` | string | API key for browser extension authentication | `dev-api-key` |
+| Variable                    | Type   | Description                                  | Default            |
+| --------------------------- | ------ | -------------------------------------------- | ------------------ |
+| `BASE_URL`                  | string | Base URL for the application                 | `http://localhost` |
+| `PORT`                      | number | Port number for the server                   | `3000`             |
+| `JOB_APP_MANAGER_TYPE`      | string | Database mode (`prod` or `test`)             | `prod`             |
+| `BROWSER_EXTENSION_API_KEY` | string | API key for browser extension authentication | `dev-api-key`      |
 
 ### Development
 
@@ -104,8 +106,8 @@ The application includes a feature flag system that allows you to enable develop
 
 ### Available Feature Flags
 
-| Flag | Description | Default |
-|-------|-------------|-----------|
+| Flag              | Description                                                           | Default |
+| ----------------- | --------------------------------------------------------------------- | ------- |
 | `enableTestTools` | Shows database selector and other testing tools in the navigation bar | `false` |
 
 ### Browser Console API
@@ -114,35 +116,35 @@ Open your browser's developer console (F12) and use the following commands:
 
 ```javascript
 // List all available feature flags
-featureFlags.list()
+featureFlags.list();
 
 // Get current flag values
-featureFlags.getFlags()
+featureFlags.getFlags();
 
 // Enable a specific flag
-featureFlags.enable('enableTestTools')
+featureFlags.enable("enableTestTools");
 
 // Disable a specific flag
-featureFlags.disable('enableTestTools')
+featureFlags.disable("enableTestTools");
 
 // Toggle a flag (enable if disabled, disable if enabled)
-featureFlags.toggle('enableTestTools')
+featureFlags.toggle("enableTestTools");
 
 // Reset all flags to defaults
-featureFlags.reset()
+featureFlags.reset();
 ```
 
 ### Example Usage
 
 ```javascript
 // Enable testing tools to see database selector
-featureFlags.enable('enableTestTools')
+featureFlags.enable("enableTestTools");
 
 // The database selector will now appear in the navigation bar
 // allowing you to switch between test and production databases
 
 // Disable testing tools when done
-featureFlags.disable('enableTestTools')
+featureFlags.disable("enableTestTools");
 ```
 
 ### Benefits
@@ -244,8 +246,8 @@ Private project - not licensed for distribution.
 
 This project uses conventional development workflows:
 
-- **Code Style**: Configured with Biome (see biome.json)
-- **Testing**: Place tests next to source files (*.test.ts)
+- **Code Style**: Configured with OXC (see .oxlintrc.json, .oxfmtrc.json)
+- **Testing**: Place tests next to source files (\*.test.ts)
 - **Git Hooks**: Pre-commit hooks run code formatting and linting
 - **Changesets**: Use `@changesets/cli` for version management
 

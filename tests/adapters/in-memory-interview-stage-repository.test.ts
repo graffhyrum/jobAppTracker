@@ -1,7 +1,9 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
 import type { InterviewStageForCreate } from "#src/domain/entities/interview-stage.ts";
 import type { JobApplicationId } from "#src/domain/entities/job-application.ts";
+
 import { createInMemoryInterviewStageRepository } from "./in-memory-interview-stage-repository.ts";
 
 describe("InMemoryInterviewStageRepository", () => {

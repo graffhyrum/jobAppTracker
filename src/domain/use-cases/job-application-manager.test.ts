@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
+
 import { createInMemoryJobApplicationManager } from "../../../tests/adapters/in-memory-job-application-manager.ts";
 import type { ForUpdate } from "../../infrastructure/storage/storage-provider-interface.ts";
 import type {

@@ -48,9 +48,10 @@ src/presentation/styles/
 ```
 
 **Example Usage:**
+
 ```css
 .my-card {
-    background-color: var(--color-bg-container);
+	background-color: var(--color-bg-container);
 }
 ```
 
@@ -67,13 +68,14 @@ src/presentation/styles/
 ```
 
 **Example Usage:**
+
 ```css
 .heading {
-    color: var(--color-text-primary);
+	color: var(--color-text-primary);
 }
 
 .subtitle {
-    color: var(--color-text-secondary);
+	color: var(--color-text-secondary);
 }
 ```
 
@@ -89,15 +91,17 @@ src/presentation/styles/
 ```
 
 **Example Usage:**
+
 ```css
 .input-field {
-    border: 2px solid var(--color-border-primary);
+	border: 2px solid var(--color-border-primary);
 }
 ```
 
 ### Accent Colors
 
 #### Primary (Green)
+
 ```css
 --color-accent-primary              /* Base green */
 --color-accent-primary-hover        /* Hover state */
@@ -112,6 +116,7 @@ src/presentation/styles/
 **Use Cases:** Primary buttons, success states, positive indicators
 
 #### Blue
+
 ```css
 --color-accent-blue              /* Base blue */
 --color-accent-blue-hover        /* Hover state */
@@ -125,6 +130,7 @@ src/presentation/styles/
 **Use Cases:** Links, information, secondary actions
 
 #### Purple
+
 ```css
 --color-accent-purple         /* Base purple */
 --color-accent-purple-text    /* Purple text */
@@ -135,6 +141,7 @@ src/presentation/styles/
 **Use Cases:** Visited links, special states
 
 #### Yellow/Gold
+
 ```css
 --color-accent-yellow          /* Base yellow */
 --color-accent-yellow-light    /* Light variant */
@@ -148,6 +155,7 @@ src/presentation/styles/
 ### Status Colors
 
 #### Error/Danger (Red)
+
 ```css
 --color-status-error           /* Error state */
 --color-status-error-hover     /* Error hover */
@@ -162,6 +170,7 @@ src/presentation/styles/
 **Use Cases:** Error messages, delete buttons, rejections
 
 #### Success (Green)
+
 ```css
 --color-status-success         /* Success state */
 --color-status-success-hover   /* Success hover */
@@ -170,6 +179,7 @@ src/presentation/styles/
 **Use Cases:** Success messages, confirmations, offers
 
 #### Overdue
+
 ```css
 --color-status-overdue         /* Overdue indicator */
 --color-status-overdue-bg      /* Overdue background */
@@ -262,9 +272,9 @@ The `utilities.css` file provides pre-built classes for common patterns:
 
 ```css
 .my-component {
-    background-color: var(--color-bg-container);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-border-primary);
+	background-color: var(--color-bg-container);
+	color: var(--color-text-primary);
+	border: 1px solid var(--color-border-primary);
 }
 ```
 
@@ -272,11 +282,11 @@ The `utilities.css` file provides pre-built classes for common patterns:
 
 ```css
 .button {
-    background-color: var(--color-accent-primary);
+	background-color: var(--color-accent-primary);
 }
 
 .button:hover {
-    background-color: var(--color-accent-primary-hover);
+	background-color: var(--color-accent-primary-hover);
 }
 ```
 
@@ -284,8 +294,8 @@ The `utilities.css` file provides pre-built classes for common patterns:
 
 ```css
 .input:focus-visible {
-    outline: 2px solid var(--color-accent-blue-focus);
-    outline-offset: 2px;
+	outline: 2px solid var(--color-accent-blue-focus);
+	outline-offset: 2px;
 }
 ```
 
@@ -295,14 +305,14 @@ The `utilities.css` file provides pre-built classes for common patterns:
 
 ```javascript
 const getThemeColor = (colorVar) => {
-    return getComputedStyle(document.documentElement)
-        .getPropertyValue(colorVar)
-        .trim();
+	return getComputedStyle(document.documentElement)
+		.getPropertyValue(colorVar)
+		.trim();
 };
 
 // Usage
-const primaryColor = getThemeColor('--color-accent-primary');
-const errorColor = getThemeColor('--color-status-error');
+const primaryColor = getThemeColor("--color-accent-primary");
+const errorColor = getThemeColor("--color-status-error");
 ```
 
 ### Example: Chart.js Integration
@@ -310,29 +320,31 @@ const errorColor = getThemeColor('--color-status-error');
 ```javascript
 // Read colors from theme
 const themeColors = {
-    primary: getThemeColor('--color-accent-primary'),
-    error: getThemeColor('--color-status-error'),
-    textPrimary: getThemeColor('--color-text-primary'),
+	primary: getThemeColor("--color-accent-primary"),
+	error: getThemeColor("--color-status-error"),
+	textPrimary: getThemeColor("--color-text-primary"),
 };
 
 // Use in chart configuration
 new Chart(ctx, {
-    type: 'bar',
-    data: {
-        datasets: [{
-            backgroundColor: themeColors.primary,
-            borderColor: themeColors.primary,
-        }]
-    },
-    options: {
-        scales: {
-            y: {
-                ticks: {
-                    color: themeColors.textPrimary
-                }
-            }
-        }
-    }
+	type: "bar",
+	data: {
+		datasets: [
+			{
+				backgroundColor: themeColors.primary,
+				borderColor: themeColors.primary,
+			},
+		],
+	},
+	options: {
+		scales: {
+			y: {
+				ticks: {
+					color: themeColors.textPrimary,
+				},
+			},
+		},
+	},
 });
 ```
 
@@ -350,14 +362,14 @@ All color variables have both light and dark mode definitions. The theme switche
 ```css
 /* Light mode (default) */
 :root {
-    --color-bg-body: #f5f5f5;
-    --color-text-primary: #333;
+	--color-bg-body: #f5f5f5;
+	--color-text-primary: #333;
 }
 
 /* Dark mode */
 [data-theme="dark"] {
-    --color-bg-body: #1a1a1a;
-    --color-text-primary: #e0e0e0;
+	--color-bg-body: #1a1a1a;
+	--color-text-primary: #e0e0e0;
 }
 ```
 
@@ -410,28 +422,32 @@ color: var(--color-text-primary);
 ### Examples
 
 **Bad:**
+
 ```html
 <div style="color: red; background-color: #ffebee;">Error!</div>
 ```
 
 **Good:**
+
 ```html
 <div class="error-alert">Error!</div>
 ```
 
 **Bad:**
+
 ```css
 .my-button {
-    background-color: #4caf50;
-    color: white;
+	background-color: #4caf50;
+	color: white;
 }
 ```
 
 **Good:**
+
 ```css
 .my-button {
-    background-color: var(--color-accent-primary);
-    color: var(--color-text-inverse);
+	background-color: var(--color-accent-primary);
+	color: var(--color-text-inverse);
 }
 ```
 
@@ -452,14 +468,14 @@ If you need a new color:
 
 /* Light theme */
 :root {
-    --color-accent-teal: #14b8a6;
-    --color-accent-teal-light: #ccfbf1;
+	--color-accent-teal: #14b8a6;
+	--color-accent-teal-light: #ccfbf1;
 }
 
 /* Dark theme */
 [data-theme="dark"] {
-    --color-accent-teal: #2dd4bf;
-    --color-accent-teal-light: #134e4a;
+	--color-accent-teal: #2dd4bf;
+	--color-accent-teal-light: #134e4a;
 }
 ```
 
@@ -494,15 +510,15 @@ If you need a new color:
 
 ## Quick Reference Card
 
-| Category | Variable Pattern | Example |
-|----------|-----------------|---------|
-| Background | `--color-bg-*` | `--color-bg-container` |
-| Text | `--color-text-*` | `--color-text-primary` |
-| Border | `--color-border-*` | `--color-border-primary` |
-| Accent | `--color-accent-*` | `--color-accent-blue` |
-| Status | `--color-status-*` | `--color-status-error` |
-| Button | `--color-btn-*` | `--color-btn-secondary-bg` |
-| Shadow | `--shadow-*` | `--shadow-md` |
-| Spacing | `--space-*` | `--space-lg` |
-| Typography | `--font-size-*` | `--font-size-lg` |
-| Radius | `--radius-*` | `--radius-md` |
+| Category   | Variable Pattern   | Example                    |
+| ---------- | ------------------ | -------------------------- |
+| Background | `--color-bg-*`     | `--color-bg-container`     |
+| Text       | `--color-text-*`   | `--color-text-primary`     |
+| Border     | `--color-border-*` | `--color-border-primary`   |
+| Accent     | `--color-accent-*` | `--color-accent-blue`      |
+| Status     | `--color-status-*` | `--color-status-error`     |
+| Button     | `--color-btn-*`    | `--color-btn-secondary-bg` |
+| Shadow     | `--shadow-*`       | `--shadow-md`              |
+| Spacing    | `--space-*`        | `--space-lg`               |
+| Typography | `--font-size-*`    | `--font-size-lg`           |
+| Radius     | `--radius-*`       | `--radius-md`              |

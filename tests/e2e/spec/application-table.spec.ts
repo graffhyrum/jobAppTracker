@@ -1,3 +1,5 @@
+import { expect } from "@playwright/test";
+
 import { test } from "../fixtures/base.ts";
 
 test.beforeEach(async ({ POMs, testJobApplication }) => {
@@ -319,5 +321,22 @@ test.describe("Application deletion", () => {
 
 		// Row should still be visible
 		await row.assertions.isVisible();
+	});
+
+	test("codegen", async ({ page, testJobApplication }) => {
+		const itemId = testJobApplication.id;
+		const editButtonLocator = page.getByTestId(`edit-btn-${itemId}`);
+		const saveButtonLocator = page.getByTestId(`save-btn-${itemId}`);
+		const cancelButtonLocator = page.getByTestId(`cancel-btn-${itemId}`);
+		const viewButtonLocator = page.getByTestId(`view-btn-${itemId}`);
+		const deleteButtonLocator = page.getByTestId(`delete-btn-${itemId}`);
+
+		await editButtonLocator.click();
+		await expect(saveButtonLocator).toBeVisible();
+		await expect(cancelButtonLocator).toBeVisible();
+		await saveButtonLocator.click();
+		await expect(editButtonLocator).toBeVisible();
+		await expect(viewButtonLocator).toBeVisible();
+		await expect(deleteButtonLocator).toBeVisible();
 	});
 });

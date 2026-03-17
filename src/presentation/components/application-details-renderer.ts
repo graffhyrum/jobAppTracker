@@ -34,7 +34,7 @@ export const renderApplicationDetailsView = (app: JobApplication): string => {
 				</div>
 			`;
 		})
-		.reverse()
+		.toReversed()
 		.join("");
 
 	return `

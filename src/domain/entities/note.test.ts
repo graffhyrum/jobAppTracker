@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
+
 import { createNote, createNotesCollectionManager } from "./note";
 
 describe("createNote", () => {

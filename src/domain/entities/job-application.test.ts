@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
+
 import {
 	createJobApplication,
 	createJobApplicationId,

@@ -94,8 +94,7 @@ export async function createJobApplicationViaUI(
 	// Submit and capture the response to extract the application ID
 	const [response] = await Promise.all([
 		page.waitForResponse(
-			(response) =>
-				response.request().method() === "POST" && response.status() === 200,
+			(r) => r.request().method() === "POST" && r.status() === 200,
 			{ timeout: 10000 },
 		),
 		page.click('button[type="submit"]'),

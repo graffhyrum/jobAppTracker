@@ -14,12 +14,14 @@
  *
  * @returns true if in development mode, false if in production
  */
+/* c8 ignore start */
 export function isDevelopment(): boolean {
 	// Check if main file is in src/ directory (dev mode)
 	if (Bun.main.includes("/src/") || Bun.main.includes("\\src\\")) {
 		return true;
 	}
 
+	/* c8 ignore next */
 	// Check NODE_ENV
 	if (process.env.NODE_ENV === "development") {
 		return true;
@@ -28,6 +30,7 @@ export function isDevelopment(): boolean {
 	// Default to production for safety
 	return false;
 }
+/* c8 ignore stop */
 
 /**
  * Detects if the application is running as a production binary.

@@ -1,0 +1,242 @@
+$ bun scripts/end-to-end.ts
+Dev server not found. Starting new server
+$ bun run build:scripts && bun --watch run src/index.ts
+$ bun build src/presentation/scripts/feature-flags.ts --target browser --outfile src/presentation/scripts/feature-flags.js  && bun build src/presentation/scripts/pipeline-client.ts --target browser --outfile src/presentation/scripts/pipeline-client.js
+Bundled 1 module in 1ms
+
+  feature-flags.js  2.85 KB  (entry point)
+
+Bundled 1 module in 1ms
+
+  pipeline-client.js  9.27 KB  (entry point)
+
+[11.10ms] pollDevServer
+🔍 [SQLite] Database initialized: :memory:
+🔍 [SQLite] Database initialized: data/jobapp.sqlite
+🚀 Starting Job Application Tracker with Elysia...
+🛠️  Dev tools enabled at /dev/*
+🦊 Elysia is running at http://localhost:3000
+
+🚀 E2E Test Suite Starting
+
+🔧 E2E Global Setup: Clearing test tables via API
+📦 Test environment ready (in-memory database)
+✅ E2E Global Setup Complete
+
+
+Running 33 tests using 8 workers
+Failed to create application: Failed to create Job Application: SQLiteError: database is locked
+F········Failed to create application: Failed to create Job Application: SQLiteError: database is locked
+F········Failed to create application: Failed to create Job Application: SQLiteError: database is locked
+·F········F····
+🧹 E2E Test Suite Cleanup
+
+🔧 E2E Global Teardown: Test environment cleanup
+✅ E2E Global Teardown Complete
+
+
+
+  1) [chromium-1920x1080] › tests/e2e/spec/application-sorting.spec.ts:18:2 › Application table sorting - column name validation › should accept updatedAt as valid sortColumn 
+
+    Error: Failed to create test job application: 400
+
+       at fixtures/base.ts:72
+
+      70 |
+      71 | 		if (!response.ok()) {
+    > 72 | 			throw new Error(
+         | 			      ^
+      73 | 				`Failed to create test job application: ${response.status()}`,
+      74 | 			);
+      75 | 		}
+        at Object.testJobApplication (/home/graff/WebstormProjects/jobAppTracker/tests/e2e/fixtures/base.ts:72:10)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/spec-application-sorting-A-bc1ce-datedAt-as-valid-sortColumn-chromium-1920x1080/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/spec-application-sorting-A-bc1ce-datedAt-as-valid-sortColumn-chromium-1920x1080/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/spec-application-sorting-A-bc1ce-datedAt-as-valid-sortColumn-chromium-1920x1080/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/spec-application-sorting-A-bc1ce-datedAt-as-valid-sortColumn-chromium-1920x1080/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium-1920x1080] › tests/e2e/spec/application-table.spec.ts:71:2 › Application inline editing › should edit position title successfully 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).not.[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator:  locator('[data-testid="edit-input-position-019cfe04-8821-7000-a58f-2feb97c828b1"]')
+    Expected: not visible
+    Received: visible
+    Timeout:  2000ms
+
+    Call log:
+    [2m  - Expect "not toBeVisible" with timeout 2000ms[22m
+    [2m  - waiting for locator('[data-testid="edit-input-position-019cfe04-8821-7000-a58f-2feb97c828b1"]')[22m
+    [2m    6 × locator resolved to <input type="text" class="edit-input" name="positionTitle" value="Test Position - 5" data-testid="edit-input-position-019cfe04-8821-7000-a58f-2feb97c828b1"/>[22m
+    [2m      - unexpected value "visible"[22m
+
+
+       at POMs/pipelineTable/pipelineTableRowPOM.ts:109
+
+      107 | 		await locators.positionInput.fill(newValue);
+      108 | 		await clickSave();
+    > 109 | 		await expect(locators.positionInput).not.toBeVisible();
+          | 		                                         ^
+      110 | 	}
+      111 |
+      112 | 	async function editStatus(newStatus: string) {
+        at Object.editPositionTitle (/home/graff/WebstormProjects/jobAppTracker/tests/e2e/POMs/pipelineTable/pipelineTableRowPOM.ts:109:44)
+        at Object.editPositionTitleById (/home/graff/WebstormProjects/jobAppTracker/tests/e2e/POMs/pipelineTable/pipelineTablePOM.ts:131:3)
+        at /home/graff/WebstormProjects/jobAppTracker/tests/e2e/spec/application-table.spec.ts:80:3
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-eab92-position-title-successfully-chromium-1920x1080/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-eab92-position-title-successfully-chromium-1920x1080/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results/spec-application-table-App-eab92-position-title-successfully-chromium-1920x1080/error-context.md
+
+    attachment #4: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-eab92-position-title-successfully-chromium-1920x1080/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/spec-application-table-App-eab92-position-title-successfully-chromium-1920x1080/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [chromium-1920x1080] › tests/e2e/spec/application-table.spec.ts:139:2 › Application inline editing › should cancel edit operation 
+
+    Error: Failed to create test job application: 400
+
+       at fixtures/base.ts:72
+
+      70 |
+      71 | 		if (!response.ok()) {
+    > 72 | 			throw new Error(
+         | 			      ^
+      73 | 				`Failed to create test job application: ${response.status()}`,
+      74 | 			);
+      75 | 		}
+        at Object.testJobApplication (/home/graff/WebstormProjects/jobAppTracker/tests/e2e/fixtures/base.ts:72:10)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-17af3-hould-cancel-edit-operation-chromium-1920x1080/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-17af3-hould-cancel-edit-operation-chromium-1920x1080/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-17af3-hould-cancel-edit-operation-chromium-1920x1080/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/spec-application-table-App-17af3-hould-cancel-edit-operation-chromium-1920x1080/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [chromium-1920x1080] › tests/e2e/spec/application-table.spec.ts:168:2 › Application inline editing › should work after filtering applications 
+
+    Error: Failed to create test job application: 400
+
+       at fixtures/base.ts:72
+
+      70 |
+      71 | 		if (!response.ok()) {
+    > 72 | 			throw new Error(
+         | 			      ^
+      73 | 				`Failed to create test job application: ${response.status()}`,
+      74 | 			);
+      75 | 		}
+        at Object.testJobApplication (/home/graff/WebstormProjects/jobAppTracker/tests/e2e/fixtures/base.ts:72:10)
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-0a048-fter-filtering-applications-chromium-1920x1080/test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: video (video/webm) ──────────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-0a048-fter-filtering-applications-chromium-1920x1080/video.webm
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/spec-application-table-App-0a048-fter-filtering-applications-chromium-1920x1080/trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/spec-application-table-App-0a048-fter-filtering-applications-chromium-1920x1080/trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4 failed
+    [chromium-1920x1080] › tests/e2e/spec/application-sorting.spec.ts:18:2 › Application table sorting - column name validation › should accept updatedAt as valid sortColumn 
+    [chromium-1920x1080] › tests/e2e/spec/application-table.spec.ts:71:2 › Application inline editing › should edit position title successfully 
+    [chromium-1920x1080] › tests/e2e/spec/application-table.spec.ts:139:2 › Application inline editing › should cancel edit operation 
+    [chromium-1920x1080] › tests/e2e/spec/application-table.spec.ts:168:2 › Application inline editing › should work after filtering applications 
+  29 passed (5.6s)
+error: script "test:e2e" exited with code 1
+[Error NOT_FOUND]: error: NOT_FOUND
+ status: 404,
+   code: "NOT_FOUND"
+
+      at anonymous (file:///home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/compose.mjs:12:33)
+      at composeGeneralHandler (/home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/compose.mjs:1187:3)
+      at compile (/home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/index.mjs:1878:119)
+      at /home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/adapter/bun/index.mjs:201:29
+ Request (0 KB) {
+  method: "GET",
+  url: "http://localhost:3000/catalog",
+  headers: Headers {
+    "host": "localhost:3000",
+    "connection": "keep-alive",
+    "upgrade-insecure-requests": "1",
+    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+    "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+    "sec-fetch-mode": "navigate",
+    "sec-fetch-dest": "document",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "sec-ch-ua": "\"Not-A.Brand\";v=\"24\", \"Chromium\";v=\"146\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": "\"Linux\"",
+    "sec-fetch-site": "none",
+    "sec-fetch-user": "?1",
+  }
+}
+[Error NOT_FOUND]: error: NOT_FOUND
+ status: 404,
+   code: "NOT_FOUND"
+
+      at anonymous (file:///home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/compose.mjs:12:33)
+      at composeGeneralHandler (/home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/compose.mjs:1187:3)
+      at compile (/home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/index.mjs:1878:119)
+      at /home/graff/WebstormProjects/jobAppTracker/node_modules/elysia/dist/adapter/bun/index.mjs:201:29
+ Request (0 KB) {
+  method: "GET",
+  url: "http://localhost:3000/favicon.ico",
+  headers: Headers {
+    "host": "localhost:3000",
+    "connection": "keep-alive",
+    "user-agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36",
+    "accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+    "sec-fetch-mode": "no-cors",
+    "sec-fetch-dest": "image",
+    "referer": "http://localhost:3000/catalog",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "en-US,en;q=0.9",
+    "sec-ch-ua-platform": "\"Linux\"",
+    "sec-ch-ua": "\"Not-A.Brand\";v=\"24\", \"Chromium\";v=\"146\"",
+    "sec-ch-ua-mobile": "?0",
+    "sec-fetch-site": "same-origin",
+  }
+}
+Failed to create application: Failed to create Job Application: SQLiteError: database is locked
+❌ [Homepage] Failed to fetch job boards: Failed to query job boards: SQLiteError: database is locked

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
 import type { JobBoardForCreate } from "#src/domain/entities/job-board.ts";
+
 import { createInMemoryJobBoardRepository } from "./in-memory-job-board-repository.ts";
 
 describe("InMemoryJobBoardRepository", () => {

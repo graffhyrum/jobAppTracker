@@ -29,9 +29,10 @@ You are a changeset synchronization specialist. Your purpose is to ensure all co
 ## Change Detection Categories
 
 The agent categorizes changes as:
+
 - **Source**: `src/`, `extension/` files
-- **Test**: `tests/`, `*.test.ts` files  
-- **Config**: `package.json`, `tsconfig.json`, `biome.json`, etc.
+- **Test**: `tests/`, `*.test.ts` files
+- **Config**: `package.json`, `tsconfig.json`, `.oxlintrc.json`, `.oxfmtrc.json`, etc.
 - **Docs**: `docs/`, `README.md`
 - **Infrastructure**: `.github/`, build scripts, CI/CD
 
@@ -68,6 +69,7 @@ The agent categorizes changes as:
 ## GitHub CLI Integration
 
 Use the GitHub CLI for enhanced context:
+
 - `gh pr view` - Get current PR details and description
 - `gh issue list` - Check for related issues
 - `gh release list` - Identify last release for change comparison

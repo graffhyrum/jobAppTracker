@@ -1,4 +1,5 @@
 import { Elysia } from "elysia";
+
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import type { Column } from "#src/presentation/components/pipeline.ts";
 import { pipelineQuerySchema } from "#src/presentation/schemas/pipeline-routes.schemas.ts";
@@ -20,9 +21,8 @@ export const createPipelinePlugin = new Elysia({ prefix: "/api" })
 				: [];
 
 			// Import pipeline component to avoid circular dependency
-			const { pipelineComponent } = await import(
-				"../../../presentation/components/pipeline.ts"
-			);
+			const { pipelineComponent } =
+				await import("../../../presentation/components/pipeline.ts");
 
 			set.headers["Content-Type"] = "text/html";
 			return pipelineComponent(applications, sortColumn, sortDirection);

@@ -19,11 +19,11 @@ This test plan outlines the testing strategy for the Job Application Tracker, us
       /  \     E2E Tests (Playwright)
      /    \    - Happy path workflows
     /______\   - Critical user journeys
-   /        \  
+   /        \
   /          \  Integration Tests (Bun)
  /            \ - Database interactions
 /______________\- External service mocking
-                
+
                 Unit Tests (Bun)
                 - Business logic
                 - Domain entities
@@ -33,12 +33,14 @@ This test plan outlines the testing strategy for the Job Application Tracker, us
 ## Testing Framework Setup
 
 ### Unit & Integration Tests
+
 - **Framework**: Bun Test Runner
 - **Mocking**: Bun's built-in mocking
 - **Assertions**: Bun's built-in assertions
 - **Coverage**: Bun's built-in coverage reporting
 
 ### End-to-End Tests
+
 - **Framework**: Playwright
 - **Browsers**: Chromium (primary), Firefox, Safari (CI only)
 - **Test Data**: Isolated test database per test
@@ -47,6 +49,7 @@ This test plan outlines the testing strategy for the Job Application Tracker, us
 ## Test Structure
 
 ### Directory Organization
+
 ```
 src/
 ├── domain/
@@ -68,53 +71,57 @@ tests/
 ## Unit Test Plan
 
 ### Domain Layer Tests
+
 - **JobApplication Entity**: Validation, status updates, note management, timestamp handling
 - **Use Cases**: Application creation, status updates, data validation, error handling
 
 ### Infrastructure Layer Tests
+
 - **Repository Implementation**: Data persistence, querying, error handling
 
 ## Integration Test Plan
 
 ### Database Integration
+
 - Application persistence with all fields
 - Database migrations and schema changes
 - Referential integrity maintenance
 - Concurrent write handling
 
-### API Integration  
+### API Integration
+
 - CRUD operations via HTTP endpoints
 - Request validation and error handling
 - Response format consistency
 - Authentication and authorization (future)
-
-
 
 ## End-to-End Test Plan
 
 ### Critical User Journeys
 
 #### Application Management Flow
+
 - Create new application with all required fields
 - Edit application details and verify persistence
 - Delete application and confirm removal
 - Navigate between application views
 
-#### Pipeline Workflow  
+#### Pipeline Workflow
+
 - Move applications through active status pipeline
 - Transition applications to inactive status
 - Verify status changes reflect in dashboard
 - Test pipeline customization functionality
 
-
-
 #### Dashboard & Task Management
+
 - View overdue applications prominently
 - Update next event dates
 - Manage todo items from dashboard
 - Filter and sort applications by various criteria
 
 ### Cross-browser Testing
+
 - Test core functionality across Chromium, Firefox, and WebKit
 - Verify consistent behavior and styling
 - Validate form submissions and data persistence
@@ -122,12 +129,14 @@ tests/
 ## Test Data Management
 
 ### Fixtures
+
 - **Sample Applications**: Basic, with notes, overdue, and inactive scenarios
 
 - **Pipeline Configurations**: Default and custom pipeline setups
 - **Notes Data**: Various note content and timestamp scenarios
 
 ### Database Test Helpers
+
 - **Test Database Creation**: Isolated in-memory databases per test
 - **Data Seeding**: Populate test databases with fixture data
 - **Cleanup Utilities**: Reset database state between tests
@@ -136,16 +145,16 @@ tests/
 ## Performance Testing
 
 ### Load Testing
+
 - Handle large numbers of applications (1000+) efficiently
 - Measure response times under load
 - Monitor memory usage and resource consumption
 - Test database performance with realistic data volumes
 
-
-
 ## Test Execution Strategy
 
 ### Local Development
+
 ```bash
 # Run all unit tests
 bun test tests/unit/
@@ -161,6 +170,7 @@ bunx playwright test
 ```
 
 ### CI/CD Pipeline
+
 ```yaml
 # .github/workflows/test.yml
 jobs:
@@ -169,13 +179,13 @@ jobs:
     steps:
       - name: Run unit tests
         run: bun test tests/unit/ --coverage
-        
+
   integration-tests:
     runs-on: ubuntu-latest
     steps:
       - name: Run integration tests
         run: bun test tests/integration/
-        
+
   e2e-tests:
     runs-on: ubuntu-latest
     steps:
@@ -187,22 +197,24 @@ jobs:
 
 ## Coverage Goals
 
-| Layer | Coverage Target | Critical Paths |
-|-------|----------------|----------------|
-| Domain Entities | 95%+ | All business logic |
-| Use Cases | 90%+ | Error handling paths |
-| Infrastructure | 80%+ | Happy path + error cases |
-| Presentation | 70%+ | Key user interactions |
+| Layer           | Coverage Target | Critical Paths           |
+| --------------- | --------------- | ------------------------ |
+| Domain Entities | 95%+            | All business logic       |
+| Use Cases       | 90%+            | Error handling paths     |
+| Infrastructure  | 80%+            | Happy path + error cases |
+| Presentation    | 70%+            | Key user interactions    |
 
 ## Mock Strategy
 
 ### External Dependencies
+
 - **Database**: Use in-memory SQLite for unit tests
 - **File System**: Mock PDF file operations
 - **Time**: Mock Date.now() for consistent timestamps
 - **External APIs**: Not applicable (offline app)
 
 ### Test Doubles
+
 - **Repository Mocks**: Mock data persistence layer
 - **Time Mocks**: Consistent timestamp generation
 - **File System Mocks**: Simulate file operations
@@ -210,16 +222,19 @@ jobs:
 ## Quality Gates
 
 ### Pre-commit Hooks
+
 - All unit tests must pass
 - Code coverage must not decrease
 - Linting and type checking must pass
 
 ### Pre-merge Requirements
+
 - All tests (unit, integration, E2E) must pass
 - Coverage targets must be met
 - Performance tests must not regress
 
 ### Release Criteria
+
 - Full test suite passes on all supported platforms
 - E2E tests pass on all target browsers
 - Performance benchmarks meet requirements
@@ -228,12 +243,14 @@ jobs:
 ## Test Maintenance
 
 ### Regular Tasks
+
 - Review and update test data monthly
 - Audit test performance quarterly
 - Update browser versions for E2E tests
 - Clean up obsolete tests during refactoring
 
 ### Test Hygiene Rules
+
 - One assertion per test where possible
 - Descriptive test names following "should [expected behavior] when [condition]"
 - No shared mutable state between tests

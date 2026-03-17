@@ -1,5 +1,7 @@
 import { expect, test } from "bun:test";
+
 import { type } from "arktype";
+
 import { createBunUUIDGeneration } from "./bun-uuid-generation.ts";
 import { createNodeUUIDGeneration } from "./node-uuid-generation.ts";
 import type { UUIDGeneration } from "./uuid-generation.ts";

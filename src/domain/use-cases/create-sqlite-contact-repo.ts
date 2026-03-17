@@ -1,4 +1,5 @@
 import { Database } from "bun:sqlite";
+
 import { processEnv } from "../../../processEnvFacade.ts";
 import { createSQLiteContactRepository } from "../../infrastructure/adapters/sqlite-contact-repository.ts";
 import { getDatabasePath } from "../../infrastructure/config/sqlite-config.ts";
