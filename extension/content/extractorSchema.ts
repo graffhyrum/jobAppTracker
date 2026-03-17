@@ -1,4 +1,5 @@
 import { expect } from "bun:test";
+
 import { ArkErrors, type TraversalError, type Type, type } from "arktype";
 import { err, ok, type Result } from "neverthrow";
 
@@ -14,7 +15,7 @@ export function getAndAssertJobData(x: unknown): JobData {
 	return assertValidPerSchema(jobDataSchema, x);
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: generic
+// oxlint-disable-next-line no-explicit-any
 function assertValidPerSchema<const ArkType extends Type<any, any>>(
 	arkType: ArkType,
 	input: unknown,
@@ -24,7 +25,7 @@ function assertValidPerSchema<const ArkType extends Type<any, any>>(
 	return res._unsafeUnwrap();
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: generic
+// oxlint-disable-next-line no-explicit-any
 function toArkResult<const ArkType extends Type<any, any>>(
 	arkType: ArkType,
 	input: unknown,

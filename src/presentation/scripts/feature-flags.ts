@@ -44,7 +44,7 @@
 
 	const exposeToConsole = (): undefined => {
 		// Expose feature flag manager to console for debugging
-		// biome-ignore lint/suspicious/noExplicitAny: Intentional global assignment
+		// oxlint-disable-next-line no-explicit-any
 		(globalThis as any).featureFlags = {
 			// Get current flag values
 			getFlags: (): FeatureFlags => ({ ...flags }),
@@ -118,11 +118,11 @@
 	};
 
 	// Expose to global scope for use by other scripts
-	// biome-ignore lint/suspicious/noExplicitAny: Intentional global assignment
+	// oxlint-disable-next-line no-explicit-any
 	(globalThis as any).isFeatureEnabled = isFeatureEnabled;
-	// biome-ignore lint/suspicious/noExplicitAny: Intentional global assignment
+	// oxlint-disable-next-line no-explicit-any
 	(globalThis as any).getFeatureFlags = getFeatureFlags;
-	// biome-ignore lint/suspicious/noExplicitAny: Intentional global assignment
+	// oxlint-disable-next-line no-explicit-any
 	(globalThis as any).getFeatureFlagManager = getFeatureFlagManager;
 
 	// Auto-initialize DB selector visibility

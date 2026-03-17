@@ -3,7 +3,7 @@ import { err, ok, type Result } from "neverthrow";
 
 type ArkTypeOut<T> = T extends Type<infer Out, infer _Scope> ? Out : never;
 
-// biome-ignore lint/suspicious/noExplicitAny: generic function
+// oxlint-disable-next-line no-explicit-any
 export function toArkResult<const ArkType extends Type<any, any>>(
 	arkType: ArkType,
 	input: unknown,

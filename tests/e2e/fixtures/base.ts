@@ -1,8 +1,10 @@
-/** biome-ignore-all lint/correctness/noEmptyPattern: required by playwright */
+/* oxlint-disable no-empty-pattern */
 import { test as base } from "@playwright/test";
+
 import type { JobApplication } from "#src/domain/entities/job-application.ts";
 import type { PageLinkKeys } from "#src/presentation/components/pageConfig.ts";
 import type { createApplicationBodySchema } from "#src/presentation/schemas/application-routes.schemas.ts";
+
 import type { ComponentObject, PageObject } from "../config/ScreenplayTypes.ts";
 import {
 	createHealthPage,

@@ -70,7 +70,7 @@ function exposeToConsole(): void {
 	}
 
 	// Expose feature flag manager to console for debugging
-	// biome-ignore lint/suspicious/noExplicitAny: Intentional global window assignment
+	// oxlint-disable-next-line no-explicit-any
 	const windowAny = window as any;
 	windowAny.featureFlags = {
 		// Get current flag values

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it } from "bun:test";
+
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
+
 import { getAndAssertJobData, type JobData } from "./extractorSchema.ts";
 
 // Register happy-dom globals once
@@ -127,7 +129,7 @@ describe("Content Script Extractor", () => {
       };
     `;
 
-		// biome-ignore lint: eval needed for dynamic code loading in tests
+		// oxlint-disable-next-line no-eval
 		const functions = eval(`(function () {
             ${wrappedCode}
         })()`);

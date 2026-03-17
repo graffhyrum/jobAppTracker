@@ -1,8 +1,10 @@
 import { expect } from "bun:test";
+
 import type { Type } from "arktype";
+
 import { toArkResult } from "#helpers/ark-results.ts";
 
-// biome-ignore lint/suspicious/noExplicitAny: generic function
+// oxlint-disable-next-line no-explicit-any
 export function assertValidPerSchema<const ArkType extends Type<any, any>>(
 	arkType: ArkType,
 	input: unknown,
