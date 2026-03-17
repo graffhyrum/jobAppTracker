@@ -4,6 +4,7 @@ import {
 	type PlaywrightTestProject,
 	type ViewportSize,
 } from "@playwright/test";
+
 import { processEnv } from "./processEnvFacade.ts";
 import type { TestFixtures } from "./tests/e2e/fixtures/base.ts";
 
@@ -16,10 +17,10 @@ export default defineConfig({
 	expect: {
 		timeout: 2 * 1000,
 	},
-	fullyParallel: true,
+	fullyParallel: false,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	workers: process.env.CI ? 1 : 8,
+	workers: 1,
 	reporter: [["dot"], ["html", { open: "never" }]],
 
 	// Global setup and teardown for data isolation
