@@ -75,21 +75,23 @@ describe("createNotesCollection", () => {
 			expect(result.isErr()).toBe(true);
 		});
 
-		it("regression: add() never throws even if generateId were to produce the same id repeatedly", () => {
-			// Before the fix, NoteId.assert() inside .map() would throw on invalid input,
-			// bypassing NeverThrow's error channel. Now generateId is typed as () => NoteId,
-			// so validation is enforced at the call site, not inside the Result chain.
+		it("regression: add() returns Err on invalid content without throwing (NoteId.assert removal)", () => {
+			// Before the fix, NoteId.assert() inside .map() could throw on invalid input,
+			// bypassing NeverThrow's error channel. The fix moved ID validation to the call
+			// site by typing generateId as () => NoteId. This test verifies that the .map()
+			// callback produces Result values without throwing for both success and failure paths.
 			const fixedId = noteModule.NoteId.assert(
 				"00000000-0000-4000-8000-000000000099",
 			);
 			const collection = createNotesCollectionManager(() => fixedId);
 
-			const result1 = collection.operations.add({ content: "First note" });
-			expect(result1.isOk()).toBe(true);
+			// Success path: valid content returns Ok without throwing
+			const okResult = collection.operations.add({ content: "Valid note" });
+			expect(okResult.isOk()).toBe(true);
 
-			// Adding a second note with the same ID overwrites (no throw)
-			const result2 = collection.operations.add({ content: "Second note" });
-			expect(result2.isOk()).toBe(true);
+			// Failure path: invalid content returns Err without throwing
+			const errResult = collection.operations.add({ content: "" });
+			expect(errResult.isErr()).toBe(true);
 		});
 
 		it("should generate unique IDs for multiple notes", () => {
