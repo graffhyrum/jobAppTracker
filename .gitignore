@@ -48,6 +48,8 @@ playwright-report
 **/.well-known/appspecific/com.chrome.devtools.json
 !/plans/
 /src/domain/entities/baseData-schema.ts
+/handoff.md
+.claude/worktrees/
 
 # bv (beads viewer) local config and caches
 .bv/
