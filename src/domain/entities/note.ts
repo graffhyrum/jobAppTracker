@@ -2,7 +2,6 @@ import { ArkErrors } from "arktype";
 import { err, ok, type Result } from "neverthrow";
 
 import { getEntries } from "../../../types/entries.ts";
-import { uuidProvider } from "../../infrastructure/di/uuid-provider.ts";
 import {
 	type Note,
 	type NoteCollection,
@@ -12,10 +11,6 @@ import {
 	type NotesCollection,
 	noteModule,
 } from "./noteScope.ts";
-
-function getNewNoteId(): NoteId {
-	return noteModule.NoteId.assert(uuidProvider.generateUUID());
-}
 
 export function createNote({
 	content,
@@ -34,6 +29,7 @@ export function createNote({
 }
 
 export function createNotesCollectionManager(
+	generateId: () => string,
 	collection: NoteCollection = {},
 ): NotesCollection {
 	return {
@@ -61,7 +57,7 @@ export function createNotesCollectionManager(
 			},
 			add({ content }) {
 				return createNote({ content }).map((newNote) => {
-					const id = getNewNoteId();
+					const id = noteModule.NoteId.assert(generateId());
 					collection[id] = newNote;
 					return {
 						id,
