@@ -15,7 +15,7 @@ import {
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
 import type { InterviewStageRepository } from "../../domain/ports/interview-stage-repository.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
-import type { ForUpdate } from "../storage/storage-provider-interface.ts";
+import type { ForUpdate } from "../../domain/ports/common-types.ts";
 
 export function createSQLiteInterviewStageRepository(
 	db: Database,

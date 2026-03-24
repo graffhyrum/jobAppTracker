@@ -1,6 +1,6 @@
 import type { ResultAsync } from "neverthrow";
 
-import type { ForUpdate } from "../../infrastructure/storage/storage-provider-interface.ts";
+import type { ForUpdate } from "./common-types.ts";
 import type {
 	Contact,
 	ContactForCreate,
