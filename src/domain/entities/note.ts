@@ -29,7 +29,7 @@ export function createNote({
 }
 
 export function createNotesCollectionManager(
-	generateId: () => string,
+	generateId: () => NoteId,
 	collection: NoteCollection = {},
 ): NotesCollection {
 	return {
@@ -57,7 +57,7 @@ export function createNotesCollectionManager(
 			},
 			add({ content }) {
 				return createNote({ content }).map((newNote) => {
-					const id = noteModule.NoteId.assert(generateId());
+					const id = generateId();
 					collection[id] = newNote;
 					return {
 						id,

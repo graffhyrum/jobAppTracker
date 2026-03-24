@@ -2,13 +2,14 @@ import { describe, expect, it } from "bun:test";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
 
+import { type NoteId, noteModule } from "./noteScope.ts";
 import { createNote, createNotesCollectionManager } from "./note";
 
-function makeMockIdGenerator(): () => string {
+function makeMockIdGenerator(): () => NoteId {
 	let counter = 0;
 	return () => {
 		const hex = (counter++).toString(16).padStart(12, "0");
-		return `00000000-0000-4000-8000-${hex}`;
+		return noteModule.NoteId.assert(`00000000-0000-4000-8000-${hex}`);
 	};
 }
 
@@ -72,6 +73,23 @@ describe("createNotesCollection", () => {
 			const result = collection.operations.add({ content: "" });
 
 			expect(result.isErr()).toBe(true);
+		});
+
+		it("regression: add() never throws even if generateId were to produce the same id repeatedly", () => {
+			// Before the fix, NoteId.assert() inside .map() would throw on invalid input,
+			// bypassing NeverThrow's error channel. Now generateId is typed as () => NoteId,
+			// so validation is enforced at the call site, not inside the Result chain.
+			const fixedId = noteModule.NoteId.assert(
+				"00000000-0000-4000-8000-000000000099",
+			);
+			const collection = createNotesCollectionManager(() => fixedId);
+
+			const result1 = collection.operations.add({ content: "First note" });
+			expect(result1.isOk()).toBe(true);
+
+			// Adding a second note with the same ID overwrites (no throw)
+			const result2 = collection.operations.add({ content: "Second note" });
+			expect(result2.isOk()).toBe(true);
 		});
 
 		it("should generate unique IDs for multiple notes", () => {
