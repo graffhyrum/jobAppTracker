@@ -1,12 +1,12 @@
 import type { ResultAsync } from "neverthrow";
 
-import type { ForUpdate } from "./common-types.ts";
 import type {
 	Contact,
 	ContactForCreate,
 	ContactId,
 } from "../entities/contact.ts";
 import type { JobApplicationId } from "../entities/job-application.ts";
+import type { ForUpdate } from "./common-types.ts";
 
 export interface ContactRepository {
 	create(data: ContactForCreate): ResultAsync<Contact, string>;

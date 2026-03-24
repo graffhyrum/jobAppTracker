@@ -55,7 +55,6 @@ This is a **hexagonal (ports & adapters)** architecture. Domain logic never depe
 
 `bun test:e2e` runs `scripts/end-to-end.ts` which finds or starts a dev server on port 3000, polls for health, then spawns Playwright. Global setup/teardown clears and seeds the database. Page Objects are in `tests/e2e/POMs/`, fixtures in `tests/e2e/fixtures/base.ts`.
 
-
 <!-- bv-agent-instructions-v2 -->
 
 ---
@@ -68,13 +67,14 @@ This project uses [beads_rust](https://github.com/Dicklesworthstone/beads_rust) 
 
 bv is a graph-aware triage engine for Beads projects (.beads/beads.jsonl). Instead of parsing JSONL or hallucinating graph traversal, use robot flags for deterministic, dependency-aware outputs with precomputed metrics (PageRank, betweenness, critical path, cycles, HITS, eigenvector, k-core).
 
-**Scope boundary:** bv handles *what to work on* (triage, priority, planning). `br` handles creating, modifying, and closing beads.
+**Scope boundary:** bv handles _what to work on_ (triage, priority, planning). `br` handles creating, modifying, and closing beads.
 
-**CRITICAL: Use ONLY --robot-* flags. Bare bv launches an interactive TUI that blocks your session.**
+**CRITICAL: Use ONLY --robot-\* flags. Bare bv launches an interactive TUI that blocks your session.**
 
 #### The Workflow: Start With Triage
 
 **`bv --robot-triage` is your single entry point.** It returns everything you need in one call:
+
 - `quick_ref`: at-a-glance counts + top 3 picks
 - `recommendations`: ranked actionable items with scores, reasons, unblock info
 - `quick_wins`: low-effort high-impact items
@@ -92,15 +92,15 @@ bv --robot-triage --format toon
 
 #### Other bv Commands
 
-| Command | Returns |
-|---------|---------|
-| `--robot-plan` | Parallel execution tracks with unblocks lists |
-| `--robot-priority` | Priority misalignment detection with confidence |
-| `--robot-insights` | Full metrics: PageRank, betweenness, HITS, eigenvector, critical path, cycles, k-core |
-| `--robot-alerts` | Stale issues, blocking cascades, priority mismatches |
-| `--robot-suggest` | Hygiene: duplicates, missing deps, label suggestions, cycle breaks |
-| `--robot-diff --diff-since <ref>` | Changes since ref: new/closed/modified issues |
-| `--robot-graph [--graph-format=json\|dot\|mermaid]` | Dependency graph export |
+| Command                                             | Returns                                                                               |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `--robot-plan`                                      | Parallel execution tracks with unblocks lists                                         |
+| `--robot-priority`                                  | Priority misalignment detection with confidence                                       |
+| `--robot-insights`                                  | Full metrics: PageRank, betweenness, HITS, eigenvector, critical path, cycles, k-core |
+| `--robot-alerts`                                    | Stale issues, blocking cascades, priority mismatches                                  |
+| `--robot-suggest`                                   | Hygiene: duplicates, missing deps, label suggestions, cycle breaks                    |
+| `--robot-diff --diff-since <ref>`                   | Changes since ref: new/closed/modified issues                                         |
+| `--robot-graph [--graph-format=json\|dot\|mermaid]` | Dependency graph export                                                               |
 
 #### Scoping & Filtering
 

@@ -2,8 +2,8 @@ import { describe, expect, it } from "bun:test";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
 
-import { type NoteId, noteModule } from "./noteScope.ts";
 import { createNote, createNotesCollectionManager } from "./note";
+import { type NoteId, noteModule } from "./noteScope.ts";
 
 function makeMockIdGenerator(): () => NoteId {
 	let counter = 0;

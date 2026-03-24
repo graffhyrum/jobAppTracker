@@ -1,12 +1,12 @@
 import type { ResultAsync } from "neverthrow";
 
-import type { ForUpdate } from "./common-types.ts";
 import type {
 	InterviewStage,
 	InterviewStageForCreate,
 	InterviewStageId,
 } from "../entities/interview-stage.ts";
 import type { JobApplicationId } from "../entities/job-application.ts";
+import type { ForUpdate } from "./common-types.ts";
 
 export interface InterviewStageRepository {
 	create(data: InterviewStageForCreate): ResultAsync<InterviewStage, string>;

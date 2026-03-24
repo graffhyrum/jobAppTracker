@@ -250,4 +250,3 @@ This project uses conventional development workflows:
 - **Testing**: Place tests next to source files (\*.test.ts)
 - **Git Hooks**: Pre-commit hooks run code formatting and linting
 - **Changesets**: Use `@changesets/cli` for version management
-

@@ -3,11 +3,11 @@ import { describe, expect, it } from "bun:test";
 import { assertDefined } from "#helpers/assertDefined.ts";
 
 import { createInMemoryJobApplicationManager } from "../../../tests/adapters/in-memory-job-application-manager.ts";
-import type { ForUpdate } from "../ports/common-types.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
 } from "../entities/job-application.ts";
+import type { ForUpdate } from "../ports/common-types.ts";
 
 /**
  * Unit tests for JobApplicationManager interface using in-memory adapter.

@@ -1,12 +1,12 @@
 import type { ResultAsync } from "neverthrow";
 
-import type { ForUpdate } from "./common-types.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
 	JobApplicationId,
 } from "../entities/job-application.ts";
 import type { UUID } from "../entities/uuid.ts";
+import type { ForUpdate } from "./common-types.ts";
 
 export interface JobApplicationManager {
 	createJobApplication(
