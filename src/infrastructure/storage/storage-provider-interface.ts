@@ -2,12 +2,13 @@ import type { JsonObject } from "@ark/util";
 import type { ResultAsync } from "neverthrow";
 
 import type { UUID } from "../../domain/entities/uuid.ts";
+import type { ForUpdate } from "../../domain/ports/common-types.ts";
 
 export type Storable<T extends JsonObject = JsonObject> = T & {
 	id: UUID;
 };
 export type ForCreate<T extends JsonObject> = Omit<T, "id">;
-export type ForUpdate<T extends JsonObject> = Partial<T>;
+export type { ForUpdate };
 
 /*
 Storage Layer handles IDs

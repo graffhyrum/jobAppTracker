@@ -12,7 +12,7 @@ import { contactModule, createContact } from "../../domain/entities/contact.ts";
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
 import type { ContactRepository } from "../../domain/ports/contact-repository.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
-import type { ForUpdate } from "../storage/storage-provider-interface.ts";
+import type { ForUpdate } from "../../domain/ports/common-types.ts";
 
 export function createSQLiteContactRepository(db: Database): ContactRepository {
 	return {

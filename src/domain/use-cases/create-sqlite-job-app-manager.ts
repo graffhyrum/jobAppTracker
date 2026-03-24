@@ -10,7 +10,7 @@ import {
 import { createSQLiteJobBoardRepository } from "../../infrastructure/adapters/sqlite-job-board-repository.ts";
 import { getDatabasePath } from "../../infrastructure/config/sqlite-config.ts";
 import { uuidProvider } from "../../infrastructure/di/uuid-provider.ts";
-import type { ForUpdate } from "../../infrastructure/storage/storage-provider-interface.ts";
+import type { ForUpdate } from "../ports/common-types.ts";
 import {
 	createJobApplicationWithInitialStatus,
 	type JobApplication,
