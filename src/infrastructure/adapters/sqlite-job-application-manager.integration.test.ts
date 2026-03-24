@@ -8,7 +8,7 @@ import type {
 	JobApplicationId,
 } from "../../domain/entities/job-application.ts";
 import type { JobApplicationManager } from "../../domain/ports/job-application-manager.ts";
-import { jobAppManagerRegistry } from "../../domain/use-cases/create-sqlite-job-app-manager.ts";
+import { jobAppManagerRegistry } from "../factories/create-sqlite-job-app-manager.ts";
 import type { ForUpdate } from "../storage/storage-provider-interface.ts";
 
 // Get the test manager for testing

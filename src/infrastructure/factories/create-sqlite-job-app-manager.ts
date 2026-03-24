@@ -7,18 +7,18 @@ import {
 	type ProcessEnvSchema,
 	processEnv,
 } from "../../../processEnvFacade.ts";
-import { createSQLiteJobBoardRepository } from "../../infrastructure/adapters/sqlite-job-board-repository.ts";
-import { getDatabasePath } from "../../infrastructure/config/sqlite-config.ts";
-import { uuidProvider } from "../../infrastructure/di/uuid-provider.ts";
-import type { ForUpdate } from "../ports/common-types.ts";
+import { createSQLiteJobBoardRepository } from "../adapters/sqlite-job-board-repository.ts";
+import { getDatabasePath } from "../config/sqlite-config.ts";
+import { uuidProvider } from "../di/uuid-provider.ts";
+import type { ForUpdate } from "../../domain/ports/common-types.ts";
 import {
 	createJobApplicationWithInitialStatus,
 	type JobApplication,
 	type JobApplicationForCreate,
 	jobApplicationModule,
-} from "../entities/job-application.ts";
-import type { UUID } from "../entities/uuid.ts";
-import type { JobApplicationManager } from "../ports/job-application-manager.ts";
+} from "../../domain/entities/job-application.ts";
+import type { UUID } from "../../domain/entities/uuid.ts";
+import type { JobApplicationManager } from "../../domain/ports/job-application-manager.ts";
 
 export function createSQLiteJobAppManager(
 	environment: ProcessEnvSchema["JOB_APP_MANAGER_TYPE"] = "test",

@@ -1,8 +1,8 @@
 import { Database } from "bun:sqlite";
 
 import { processEnv } from "../../../processEnvFacade.ts";
-import { createSQLiteInterviewStageRepository } from "../../infrastructure/adapters/sqlite-interview-stage-repository.ts";
-import { getDatabasePath } from "../../infrastructure/config/sqlite-config.ts";
+import { createSQLiteInterviewStageRepository } from "../adapters/sqlite-interview-stage-repository.ts";
+import { getDatabasePath } from "../config/sqlite-config.ts";
 
 // Get database connection from the same singleton instance used by job app manager
 function getDatabase() {

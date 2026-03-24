@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test";
 
-import { jobAppManagerRegistry } from "./create-sqlite-job-app-manager";
+import { jobAppManagerRegistry } from "../../infrastructure/factories/create-sqlite-job-app-manager.ts";
 
 describe("JobAppManagerRegistry", () => {
 	it("has default environment from process.env", () => {
