@@ -39,7 +39,7 @@ import type { ContactRepository } from "../src/domain/ports/contact-repository.t
 import type { InterviewStageRepository } from "../src/domain/ports/interview-stage-repository.ts";
 import type { JobApplicationManager } from "../src/domain/ports/job-application-manager.ts";
 import type { JobBoardRepository } from "../src/domain/ports/job-board-repository.ts";
-import { jobAppManagerRegistry } from "../src/domain/use-cases/create-sqlite-job-app-manager.ts";
+import { jobAppManagerRegistry } from "../src/infrastructure/factories/create-sqlite-job-app-manager.ts";
 import { createSQLiteContactRepository } from "../src/infrastructure/adapters/sqlite-contact-repository.ts";
 import { createSQLiteInterviewStageRepository } from "../src/infrastructure/adapters/sqlite-interview-stage-repository.ts";
 import { createSQLiteJobBoardRepository } from "../src/infrastructure/adapters/sqlite-job-board-repository.ts";
