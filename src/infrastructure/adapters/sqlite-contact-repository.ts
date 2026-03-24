@@ -10,9 +10,10 @@ import type {
 } from "../../domain/entities/contact.ts";
 import { contactModule, createContact } from "../../domain/entities/contact.ts";
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
+import type { ForUpdate } from "../../domain/ports/common-types.ts";
 import type { ContactRepository } from "../../domain/ports/contact-repository.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
-import type { ForUpdate } from "../../domain/ports/common-types.ts";
+import { normalizeContactRow } from "../sqlite/normalize-sqlite-row.ts";
 
 export function createSQLiteContactRepository(db: Database): ContactRepository {
 	return {
@@ -108,7 +109,10 @@ export function createSQLiteContactRepository(db: Database): ContactRepository {
 						throw new Error(`Contact with id ${id} not found`);
 					}
 
-					const normalized = normalizeRow(current) as Record<string, unknown>;
+					const normalized = normalizeContactRow(current) as Record<
+						string,
+						unknown
+					>;
 					const updated = {
 						...normalized,
 						...data,
@@ -164,7 +168,7 @@ export function createSQLiteContactRepository(db: Database): ContactRepository {
 
 function parseContactArray(maybeArray: unknown) {
 	const normalizedArray = Array.isArray(maybeArray)
-		? maybeArray.map(normalizeRow)
+		? maybeArray.map(normalizeContactRow)
 		: maybeArray;
 
 	const parsedResult = contactModule.Contact.array()(normalizedArray);
@@ -175,32 +179,10 @@ function parseContactArray(maybeArray: unknown) {
 }
 
 function parseContact(maybeRecord: unknown) {
-	const normalized = normalizeRow(maybeRecord);
+	const normalized = normalizeContactRow(maybeRecord);
 	const parseResult = contactModule.Contact(normalized);
 	if (parseResult instanceof ArkErrors) {
 		return errAsync(JSON.stringify(parseResult, null, 2));
 	}
 	return okAsync(parseResult);
-}
-
-function normalizeRow(record: unknown): unknown {
-	if (typeof record === "object" && record !== null) {
-		const row = record as Record<string, unknown>;
-		const normalized: Record<string, unknown> = {};
-
-		for (const [key, value] of Object.entries(row)) {
-			if (value === null) {
-				continue;
-			}
-
-			if (key === "responseReceived" && typeof value === "number") {
-				normalized[key] = value === 1;
-			} else {
-				normalized[key] = value;
-			}
-		}
-
-		return normalized;
-	}
-	return record;
 }

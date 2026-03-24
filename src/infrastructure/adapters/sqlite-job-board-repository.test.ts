@@ -3,8 +3,8 @@ import { describe, expect, it } from "bun:test";
 import { assertDefined } from "#helpers/assertDefined.ts";
 
 import type { JobBoardForCreate } from "../../domain/entities/job-board.ts";
-import { jobAppManagerRegistry } from "../factories/create-sqlite-job-app-manager.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
+import { jobAppManagerRegistry } from "../sqlite/sqlite-registry.ts";
 import { createSQLiteJobBoardRepository } from "./sqlite-job-board-repository.ts";
 
 // Get the test database for testing

@@ -1,8 +1,7 @@
 import { processEnv } from "../../../processEnvFacade.ts";
 import { createSQLiteInterviewStageRepository } from "../adapters/sqlite-interview-stage-repository.ts";
-import { jobAppManagerRegistry } from "./create-sqlite-job-app-manager.ts";
+import { jobAppManagerRegistry } from "../sqlite/sqlite-registry.ts";
 
-export const interviewStageRepository =
-	createSQLiteInterviewStageRepository(
-		jobAppManagerRegistry.getDatabase(processEnv.JOB_APP_MANAGER_TYPE),
-	);
+export const interviewStageRepository = createSQLiteInterviewStageRepository(
+	jobAppManagerRegistry.getDatabase(processEnv.JOB_APP_MANAGER_TYPE),
+);

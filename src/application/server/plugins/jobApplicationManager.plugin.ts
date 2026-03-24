@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 
-import { jobAppManagerRegistry } from "#src/infrastructure/factories/create-sqlite-job-app-manager.ts";
+import { jobAppManagerRegistry } from "#src/infrastructure/sqlite/sqlite-registry.ts";
 import { isDevelopment } from "#src/infrastructure/utils/environment-detector.ts";
 
 import { DEV_DB_COOKIE_NAME } from "./db-selector-constants.ts";

@@ -4,7 +4,7 @@ import { type } from "arktype";
 import { Elysia } from "elysia";
 
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
-import { jobAppManagerRegistry } from "#src/infrastructure/factories/create-sqlite-job-app-manager.ts";
+import { jobAppManagerRegistry } from "#src/infrastructure/sqlite/sqlite-registry.ts";
 
 // Get the test manager for testing
 const jobApplicationManager = jobAppManagerRegistry.getManager("test");

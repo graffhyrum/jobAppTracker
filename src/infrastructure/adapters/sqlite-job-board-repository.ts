@@ -15,6 +15,7 @@ import {
 } from "../../domain/entities/job-board.ts";
 import type { JobBoardRepository } from "../../domain/ports/job-board-repository.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
+import { normalizeJobBoardRow } from "../sqlite/normalize-sqlite-row.ts";
 
 export function createSQLiteJobBoardRepository(
 	db: Database,
@@ -92,7 +93,7 @@ export function createSQLiteJobBoardRepository(
 					const allBoards = allQuery.all();
 
 					for (const board of allBoards) {
-						const normalized = normalizeRow(board);
+						const normalized = normalizeJobBoardRow(board);
 						if (
 							typeof normalized === "object" &&
 							normalized !== null &&
@@ -159,7 +160,7 @@ export function createSQLiteJobBoardRepository(
 
 function parseJobBoardArray(maybeArray: unknown) {
 	const normalizedArray = Array.isArray(maybeArray)
-		? maybeArray.map(normalizeRow)
+		? maybeArray.map(normalizeJobBoardRow)
 		: maybeArray;
 
 	const parsedResult = jobBoardModule.JobBoard.array()(normalizedArray);
@@ -170,32 +171,10 @@ function parseJobBoardArray(maybeArray: unknown) {
 }
 
 function parseJobBoard(maybeRecord: unknown) {
-	const normalized = normalizeRow(maybeRecord);
+	const normalized = normalizeJobBoardRow(maybeRecord);
 	const parseResult = jobBoardModule.JobBoard(normalized);
 	if (parseResult instanceof ArkErrors) {
 		return errAsync(JSON.stringify(parseResult, null, 2));
 	}
 	return okAsync(parseResult);
-}
-
-function normalizeRow(record: unknown): unknown {
-	if (typeof record === "object" && record !== null) {
-		const row = record as Record<string, unknown>;
-		const normalized: Record<string, unknown> = {};
-
-		for (const [key, value] of Object.entries(row)) {
-			if (value === null) {
-				continue;
-			}
-
-			if (key === "domains" && typeof value === "string") {
-				normalized[key] = JSON.parse(value);
-			} else {
-				normalized[key] = value;
-			}
-		}
-
-		return normalized;
-	}
-	return record;
 }

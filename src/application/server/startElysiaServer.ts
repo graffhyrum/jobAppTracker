@@ -3,8 +3,8 @@ import { staticPlugin } from "@elysiajs/static";
 import { swagger } from "@elysiajs/swagger";
 import { Elysia } from "elysia";
 
-import { jobAppManagerRegistry } from "#src/infrastructure/factories/create-sqlite-job-app-manager.ts";
 import { createSQLiteJobBoardRepo } from "#src/infrastructure/factories/create-sqlite-job-board-repo.ts";
+import { jobAppManagerRegistry } from "#src/infrastructure/sqlite/sqlite-registry.ts";
 
 import { isDevelopment } from "../../infrastructure/utils/environment-detector.ts";
 import { createAnalyticsPlugin } from "./plugins/analytics.plugin.ts";

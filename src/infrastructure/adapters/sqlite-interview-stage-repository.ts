@@ -13,9 +13,10 @@ import {
 	interviewStageModule,
 } from "../../domain/entities/interview-stage.ts";
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
+import type { ForUpdate } from "../../domain/ports/common-types.ts";
 import type { InterviewStageRepository } from "../../domain/ports/interview-stage-repository.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
-import type { ForUpdate } from "../../domain/ports/common-types.ts";
+import { normalizeInterviewStageRow } from "../sqlite/normalize-sqlite-row.ts";
 
 export function createSQLiteInterviewStageRepository(
 	db: Database,
@@ -118,7 +119,10 @@ export function createSQLiteInterviewStageRepository(
 						throw new Error(`Interview stage with id ${id} not found`);
 					}
 
-					const normalized = normalizeRow(current) as Record<string, unknown>;
+					const normalized = normalizeInterviewStageRow(current) as Record<
+						string,
+						unknown
+					>;
 					const updated = {
 						...normalized,
 						...data,
@@ -179,7 +183,7 @@ export function createSQLiteInterviewStageRepository(
 
 function parseInterviewStageArray(maybeArray: unknown) {
 	const normalizedArray = Array.isArray(maybeArray)
-		? maybeArray.map(normalizeRow)
+		? maybeArray.map(normalizeInterviewStageRow)
 		: maybeArray;
 
 	const parsedResult =
@@ -191,34 +195,10 @@ function parseInterviewStageArray(maybeArray: unknown) {
 }
 
 function parseInterviewStage(maybeRecord: unknown) {
-	const normalized = normalizeRow(maybeRecord);
+	const normalized = normalizeInterviewStageRow(maybeRecord);
 	const parseResult = interviewStageModule.InterviewStage(normalized);
 	if (parseResult instanceof ArkErrors) {
 		return errAsync(JSON.stringify(parseResult, null, 2));
 	}
 	return okAsync(parseResult);
-}
-
-function normalizeRow(record: unknown): unknown {
-	if (typeof record === "object" && record !== null) {
-		const row = record as Record<string, unknown>;
-		const normalized: Record<string, unknown> = {};
-
-		for (const [key, value] of Object.entries(row)) {
-			if (value === null) {
-				continue;
-			}
-
-			if (key === "questions" && typeof value === "string") {
-				normalized[key] = JSON.parse(value);
-			} else if (key === "isFinalRound" && typeof value === "number") {
-				normalized[key] = value === 1;
-			} else {
-				normalized[key] = value;
-			}
-		}
-
-		return normalized;
-	}
-	return record;
 }
