@@ -4,6 +4,14 @@ import { assertDefined } from "#helpers/assertDefined.ts";
 
 import { createNote, createNotesCollectionManager } from "./note";
 
+function makeMockIdGenerator(): () => string {
+	let counter = 0;
+	return () => {
+		const hex = (counter++).toString(16).padStart(12, "0");
+		return `00000000-0000-4000-8000-${hex}`;
+	};
+}
+
 describe("createNote", () => {
 	it("should create a note with valid content", () => {
 		const noteData = { content: "This is a test note" };
@@ -40,7 +48,7 @@ describe("createNote", () => {
 
 describe("createNotesCollection", () => {
 	it("should create an empty notes collection", () => {
-		const collection = createNotesCollectionManager();
+		const collection = createNotesCollectionManager(makeMockIdGenerator());
 
 		expect(collection.notes).toEqual({});
 		expect(collection.operations.add).toBeFunction();
@@ -48,7 +56,7 @@ describe("createNotesCollection", () => {
 
 	describe("operations.add", () => {
 		it("should add a note to the collection", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const result = collection.operations.add({ content: "Test note" });
 
 			expect(result.isOk()).toBe(true);
@@ -60,14 +68,14 @@ describe("createNotesCollection", () => {
 		});
 
 		it("should fail to add note with invalid content", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const result = collection.operations.add({ content: "" });
 
 			expect(result.isErr()).toBe(true);
 		});
 
 		it("should generate unique IDs for multiple notes", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const result1 = collection.operations.add({ content: "Note 1" });
 			const result2 = collection.operations.add({ content: "Note 2" });
 
@@ -82,7 +90,7 @@ describe("createNotesCollection", () => {
 
 	describe("operations.get", () => {
 		it("should retrieve an existing note by ID", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const addResult = collection.operations.add({ content: "Test note" });
 
 			expect(addResult.isOk()).toBe(true);
@@ -100,7 +108,7 @@ describe("createNotesCollection", () => {
 		});
 
 		it("should fail to retrieve non-existent note", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			// Using a valid UUID format but one that doesn't exist in the collection
 			const fakeId = "123e4567-e89b-12d3-a456-426614174000";
 			const result = collection.operations.get(fakeId);
@@ -111,14 +119,14 @@ describe("createNotesCollection", () => {
 
 	describe("operations.getAll", () => {
 		it("should return empty array error when no notes exist", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const result = collection.operations.getAll();
 
 			expect(result.isErr()).toBe(true);
 		});
 
 		it("should return all notes when collection has notes", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const addResult1 = collection.operations.add({ content: "Note 1" });
 			const addResult2 = collection.operations.add({ content: "Note 2" });
 
@@ -139,7 +147,7 @@ describe("createNotesCollection", () => {
 
 	describe("operations.update", () => {
 		it("should update an existing note", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const addResult = collection.operations.add({
 				content: "Original content",
 			});
@@ -166,7 +174,7 @@ describe("createNotesCollection", () => {
 		});
 
 		it("should fail to update non-existent note", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const fakeId = "123e4567-e89b-12d3-a456-426614174000";
 			const result = collection.operations.update(fakeId, {
 				content: "New content",
@@ -176,7 +184,7 @@ describe("createNotesCollection", () => {
 		});
 
 		it("should partially update note properties", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const addResult = collection.operations.add({
 				content: "Original content",
 			});
@@ -205,7 +213,7 @@ describe("createNotesCollection", () => {
 
 	describe("operations.remove", () => {
 		it("should remove an existing note", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const addResult = collection.operations.add({ content: "To be removed" });
 
 			expect(addResult.isOk()).toBe(true);
@@ -224,7 +232,7 @@ describe("createNotesCollection", () => {
 		});
 
 		it("should fail to remove non-existent note", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const fakeId = "123e4567-e89b-12d3-a456-426614174000";
 			const result = collection.operations.remove(fakeId);
 
@@ -232,7 +240,7 @@ describe("createNotesCollection", () => {
 		});
 
 		it("should not affect other notes when removing one", () => {
-			const collection = createNotesCollectionManager();
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const addResult1 = collection.operations.add({
 				content: "Keep this note",
 			});
