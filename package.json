@@ -24,7 +24,7 @@
 		"fix": "bunx oxlint --fix && bunx oxfmt",
 		"fixx": "bunx oxlint --fix --fix-suggestions --fix-dangerously && bunx oxfmt",
 		"typecheck": "tsc --noEmit",
-		"fastvet": "bun typecheck && bun fix && bun run test:unit:ai",
+		"fastvet": "bun typecheck && bun fix && stepdown-rule fix src/ && stepdown-rule analyze src/ && rule-validator 'src/**/*.ts' && bun run test:unit:ai",
 		"vet": "bun fastvet && bun test:e2e"
 	},
 	"dependencies": {
