@@ -251,4 +251,3 @@ This project uses conventional development workflows:
 - **Git Hooks**: Pre-commit hooks run code formatting and linting
 - **Changesets**: Use `@changesets/cli` for version management
 
-See [AGENTS.md](./AGENTS.md) for detailed development guidelines and available commands.
