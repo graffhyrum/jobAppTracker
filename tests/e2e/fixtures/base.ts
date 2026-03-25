@@ -1,11 +1,14 @@
 /* oxlint-disable no-empty-pattern */
-import { test as base } from "@playwright/test";
+import { type APIRequestContext, request, test as base } from "@playwright/test";
 
-import type { JobApplication } from "#src/domain/entities/job-application.ts";
 import type { PageLinkKeys } from "#src/presentation/components/pageConfig.ts";
 import type { createApplicationBodySchema } from "#src/presentation/schemas/application-routes.schemas.ts";
 
 import type { ComponentObject, PageObject } from "../config/ScreenplayTypes.ts";
+import {
+	createApplicationDetails,
+	type ApplicationDetailsObject,
+} from "../POMs/applicationDetailsPOM.ts";
 import {
 	createHealthPage,
 	type HealthPageObject,
@@ -16,6 +19,10 @@ import {
 	createPipelineTable,
 	type PipelineTableObject,
 } from "../POMs/pipelineTable/pipelineTablePOM.ts";
+import {
+	createThemeToggle,
+	type ThemeToggleObject,
+} from "../POMs/themeTogglePOM.ts";
 
 export type PagePOMRegistry = {
 	[K in PageLinkKeys as `${string & K}Page`]?: PageObject;
@@ -27,6 +34,25 @@ export type PagePOMRegistry = {
 type ComponentPOMRegistry = Record<string, ComponentObject> & {
 	navbar: NavBarObject;
 	pipelineTable: PipelineTableObject;
+	themeToggle: ThemeToggleObject;
+	applicationDetails: ApplicationDetailsObject;
+};
+
+export type CreatedApp = {
+	id: string;
+	company: string;
+	positionTitle: string;
+};
+
+type AppOverrides = {
+	company?: string;
+	positionTitle?: string;
+};
+
+export type AppFactory = (overrides?: AppOverrides) => Promise<CreatedApp>;
+
+export type WorkerFixtures = {
+	immutableApp: CreatedApp;
 };
 
 export type TestFixtures = {
@@ -34,10 +60,44 @@ export type TestFixtures = {
 		pages: PagePOMRegistry;
 		components: ComponentPOMRegistry;
 	};
-	testJobApplication: JobApplication;
+	appFactory: AppFactory;
+	mutableApp: CreatedApp;
 };
 
-export const test = base.extend<TestFixtures>({
+export const test = base.extend<TestFixtures, WorkerFixtures>({
+	immutableApp: [
+		async ({}, use, workerInfo) => {
+			const baseURL = workerInfo.project.use.baseURL;
+			if (!baseURL) {
+				throw new Error("baseURL not configured in playwright.config.ts");
+			}
+
+			const requestContext = await request.newContext({ baseURL });
+			let app: CreatedApp | undefined;
+
+			try {
+				app = await createAppViaApi(requestContext, {
+					company: `W${workerInfo.workerIndex}-Immutable Co`,
+					positionTitle: `W${workerInfo.workerIndex}-Immutable Position`,
+					applicationDate: new Date().toISOString(),
+					sourceType: "other",
+				});
+
+				await use(app);
+			} finally {
+				if (app) {
+					try {
+						await requestContext.delete(`/applications/${app.id}`);
+					} catch {
+						// teardown best-effort
+					}
+				}
+				await requestContext.dispose();
+			}
+		},
+		{ scope: "worker" },
+	],
+
 	POMs: async ({ page }, use) => {
 		const registry: PagePOMRegistry = {
 			homePage: createHomePage(page),
@@ -46,6 +106,8 @@ export const test = base.extend<TestFixtures>({
 		const componentRegistry: ComponentPOMRegistry = {
 			navbar: createNavBar(page),
 			pipelineTable: createPipelineTable(page),
+			themeToggle: createThemeToggle(page),
+			applicationDetails: createApplicationDetails(page),
 		};
 		await use({
 			pages: registry,
@@ -53,60 +115,65 @@ export const test = base.extend<TestFixtures>({
 		});
 	},
 
-	testJobApplication: async ({ request }, use, testInfo) => {
-		// Create the input data for the API as form data
-		const testJobAppData = {
-			company: "Test Company",
-			positionTitle: `Test Position - ${testInfo.workerIndex}`,
-			applicationDate: new Date().toISOString(),
-			sourceType: "other" as const,
-			isRemote: false,
-		} satisfies typeof createApplicationBodySchema.infer;
+	appFactory: async ({ request }, use, testInfo) => {
+		const createdIds: string[] = [];
+		let createdCount = 0;
 
-		// Create via API using form data
-		const response = await request.post("/applications", {
-			form: testJobAppData,
-		});
+		const factory: AppFactory = async (overrides) => {
+			const position = createdCount++;
+			const app = await createAppViaApi(request, {
+				company:
+					overrides?.company ??
+					`W${testInfo.workerIndex}-Factory Co`,
+				positionTitle:
+					overrides?.positionTitle ??
+					`W${testInfo.workerIndex}-Factory Position ${position}`,
+				applicationDate: new Date().toISOString(),
+				sourceType: "other",
+			});
+			createdIds.push(app.id);
+			return app;
+		};
 
-		if (!response.ok()) {
-			throw new Error(
-				`Failed to create test job application: ${response.status()}`,
-			);
+		await use(factory);
+
+		for (const id of createdIds) {
+			try {
+				await request.delete(`/applications/${id}`);
+			} catch {
+				// teardown best-effort: app may already be deleted by test
+			}
 		}
+	},
 
-		// Extract application ID from response headers
-		const applicationId = response.headers()["x-application-id"];
-		if (!applicationId) {
-			throw new Error("Application ID not found in response headers");
-		}
-
-		// Fetch the created application to get full details
-		const getResponse = await request.get(`/applications/${applicationId}`);
-		if (!getResponse.ok()) {
-			throw new Error(
-				`Failed to fetch created application: ${getResponse.status()}`,
-			);
-		}
-
-		// Parse the application from the HTML response or construct it
-		const testJobApp: JobApplication = {
-			id: applicationId,
-			...testJobAppData,
-			sourceType: "other",
-			isRemote: false,
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
-			notes: [],
-			statusLog: [
-				[new Date().toISOString(), { category: "active", label: "applied" }],
-			],
-		} as JobApplication;
-
-		testInfo.annotations.push({
-			type: "jobApplication",
-			description: JSON.stringify(testJobApp, null, 2),
-		});
-
-		await use(testJobApp);
+	mutableApp: async ({ appFactory }, use) => {
+		const app = await appFactory();
+		await use(app);
 	},
 });
+
+async function createAppViaApi(
+	requestContext: APIRequestContext,
+	data: Omit<typeof createApplicationBodySchema.infer, "isRemote">,
+): Promise<CreatedApp> {
+	const response = await requestContext.post("/applications", {
+		form: { ...data, isRemote: false },
+	});
+
+	if (!response.ok()) {
+		throw new Error(
+			`Failed to create test app: ${response.status()} ${await response.text()}`,
+		);
+	}
+
+	const applicationId = response.headers()["x-application-id"];
+	if (!applicationId) {
+		throw new Error("X-Application-ID header missing from POST response");
+	}
+
+	return {
+		id: applicationId,
+		company: data.company,
+		positionTitle: data.positionTitle,
+	};
+}

@@ -1,42 +1,75 @@
 // src/presentation/scripts/pipeline-client.ts
-var formatDate = (dateString) => {
-  return new Date(dateString).toISOString();
-};
-var formatInterestRating = (rating) => {
-  if (!rating)
-    return "";
-  return "★".repeat(rating) + "☆".repeat(3 - rating);
-};
-var sortData = (data, column, direction) => {
-  return [...data].sort((a, b) => {
-    let aVal = a[column];
-    let bVal = b[column];
-    if (column === "applicationDate" || column === "updatedAt" || column === "nextEventDate") {
-      aVal = aVal && typeof aVal === "string" ? new Date(aVal).getTime() : 0;
-      bVal = bVal && typeof bVal === "string" ? new Date(bVal).getTime() : 0;
+window.initializePipelineClient = initializePipelineClient;
+function initializePipelineClient(applicationData, config) {
+  if (applicationData.length > config.maxSerializedRecords) {
+    console.warn(`Large dataset detected (${applicationData.length} records). Consider implementing server-side pagination for better performance.`);
+  }
+  const state = {
+    currentSort: { column: "updatedAt", direction: "desc" },
+    currentPage: 1,
+    pageSize: config.initialPageSize,
+    filteredData: [...applicationData],
+    searchDebounceTimer: null
+  };
+  setupEventListeners(applicationData, state);
+  updateDisplay(state);
+}
+var setupEventListeners = (applicationData, state) => {
+  const debouncedFilterData = () => {
+    if (state.searchDebounceTimer) {
+      clearTimeout(state.searchDebounceTimer);
     }
-    if (column === "interestRating") {
-      aVal = a.interestRating || 0;
-      bVal = b.interestRating || 0;
+    state.searchDebounceTimer = setTimeout(() => {
+      filterData(applicationData, state, true);
+      state.searchDebounceTimer = null;
+    }, 300);
+  };
+  const searchInput = document.getElementById("search-filter");
+  const statusSelect = document.getElementById("status-filter");
+  const interestSelect = document.getElementById("interest-filter");
+  const overdueSelect = document.getElementById("overdue-filter");
+  searchInput?.addEventListener("input", debouncedFilterData);
+  statusSelect?.addEventListener("change", () => filterData(applicationData, state));
+  interestSelect?.addEventListener("change", () => filterData(applicationData, state));
+  overdueSelect?.addEventListener("change", () => filterData(applicationData, state));
+  const pageSizeSelect = document.getElementById("page-size");
+  pageSizeSelect?.addEventListener("change", function() {
+    const select = this;
+    state.pageSize = parseInt(select.value, 10);
+    state.currentPage = 1;
+    updateDisplay(state);
+  });
+  const prevBtn = document.getElementById("prev-page");
+  const nextBtn = document.getElementById("next-page");
+  prevBtn?.addEventListener("click", () => {
+    if (state.currentPage > 1) {
+      state.currentPage--;
+      updateDisplay(state);
     }
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      aVal = aVal.toLowerCase();
-      bVal = bVal.toLowerCase();
+  });
+  nextBtn?.addEventListener("click", () => {
+    const totalPages = Math.ceil(state.filteredData.length / state.pageSize);
+    if (state.currentPage < totalPages) {
+      state.currentPage++;
+      updateDisplay(state);
     }
-    const aNum = typeof aVal === "number" ? aVal : 0;
-    const bNum = typeof bVal === "number" ? bVal : 0;
-    if (typeof aVal === "string" && typeof bVal === "string") {
-      if (direction === "asc") {
-        return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
+  });
+  document.querySelectorAll(".sortable").forEach((th) => {
+    th.addEventListener("click", function() {
+      const column = this.dataset.column;
+      if (!column)
+        return;
+      if (state.currentSort.column === column) {
+        state.currentSort.direction = state.currentSort.direction === "asc" ? "desc" : "asc";
       } else {
-        return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
+        state.currentSort.column = column;
+        state.currentSort.direction = "asc";
       }
-    }
-    if (direction === "asc") {
-      return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
-    } else {
-      return aNum > bNum ? -1 : aNum < bNum ? 1 : 0;
-    }
+      updateDisplay(state);
+    });
+  });
+  document.body.addEventListener("htmx:beforeRequest", (evt) => {
+    console.log("HTMX: Starting request to", evt.detail.requestConfig.url);
   });
 };
 var filterData = (applicationData, state, immediate = true) => {
@@ -143,76 +176,43 @@ var updateDisplay = (state) => {
     }
   });
 };
-var setupEventListeners = (applicationData, state) => {
-  const debouncedFilterData = () => {
-    if (state.searchDebounceTimer) {
-      clearTimeout(state.searchDebounceTimer);
+var formatDate = (dateString) => {
+  return new Date(dateString).toISOString();
+};
+var formatInterestRating = (rating) => {
+  if (!rating)
+    return "";
+  return `${"★".repeat(rating)}${"☆".repeat(3 - rating)}`;
+};
+var sortData = (data, column, direction) => {
+  return [...data].sort((a, b) => {
+    let aVal = a[column];
+    let bVal = b[column];
+    if (column === "applicationDate" || column === "updatedAt" || column === "nextEventDate") {
+      aVal = aVal && typeof aVal === "string" ? new Date(aVal).getTime() : 0;
+      bVal = bVal && typeof bVal === "string" ? new Date(bVal).getTime() : 0;
     }
-    state.searchDebounceTimer = setTimeout(() => {
-      filterData(applicationData, state, true);
-      state.searchDebounceTimer = null;
-    }, 300);
-  };
-  const searchInput = document.getElementById("search-filter");
-  const statusSelect = document.getElementById("status-filter");
-  const interestSelect = document.getElementById("interest-filter");
-  const overdueSelect = document.getElementById("overdue-filter");
-  searchInput?.addEventListener("input", debouncedFilterData);
-  statusSelect?.addEventListener("change", () => filterData(applicationData, state));
-  interestSelect?.addEventListener("change", () => filterData(applicationData, state));
-  overdueSelect?.addEventListener("change", () => filterData(applicationData, state));
-  const pageSizeSelect = document.getElementById("page-size");
-  pageSizeSelect?.addEventListener("change", function() {
-    const select = this;
-    state.pageSize = parseInt(select.value, 10);
-    state.currentPage = 1;
-    updateDisplay(state);
-  });
-  const prevBtn = document.getElementById("prev-page");
-  const nextBtn = document.getElementById("next-page");
-  prevBtn?.addEventListener("click", () => {
-    if (state.currentPage > 1) {
-      state.currentPage--;
-      updateDisplay(state);
+    if (column === "interestRating") {
+      aVal = a.interestRating || 0;
+      bVal = b.interestRating || 0;
     }
-  });
-  nextBtn?.addEventListener("click", () => {
-    const totalPages = Math.ceil(state.filteredData.length / state.pageSize);
-    if (state.currentPage < totalPages) {
-      state.currentPage++;
-      updateDisplay(state);
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      aVal = aVal.toLowerCase();
+      bVal = bVal.toLowerCase();
     }
-  });
-  document.querySelectorAll(".sortable").forEach((th) => {
-    th.addEventListener("click", function() {
-      const column = this.dataset.column;
-      if (!column)
-        return;
-      if (state.currentSort.column === column) {
-        state.currentSort.direction = state.currentSort.direction === "asc" ? "desc" : "asc";
+    const aNum = typeof aVal === "number" ? aVal : 0;
+    const bNum = typeof bVal === "number" ? bVal : 0;
+    if (typeof aVal === "string" && typeof bVal === "string") {
+      if (direction === "asc") {
+        return aVal < bVal ? -1 : aVal > bVal ? 1 : 0;
       } else {
-        state.currentSort.column = column;
-        state.currentSort.direction = "asc";
+        return aVal > bVal ? -1 : aVal < bVal ? 1 : 0;
       }
-      updateDisplay(state);
-    });
-  });
-  document.body.addEventListener("htmx:beforeRequest", (evt) => {
-    console.log("HTMX: Starting request to", evt.detail.requestConfig.url);
+    }
+    if (direction === "asc") {
+      return aNum < bNum ? -1 : aNum > bNum ? 1 : 0;
+    } else {
+      return aNum > bNum ? -1 : aNum < bNum ? 1 : 0;
+    }
   });
 };
-function initializePipelineClient(applicationData, config) {
-  if (applicationData.length > config.maxSerializedRecords) {
-    console.warn(`Large dataset detected (${applicationData.length} records). Consider implementing server-side pagination for better performance.`);
-  }
-  const state = {
-    currentSort: { column: "updatedAt", direction: "desc" },
-    currentPage: 1,
-    pageSize: config.initialPageSize,
-    filteredData: [...applicationData],
-    searchDebounceTimer: null
-  };
-  setupEventListeners(applicationData, state);
-  updateDisplay(state);
-}
-window.initializePipelineClient = initializePipelineClient;

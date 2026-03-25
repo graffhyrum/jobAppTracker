@@ -6,7 +6,10 @@ import {
 } from "@playwright/test";
 
 import { processEnv } from "./processEnvFacade.ts";
-import type { TestFixtures } from "./tests/e2e/fixtures/base.ts";
+import type {
+	TestFixtures,
+	WorkerFixtures,
+} from "./tests/e2e/fixtures/base.ts";
 
 const baseURL = `${processEnv.BASE_URL}:${processEnv.PORT}`;
 
@@ -17,10 +20,10 @@ export default defineConfig({
 	expect: {
 		timeout: 2 * 1000,
 	},
-	fullyParallel: false,
+	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 2 : 0,
-	workers: 1,
+	workers: process.env.CI ? 2 : 4,
 	reporter: [["dot"], ["html", { open: "never" }]],
 
 	// Global setup and teardown for data isolation
@@ -37,13 +40,13 @@ export default defineConfig({
 	projects: getProjects(),
 });
 
-function getProjects(): PlaywrightTestProject<TestFixtures>[] {
+function getProjects(): PlaywrightTestProject<TestFixtures, WorkerFixtures>[] {
 	const base = [
 		{
 			name: "chromium",
 			use: { ...devices["Desktop Chrome"] },
 		},
-	] as const satisfies PlaywrightTestProject<TestFixtures>[];
+	] as const satisfies PlaywrightTestProject<TestFixtures, WorkerFixtures>[];
 	const viewportsOptions: Array<ViewportSize> = [
 		{ width: 1920, height: 1080 },
 		// { width: 375, height: 667 },

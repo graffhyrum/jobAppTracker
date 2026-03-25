@@ -2,17 +2,13 @@ import { expect } from "@playwright/test";
 
 import { test } from "../fixtures/base.ts";
 
-test.beforeEach(async ({ POMs, testJobApplication }) => {
+test.beforeEach(async ({ POMs, mutableApp }) => {
 	const home = POMs.pages.homePage;
 	const pipeline = POMs.components.pipelineTable;
-	// expect(testJobApplication).toBeDefined();
 
-	// Navigate to homepage and ensure table is loaded
 	await home.goto();
 	await pipeline.assertions.waitForTableDataToLoad();
-
-	// Verify our test application is visible in the table
-	await pipeline.assertions.containsApplicationById(testJobApplication.id);
+	await pipeline.assertions.containsApplicationById(mutableApp.id);
 });
 
 test.describe("Application inline editing", () => {
@@ -20,11 +16,11 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
 		await pipelineTable.assertions.hasApplications();
 
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		const editableFields = [
 			"company",
 			"position",
@@ -45,25 +41,22 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
-		// Use the test job application ID
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		const rowComponent = pipelineTable.actions.getRowById(applicationId);
 
-		// Verify the initial company name
-		const expectedCompany = testJobApplication.company;
+		const expectedCompany = mutableApp.company;
 		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
 			expectedCompany,
 		);
 
-		// Edit the company name using the row component
 		const newCompanyName = `Updated ${expectedCompany}`;
 		await rowComponent.actions.editCompanyName(newCompanyName);
 
-		// Verify the change was saved - search for the updated company name in the table
-		await pipelineTable.assertions.containsApplicationWithCompany(
+		await pipelineTable.assertions.companyNameEqualsById(
+			applicationId,
 			newCompanyName,
 		);
 	});
@@ -72,17 +65,16 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
 		const newPositionTitle = "Senior Software Engineer";
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 
 		await pipelineTable.actions.editPositionTitleById(
 			applicationId,
 			newPositionTitle,
 		);
 
-		// Verify the change
 		await pipelineTable.assertions.positionTitleEqualsById(
 			applicationId,
 			newPositionTitle,
@@ -93,12 +85,11 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		await pipelineTable.actions.editStatusById(applicationId, "interview");
 
-		// Verify the change
 		await pipelineTable.assertions.statusEqualsById(applicationId, "interview");
 	});
 
@@ -106,12 +97,11 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		await pipelineTable.actions.editInterestRatingById(applicationId, "3");
 
-		// Verify the change (should show ★★★)
 		await pipelineTable.assertions.interestRatingEqualsById(
 			applicationId,
 			"★★★",
@@ -122,14 +112,13 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
 		const nextDate = "2024-03-15";
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 
 		await pipelineTable.actions.editNextEventDateById(applicationId, nextDate);
 
-		// Verify the change (US date format)
 		await pipelineTable.assertions.nextEventDateContainsById(
 			applicationId,
 			nextDate,
@@ -140,24 +129,21 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
-		// Get application ID and verify original company name
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		const rowComponent = pipelineTable.actions.getRowById(applicationId);
-		const expectedCompany = testJobApplication.company;
+		const expectedCompany = mutableApp.company;
 		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
 			expectedCompany,
 		);
 
-		// Start editing but cancel
 		await rowComponent.actions.fromView.clickEditButton();
 		await pipelineTable.assertions.cellIsInEditMode();
 		await rowComponent.actions.enterTextValue("Should Not Save");
 		await rowComponent.actions.fromEdit.clickCancel();
 
-		// Wait for edit mode to exit and verify nothing changed
 		await pipelineTable.assertions.noEditFormVisible();
 		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
@@ -169,25 +155,23 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
 		const newCompanyName = "Filtered Edit Test";
 
-		// Filter by company name using predictable test data
-		await pipelineTable.actions.searchApplications(testJobApplication.company);
+		await pipelineTable.actions.searchApplications(mutableApp.company);
 
-		// Verify filtering worked
-		await pipelineTable.assertions.containsApplicationWithCompany(
-			testJobApplication.company,
+		await pipelineTable.assertions.companyNameEqualsById(
+			mutableApp.id,
+			mutableApp.company,
 		);
 
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		await pipelineTable.actions.editCompanyNameById(
 			applicationId,
 			newCompanyName,
 		);
 
-		// Clear filter and verify change persisted
 		await pipelineTable.actions.searchApplications("");
 		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
@@ -199,7 +183,7 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
 		const newCompanyName = "Sorted Edit Test";
 
@@ -207,13 +191,12 @@ test.describe("Application inline editing", () => {
 			await pipelineTable.actions.clickColumnHeader("company");
 		});
 
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		await pipelineTable.actions.editCompanyNameById(
 			applicationId,
 			newCompanyName,
 		);
 
-		// Verify change persisted
 		await pipelineTable.assertions.companyNameEqualsById(
 			applicationId,
 			newCompanyName,
@@ -224,17 +207,15 @@ test.describe("Application inline editing", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 		page,
 	}) => {
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		const rowComponent = pipelineTable.actions.getRowById(applicationId);
 
-		// Enter edit mode
 		await rowComponent.actions.fromView.clickEditButton();
 		await pipelineTable.assertions.cellIsInEditMode();
 
-		// Test 1: Verify initial focus on company input
 		await rowComponent.assertions.isFocused("companyInput");
 
 		await test.step("Test 2: Forward Tab navigation through all fields", async () => {
@@ -262,49 +243,35 @@ test.describe("Application inline editing", () => {
 			await rowComponent.actions.pressUntilFocused("companyInput", "Shift+Tab");
 		});
 
-		const respProm = page.waitForResponse(
-			(resp) =>
-				resp.url().includes(`/applications/${applicationId}`) &&
-				resp.request().method() === "PUT",
-		);
 		await page.keyboard.press("Enter");
-		await respProm;
 		await pipelineTable.assertions.noEditFormVisible();
 
-		// Test 5: Escape key cancels edit (if implemented)
+		// Test 5: Escape key cancels edit
 		await rowComponent.actions.fromView.clickEditButton();
 		await pipelineTable.assertions.cellIsInEditMode();
 		await rowComponent.assertions.isFocused("companyInput");
 
 		await rowComponent.actions.fillInput("companyInput", "Should Not Save");
 
-		await Promise.all([
-			page.waitForLoadState("networkidle"),
-			page.keyboard.press("Escape"),
-		]);
+		await page.keyboard.press("Escape");
 
-		// Verify Escape key cancelled edit mode
 		await pipelineTable.assertions.noEditFormVisible();
 		await rowComponent.assertions.elementIsNotVisible("cancelBtn");
 	});
 });
-
-// New tests for delete functionality
 
 test.describe("Application deletion", () => {
 	test("should delete application after confirming", async ({
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		const row = pipelineTable.actions.getRowById(applicationId);
 
-		// Confirm the delete dialog and ensure the row disappears
 		await row.actions.deleteAndConfirm();
 
-		// Assert the row is removed from the table
 		await row.assertions.rowIsNotVisible();
 	});
 
@@ -312,19 +279,18 @@ test.describe("Application deletion", () => {
 		POMs: {
 			components: { pipelineTable },
 		},
-		testJobApplication,
+		mutableApp,
 	}) => {
-		const applicationId = testJobApplication.id;
+		const applicationId = mutableApp.id;
 		const row = pipelineTable.actions.getRowById(applicationId);
 
 		await row.actions.deleteAndCancel();
 
-		// Row should still be visible
 		await row.assertions.isVisible();
 	});
 
-	test("codegen", async ({ page, testJobApplication }) => {
-		const itemId = testJobApplication.id;
+	test("codegen", async ({ page, mutableApp }) => {
+		const itemId = mutableApp.id;
 		const editButtonLocator = page.getByTestId(`edit-btn-${itemId}`);
 		const saveButtonLocator = page.getByTestId(`save-btn-${itemId}`);
 		const cancelButtonLocator = page.getByTestId(`cancel-btn-${itemId}`);

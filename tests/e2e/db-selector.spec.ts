@@ -26,9 +26,6 @@ test.describe("Database Selector", () => {
 				}
 			});
 
-			// Wait for the UI to update
-			await page.waitForTimeout(200);
-
 			// DB selector should now be visible
 			const dbSelector = page.getByTestId("db-selector");
 			await expect(dbSelector).toBeVisible();
@@ -49,9 +46,6 @@ test.describe("Database Selector", () => {
 					dbSelector.classList.add("visible");
 				}
 			});
-
-			// Wait for the UI to update
-			await page.waitForTimeout(100);
 
 			const testButton = page.getByTestId("db-selector-test");
 			const prodButton = page.getByTestId("db-selector-prod");
@@ -80,9 +74,6 @@ test.describe("Database Selector", () => {
 				}
 			});
 
-			// Wait for the UI to update
-			await page.waitForTimeout(100);
-
 			// Test would verify database switching functionality
 			// For now, just verify buttons are clickable
 			const testButton = page.getByTestId("db-selector-test");
@@ -101,9 +92,6 @@ test.describe("Database Selector", () => {
 					dbSelector.classList.add("visible");
 				}
 			});
-
-			// Wait for the UI to update
-			await page.waitForTimeout(100);
 
 			// Navigate to analytics and back
 			await page.goto("http://localhost:3000/analytics");
@@ -137,9 +125,6 @@ test.describe("Database Selector", () => {
 					dbSelector.classList.add("visible");
 				}
 			});
-
-			// Wait for any debouncing/UI updates
-			await page.waitForTimeout(200);
 
 			// DB selector should be visible after final toggle
 			const dbSelector = page.getByTestId("db-selector");

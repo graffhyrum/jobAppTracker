@@ -1,97 +1,105 @@
 import { ArkErrors, type } from "arktype";
-import { getJobAppCurrentStatusEntry, type JobApplication, } from "../../domain/entities/job-application";
+import { Either } from "effect";
+
+import {
+	getJobAppCurrentStatusEntry,
+	type JobApplication,
+} from "../../domain/entities/job-application";
 export type StatusInfo = {
-    category: "active" | "inactive";
-    label: string;
+	category: "active" | "inactive";
+	label: string;
 };
 export type ProcessedApplication = {
-    id: string;
-    company: string;
-    positionTitle: string;
-    applicationDate: string;
-    updatedAt: string;
-    interestRating: number;
-    nextEventDate: string | null;
-    status: string;
-    statusCategory: "active" | "inactive";
-    isOverdue: boolean;
+	id: string;
+	company: string;
+	positionTitle: string;
+	applicationDate: string;
+	updatedAt: string;
+	interestRating: number;
+	nextEventDate: string | null;
+	status: string;
+	statusCategory: "active" | "inactive";
+	isOverdue: boolean;
 };
 // Create schema once at module initialization to avoid race conditions under concurrent load
-const isoDateSchema = type("string.date.iso").pipe.try((s: string) => s.split("T")[0], type(/^\d{4}-\d{2}-\d{2}$/));
+const isoDateSchema = type("string.date.iso").pipe.try(
+	(s: string) => s.split("T")[0],
+	type(/^\d{4}-\d{2}-\d{2}$/),
+);
 export const activeStatuses = [
-    "applied",
-    "screening interview",
-    "interview",
-    "onsite",
-    "online test",
-    "take-home assignment",
-    "offer",
+	"applied",
+	"screening interview",
+	"interview",
+	"onsite",
+	"online test",
+	"take-home assignment",
+	"offer",
 ];
 export const inactiveStatuses = [
-    "rejected",
-    "no response",
-    "no longer interested",
-    "hiring freeze",
+	"rejected",
+	"no response",
+	"no longer interested",
+	"hiring freeze",
 ];
-export const processApplicationData = (applications: JobApplication[]): {
-    processedApps: ProcessedApplication[];
-    stats: {
-        active: number;
-        inactive: number;
-        total: number;
-    };
+export const processApplicationData = (
+	applications: JobApplication[],
+): {
+	processedApps: ProcessedApplication[];
+	stats: {
+		active: number;
+		inactive: number;
+		total: number;
+	};
 } => {
-    let activeCount = 0;
-    let inactiveCount = 0;
-    const processedApps = applications.map((app) => {
-        const statusInfo = getStatusInfo(app);
-        const isOverdue = isApplicationOverdue(app);
-        if (statusInfo.category === "active") {
-            activeCount++;
-        }
-        else {
-            inactiveCount++;
-        }
-        return {
-            id: app.id,
-            company: app.company,
-            positionTitle: app.positionTitle,
-            applicationDate: app.applicationDate,
-            updatedAt: app.updatedAt,
-            interestRating: app.interestRating || 0,
-            nextEventDate: app.nextEventDate || null,
-            status: statusInfo.label,
-            statusCategory: statusInfo.category,
-            isOverdue,
-        };
-    });
-    return {
-        processedApps,
-        stats: {
-            active: activeCount,
-            inactive: inactiveCount,
-            total: applications.length,
-        },
-    };
+	let activeCount = 0;
+	let inactiveCount = 0;
+	const processedApps = applications.map((app) => {
+		const statusInfo = getStatusInfo(app);
+		const isOverdue = isApplicationOverdue(app);
+		if (statusInfo.category === "active") {
+			activeCount++;
+		} else {
+			inactiveCount++;
+		}
+		return {
+			id: app.id,
+			company: app.company,
+			positionTitle: app.positionTitle,
+			applicationDate: app.applicationDate,
+			updatedAt: app.updatedAt,
+			interestRating: app.interestRating || 0,
+			nextEventDate: app.nextEventDate || null,
+			status: statusInfo.label,
+			statusCategory: statusInfo.category,
+			isOverdue,
+		};
+	});
+	return {
+		processedApps,
+		stats: {
+			active: activeCount,
+			inactive: inactiveCount,
+			total: applications.length,
+		},
+	};
 };
 export function formatDate(isoDateString: string): string {
-    const parsedIso = isoDateSchema(isoDateString);
-    if (parsedIso instanceof ArkErrors) {
-        throw new TypeError("Invalid date format", { cause: parsedIso });
-    }
-    return parsedIso;
+	const parsedIso = isoDateSchema(isoDateString);
+	if (parsedIso instanceof ArkErrors) {
+		throw new TypeError("Invalid date format", { cause: parsedIso });
+	}
+	return parsedIso;
 }
 export const formatInterestRating = (rating?: number): string => {
-    if (!rating)
-        return "";
-    return `${"★".repeat(rating)}${"☆".repeat(3 - rating)}`;
+	if (!rating) return "";
+	return `${"★".repeat(rating)}${"☆".repeat(3 - rating)}`;
 };
 export const getStatusInfo = (app: JobApplication): StatusInfo => {
-    const statusRes = getJobAppCurrentStatusEntry(app);
-    return statusRes.isOk()
-        ? statusRes.value[1]
-        : { category: "active" as const, label: "applied" as const };
+	const statusRes = getJobAppCurrentStatusEntry(app);
+	return Either.isRight(statusRes)
+		? statusRes.right[1]
+		: { category: "active" as const, label: "applied" as const };
 };
 export const isApplicationOverdue = (app: JobApplication): boolean => {
-    return app.nextEventDate ? Date.parse(app.nextEventDate) < Date.now() : false;
+	return app.nextEventDate ? Date.parse(app.nextEventDate) < Date.now() : false;
 };

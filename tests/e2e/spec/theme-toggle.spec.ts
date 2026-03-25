@@ -7,90 +7,80 @@ test.describe("Theme Toggle", () => {
 		await POMs.pages.homePage.goto();
 	});
 
-	test("should display theme toggle button in navbar", async ({ page }) => {
-		const themeToggle = page.getByTestId("theme-toggle");
-		await expect(themeToggle).toBeVisible();
-		await expect(themeToggle).toHaveAttribute(
-			"aria-label",
-			"Switch to dark mode",
-		);
+	test("should display theme toggle button in navbar", async ({ POMs }) => {
+		const { themeToggle } = POMs.components;
+		await themeToggle.assertions.isVisible();
+		await themeToggle.assertions.hasAriaLabel("Switch to dark mode");
 	});
 
-	test("should toggle theme when button is clicked", async ({ page }) => {
-		const themeToggle = page.getByTestId("theme-toggle");
-		const html = page.locator("html");
+	test("should toggle theme when button is clicked", async ({ POMs }) => {
+		const { themeToggle } = POMs.components;
 
-		// Get initial theme (might be light or dark based on system preference)
-		const initialTheme = await html.evaluate((el) => el.dataset.theme);
-		const initialIcon = await themeToggle.locator(".theme-icon").textContent();
+		// Get initial theme
+		const initialTheme = await themeToggle.actions.getTheme();
+		const initialIcon = await themeToggle.actions.getIcon();
 
 		// Click the toggle button
-		await themeToggle.click();
+		await themeToggle.actions.clickToggle();
 
-		// Wait for theme to change
-		await page.waitForTimeout(100);
-
-		// Verify theme has changed
-		const newTheme = await html.evaluate((el) => el.dataset.theme);
-		expect(newTheme).not.toBe(initialTheme);
+		// Verify theme has changed via DOM assertion (replaces waitForTimeout)
+		const expectedTheme = initialTheme === "dark" ? "light" : "dark";
+		await themeToggle.assertions.themeIs(expectedTheme);
 
 		// Verify icon has changed
-		const newIcon = await themeToggle.locator(".theme-icon").textContent();
+		const newIcon = await themeToggle.actions.getIcon();
 		expect(newIcon).not.toBe(initialIcon);
 
 		// Verify icon is correct based on theme
-		if (newTheme === "dark") {
+		if (expectedTheme === "dark") {
 			expect(newIcon).toBe("☀️");
 		} else {
 			expect(newIcon).toBe("🌙");
 		}
 	});
 
-	test("should persist theme preference in localStorage", async ({ page }) => {
-		const themeToggle = page.getByTestId("theme-toggle");
-		const html = page.locator("html");
+	test("should persist theme preference in localStorage", async ({
+		page,
+		POMs,
+	}) => {
+		const { themeToggle } = POMs.components;
 
 		// Get initial theme
-		const initialTheme = await html.evaluate((el) => el.dataset.theme);
+		const initialTheme = await themeToggle.actions.getTheme();
 
 		// Toggle theme
-		await themeToggle.click();
-		await page.waitForTimeout(100);
+		await themeToggle.actions.clickToggle();
+
+		// Wait for theme change via DOM assertion (replaces waitForTimeout)
+		const expectedTheme = initialTheme === "dark" ? "light" : "dark";
+		await themeToggle.assertions.themeIs(expectedTheme);
 
 		// Verify localStorage was updated
 		const storedTheme = await page.evaluate(() => {
 			return localStorage.getItem("job-app-tracker-theme");
 		});
-		const newTheme = await html.evaluate((el) => el.dataset.theme);
-		expect(storedTheme).toBe(newTheme);
+		expect(storedTheme).toBe(expectedTheme);
 		expect(storedTheme).not.toBe(initialTheme);
 
 		// Reload page and verify theme persists
 		await page.reload();
-		await page.waitForTimeout(100);
-
-		const persistedTheme = await html.evaluate((el) => el.dataset.theme);
-		expect(persistedTheme).toBe(newTheme);
+		await themeToggle.assertions.themeIs(expectedTheme);
 	});
 
-	test("should toggle theme multiple times correctly", async ({ page }) => {
-		const themeToggle = page.getByTestId("theme-toggle");
-		const html = page.locator("html");
+	test("should toggle theme multiple times correctly", async ({ POMs }) => {
+		const { themeToggle } = POMs.components;
 
 		// Get initial state
-		const initialTheme = await html.evaluate((el) => el.dataset.theme);
+		const initialTheme = await themeToggle.actions.getTheme();
+		if (initialTheme === null) throw new Error("No initial theme found");
+		const oppositeTheme = initialTheme === "dark" ? "light" : "dark";
 
-		// Toggle twice (should return to initial)
-		await themeToggle.click();
-		await page.waitForTimeout(100);
-		const firstToggleTheme = await html.evaluate((el) => el.dataset.theme);
+		// Toggle once — should change
+		await themeToggle.actions.clickToggle();
+		await themeToggle.assertions.themeIs(oppositeTheme);
 
-		await themeToggle.click();
-		await page.waitForTimeout(100);
-		const secondToggleTheme = await html.evaluate((el) => el.dataset.theme);
-
-		// After two toggles, should be back to initial
-		expect(secondToggleTheme).toBe(initialTheme);
-		expect(firstToggleTheme).not.toBe(initialTheme);
+		// Toggle again — should return to initial
+		await themeToggle.actions.clickToggle();
+		await themeToggle.assertions.themeIs(initialTheme);
 	});
 });
