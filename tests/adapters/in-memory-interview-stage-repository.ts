@@ -1,5 +1,6 @@
-import { errAsync, okAsync, type ResultAsync } from "neverthrow";
+import { Effect, Either } from "effect";
 
+import { InterviewStageError } from "#src/domain/entities/interview-stage-error.ts";
 import type {
 	InterviewStage,
 	InterviewStageForCreate,
@@ -11,7 +12,7 @@ import {
 } from "#src/domain/entities/interview-stage.ts";
 import type { JobApplicationId } from "#src/domain/entities/job-application.ts";
 import type { InterviewStageRepository } from "#src/domain/ports/interview-stage-repository.ts";
-import type { ForUpdate } from "#src/infrastructure/storage/storage-provider-interface.ts";
+import type { ForUpdate } from "#src/domain/ports/common-types.ts";
 
 export function createInMemoryInterviewStageRepository(
 	generateUUID: () => string = () => crypto.randomUUID(),
@@ -19,56 +20,75 @@ export function createInMemoryInterviewStageRepository(
 	const stages = new Map<InterviewStageId, InterviewStage>();
 
 	return {
-		create(data: InterviewStageForCreate): ResultAsync<InterviewStage, string> {
+		create(
+			data: InterviewStageForCreate,
+		): Effect.Effect<InterviewStage, InterviewStageError> {
 			const result = createInterviewStage(data, generateUUID);
-			if (result.isErr()) {
-				return errAsync(
-					`Failed to create interview stage: ${result.error.message}`,
+			if (Either.isLeft(result)) {
+				return Effect.fail(
+					new InterviewStageError({
+						detail: `Failed to create interview stage: ${result.left.detail}`,
+						operation: "create",
+					}),
 				);
 			}
-			const stage = result.value;
+			const stage = result.right;
 			stages.set(stage.id, stage);
-			return okAsync(stage);
+			return Effect.succeed(stage);
 		},
 
-		getById(id: InterviewStageId): ResultAsync<InterviewStage, string> {
+		getById(
+			id: InterviewStageId,
+		): Effect.Effect<InterviewStage, InterviewStageError> {
 			const stage = stages.get(id);
 			if (!stage) {
-				return errAsync(`Interview stage with id ${id} not found`);
+				return Effect.fail(
+					new InterviewStageError({
+						detail: `Interview stage with id ${id} not found`,
+						operation: "getById",
+					}),
+				);
 			}
-			return okAsync(stage);
+			return Effect.succeed(stage);
 		},
 
 		getByJobApplicationId(
 			jobAppId: JobApplicationId,
-		): ResultAsync<InterviewStage[], string> {
+		): Effect.Effect<InterviewStage[], InterviewStageError> {
 			const filtered = Array.from(stages.values())
 				.filter((stage) => stage.jobApplicationId === jobAppId)
 				.sort((a, b) => a.round - b.round);
-			return okAsync(filtered);
+			return Effect.succeed(filtered);
 		},
 
-		getAll(): ResultAsync<InterviewStage[], string> {
-			return okAsync(Array.from(stages.values()));
+		getAll(): Effect.Effect<InterviewStage[], InterviewStageError> {
+			return Effect.succeed(Array.from(stages.values()));
 		},
 
 		update(
 			id: InterviewStageId,
 			data: ForUpdate<InterviewStage>,
-		): ResultAsync<InterviewStage, string> {
+		): Effect.Effect<InterviewStage, InterviewStageError> {
 			const existing = stages.get(id);
 			if (!existing) {
-				return errAsync(`Interview stage with id ${id} not found`);
+				return Effect.fail(
+					new InterviewStageError({
+						detail: `Interview stage with id ${id} not found`,
+						operation: "update",
+					}),
+				);
 			}
 
 			const updated = updateInterviewStage(existing, data);
 			stages.set(id, updated);
-			return okAsync(updated);
+			return Effect.succeed(updated);
 		},
 
-		delete(id: InterviewStageId): ResultAsync<void, string> {
+		delete(
+			id: InterviewStageId,
+		): Effect.Effect<void, InterviewStageError> {
 			stages.delete(id);
-			return okAsync(undefined);
+			return Effect.succeed(undefined);
 		},
 	};
 }

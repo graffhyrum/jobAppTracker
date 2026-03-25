@@ -1,5 +1,6 @@
-import { errAsync, okAsync, type ResultAsync } from "neverthrow";
+import { Effect } from "effect";
 
+import { JobApplicationError } from "#src/domain/entities/job-application-error.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
@@ -11,44 +12,56 @@ import {
 	isInactive,
 } from "#src/domain/entities/job-application.ts";
 import type { JobApplicationManager } from "#src/domain/ports/job-application-manager.ts";
-import type { ForUpdate } from "#src/infrastructure/storage/storage-provider-interface.ts";
+import type { ForUpdate } from "#src/domain/ports/common-types.ts";
 
 export function createInMemoryJobApplicationManager(
 	generateUUID: () => string = () => crypto.randomUUID(),
 ): JobApplicationManager {
-	// Use Map for O(1) lookups
 	const applications = new Map<JobApplicationId, JobApplication>();
 
 	return {
 		createJobApplication(
 			data: JobApplicationForCreate,
-		): ResultAsync<JobApplication, string> {
+		): Effect.Effect<JobApplication, JobApplicationError> {
 			const app = createJobApplicationWithInitialStatus(data, generateUUID);
 			applications.set(app.id, app);
-			return okAsync(app);
+			return Effect.succeed(app);
 		},
 
 		getJobApplication(
 			id: JobApplicationId,
-		): ResultAsync<JobApplication, string> {
+		): Effect.Effect<JobApplication, JobApplicationError> {
 			const app = applications.get(id);
 			if (!app) {
-				return errAsync(`Job Application with id ${id} not found`);
+				return Effect.fail(
+					new JobApplicationError({
+						detail: `Job Application with id ${id} not found`,
+						operation: "getJobApplication",
+					}),
+				);
 			}
-			return okAsync(app);
+			return Effect.succeed(app);
 		},
 
-		getAllJobApplications(): ResultAsync<JobApplication[], string> {
-			return okAsync(Array.from(applications.values()));
+		getAllJobApplications(): Effect.Effect<
+			JobApplication[],
+			JobApplicationError
+		> {
+			return Effect.succeed(Array.from(applications.values()));
 		},
 
 		updateJobApplication(
 			id: JobApplicationId,
 			data: ForUpdate<JobApplication>,
-		): ResultAsync<JobApplication, string> {
+		): Effect.Effect<JobApplication, JobApplicationError> {
 			const existing = applications.get(id);
 			if (!existing) {
-				return errAsync(`Job Application with id ${id} not found`);
+				return Effect.fail(
+					new JobApplicationError({
+						detail: `Job Application with id ${id} not found`,
+						operation: "updateJobApplication",
+					}),
+				);
 			}
 
 			const updated = {
@@ -57,27 +70,35 @@ export function createInMemoryJobApplicationManager(
 				updatedAt: new Date().toISOString(),
 			};
 			applications.set(id, updated);
-			return okAsync(updated);
+			return Effect.succeed(updated);
 		},
 
-		deleteJobApplication(id: JobApplicationId): ResultAsync<void, string> {
+		deleteJobApplication(
+			id: JobApplicationId,
+		): Effect.Effect<void, JobApplicationError> {
 			applications.delete(id);
-			return okAsync(undefined);
+			return Effect.succeed(undefined);
 		},
 
-		getActiveJobApplications(): ResultAsync<JobApplication[], string> {
+		getActiveJobApplications(): Effect.Effect<
+			JobApplication[],
+			JobApplicationError
+		> {
 			const active = Array.from(applications.values()).filter(isActive);
-			return okAsync(active);
+			return Effect.succeed(active);
 		},
 
-		getInactiveJobApplications(): ResultAsync<JobApplication[], string> {
+		getInactiveJobApplications(): Effect.Effect<
+			JobApplication[],
+			JobApplicationError
+		> {
 			const inactive = Array.from(applications.values()).filter(isInactive);
-			return okAsync(inactive);
+			return Effect.succeed(inactive);
 		},
 
-		clearAllJobApplications(): ResultAsync<void, string> {
+		clearAllJobApplications(): Effect.Effect<void, JobApplicationError> {
 			applications.clear();
-			return okAsync(undefined);
+			return Effect.succeed(undefined);
 		},
 	};
 }

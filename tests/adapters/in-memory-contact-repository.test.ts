@@ -1,10 +1,18 @@
 import { describe, expect, it } from "bun:test";
+import { Effect, Either } from "effect";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
 import type { ContactForCreate } from "#src/domain/entities/contact.ts";
 import type { JobApplicationId } from "#src/domain/entities/job-application.ts";
 
 import { createInMemoryContactRepository } from "./in-memory-contact-repository.ts";
+
+/** Run an Effect and return an Either for test assertions */
+async function run<T, E>(
+	effect: Effect.Effect<T, E>,
+): Promise<Either.Either<T, E>> {
+	return Effect.runPromise(Effect.either(effect));
+}
 
 describe("InMemoryContactRepository", () => {
 	const jobAppId1 = "123e4567-e89b-12d3-a456-000000000001" as JobApplicationId;
@@ -34,11 +42,11 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const data = createValidContactData();
 
-			const result = await repository.create(data);
+			const result = await run(repository.create(data));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const contact = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const contact = result.right;
 				expect(contact.contactName).toBe(data.contactName);
 				expect(contact.contactEmail).toBe(data.contactEmail);
 				expect(contact.jobApplicationId).toBe(data.jobApplicationId);
@@ -54,11 +62,11 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository(mockGenerator);
 			const data = createValidContactData();
 
-			const result = await repository.create(data);
+			const result = await run(repository.create(data));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.id).toBe("123e4567-e89b-12d3-a456-000000000000");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.id).toBe("123e4567-e89b-12d3-a456-000000000000");
 			}
 		});
 
@@ -72,11 +80,11 @@ describe("InMemoryContactRepository", () => {
 				responseReceived: false,
 			} as ContactForCreate;
 
-			const result = await repository.create(invalidData);
+			const result = await run(repository.create(invalidData));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("Failed to create contact");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("Failed to create contact");
 			}
 		});
 
@@ -84,17 +92,17 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const data = createValidContactData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const contact = createResult.value;
-				const getResult = await repository.getById(contact.id);
+			if (Either.isRight(createResult)) {
+				const contact = createResult.right;
+				const getResult = await run(repository.getById(contact.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					expect(getResult.value.id).toBe(contact.id);
-					expect(getResult.value.contactName).toBe(contact.contactName);
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					expect(getResult.right.id).toBe(contact.id);
+					expect(getResult.right.contactName).toBe(contact.contactName);
 				}
 			}
 		});
@@ -105,17 +113,17 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const data = createValidContactData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
-				const getResult = await repository.getById(created.id);
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
+				const getResult = await run(repository.getById(created.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					expect(getResult.value.id).toBe(created.id);
-					expect(getResult.value.contactName).toBe(data.contactName);
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					expect(getResult.right.id).toBe(created.id);
+					expect(getResult.right.contactName).toBe(data.contactName);
 				}
 			}
 		});
@@ -124,11 +132,11 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.getById(nonExistentId);
+			const result = await run(repository.getById(nonExistentId));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 	});
@@ -137,27 +145,27 @@ describe("InMemoryContactRepository", () => {
 		it("should return empty array when no contacts for job application", async () => {
 			const repository = createInMemoryContactRepository();
 
-			const result = await repository.getByJobApplicationId(jobAppId1);
+			const result = await run(repository.getByJobApplicationId(jobAppId1));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toEqual([]);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual([]);
 			}
 		});
 
 		it("should return contacts for specific job application", async () => {
 			const repository = createInMemoryContactRepository();
 
-			await repository.create(createValidContactData(jobAppId1));
-			await repository.create(createValidContactData(jobAppId1));
-			await repository.create(createValidContactData(jobAppId2));
+			await Effect.runPromise(repository.create(createValidContactData(jobAppId1)));
+			await Effect.runPromise(repository.create(createValidContactData(jobAppId1)));
+			await Effect.runPromise(repository.create(createValidContactData(jobAppId2)));
 
-			const result = await repository.getByJobApplicationId(jobAppId1);
+			const result = await run(repository.getByJobApplicationId(jobAppId1));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.length).toBe(2);
-				for (const contact of result.value) {
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.length).toBe(2);
+				for (const contact of result.right) {
 					expect(contact.jobApplicationId).toBe(jobAppId1);
 				}
 			}
@@ -170,24 +178,30 @@ describe("InMemoryContactRepository", () => {
 			const middleDate = new Date("2023-06-01").toISOString();
 			const recentDate = new Date("2023-12-01").toISOString();
 
-			await repository.create({
-				...createValidContactData(jobAppId1),
-				outreachDate: oldDate,
-			});
-			await repository.create({
-				...createValidContactData(jobAppId1),
-				outreachDate: recentDate,
-			});
-			await repository.create({
-				...createValidContactData(jobAppId1),
-				outreachDate: middleDate,
-			});
+			await Effect.runPromise(
+				repository.create({
+					...createValidContactData(jobAppId1),
+					outreachDate: oldDate,
+				}),
+			);
+			await Effect.runPromise(
+				repository.create({
+					...createValidContactData(jobAppId1),
+					outreachDate: recentDate,
+				}),
+			);
+			await Effect.runPromise(
+				repository.create({
+					...createValidContactData(jobAppId1),
+					outreachDate: middleDate,
+				}),
+			);
 
-			const result = await repository.getByJobApplicationId(jobAppId1);
+			const result = await run(repository.getByJobApplicationId(jobAppId1));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const contacts = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const contacts = result.right;
 				expect(contacts.length).toBe(3);
 				const firstContact = contacts[0];
 				const secondContact = contacts[1];
@@ -207,21 +221,23 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const data = createValidContactData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
-				const updateResult = await repository.update(created.id, {
-					contactName: "Jane Smith",
-					responseReceived: true,
-				});
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
+				const updateResult = await run(
+					repository.update(created.id, {
+						contactName: "Jane Smith",
+						responseReceived: true,
+					}),
+				);
 
-				expect(updateResult.isOk()).toBe(true);
-				if (updateResult.isOk()) {
-					expect(updateResult.value.contactName).toBe("Jane Smith");
-					expect(updateResult.value.responseReceived).toBe(true);
-					expect(updateResult.value.contactEmail).toBe(data.contactEmail);
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					expect(updateResult.right.contactName).toBe("Jane Smith");
+					expect(updateResult.right.responseReceived).toBe(true);
+					expect(updateResult.right.contactEmail).toBe(data.contactEmail);
 				}
 			}
 		});
@@ -230,23 +246,25 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const data = createValidContactData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
 				const originalUpdatedAt = created.updatedAt;
 
 				// Wait a bit to ensure timestamp changes
 				await new Promise((resolve) => setTimeout(resolve, 10));
 
-				const updateResult = await repository.update(created.id, {
-					contactName: "Updated Name",
-				});
+				const updateResult = await run(
+					repository.update(created.id, {
+						contactName: "Updated Name",
+					}),
+				);
 
-				expect(updateResult.isOk()).toBe(true);
-				if (updateResult.isOk()) {
-					expect(updateResult.value.updatedAt).not.toBe(originalUpdatedAt);
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					expect(updateResult.right.updatedAt).not.toBe(originalUpdatedAt);
 				}
 			}
 		});
@@ -255,13 +273,15 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.update(nonExistentId, {
-				contactName: "Updated Name",
-			});
+			const result = await run(
+				repository.update(nonExistentId, {
+					contactName: "Updated Name",
+				}),
+			);
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 	});
@@ -271,18 +291,18 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const data = createValidContactData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const contact = createResult.value;
-				const deleteResult = await repository.delete(contact.id);
+			if (Either.isRight(createResult)) {
+				const contact = createResult.right;
+				const deleteResult = await run(repository.delete(contact.id));
 
-				expect(deleteResult.isOk()).toBe(true);
+				expect(Either.isRight(deleteResult)).toBe(true);
 
 				// Verify it's actually deleted
-				const getResult = await repository.getById(contact.id);
-				expect(getResult.isErr()).toBe(true);
+				const getResult = await run(repository.getById(contact.id));
+				expect(Either.isLeft(getResult)).toBe(true);
 			}
 		});
 
@@ -290,9 +310,9 @@ describe("InMemoryContactRepository", () => {
 			const repository = createInMemoryContactRepository();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.delete(nonExistentId);
+			const result = await run(repository.delete(nonExistentId));
 
-			expect(result.isOk()).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
 		});
 	});
 
@@ -301,17 +321,17 @@ describe("InMemoryContactRepository", () => {
 			const repository1 = createInMemoryContactRepository();
 			const repository2 = createInMemoryContactRepository();
 
-			await repository1.create(createValidContactData());
+			await Effect.runPromise(repository1.create(createValidContactData()));
 
-			const result1 = await repository1.getByJobApplicationId(jobAppId1);
-			const result2 = await repository2.getByJobApplicationId(jobAppId1);
+			const result1 = await run(repository1.getByJobApplicationId(jobAppId1));
+			const result2 = await run(repository2.getByJobApplicationId(jobAppId1));
 
-			expect(result1.isOk()).toBe(true);
-			expect(result2.isOk()).toBe(true);
+			expect(Either.isRight(result1)).toBe(true);
+			expect(Either.isRight(result2)).toBe(true);
 
-			if (result1.isOk() && result2.isOk()) {
-				expect(result1.value.length).toBe(1);
-				expect(result2.value.length).toBe(0);
+			if (Either.isRight(result1) && Either.isRight(result2)) {
+				expect(result1.right.length).toBe(1);
+				expect(result2.right.length).toBe(0);
 			}
 		});
 	});

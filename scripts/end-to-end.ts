@@ -1,5 +1,4 @@
 import find from "find-process";
-import { ResultAsync } from "neverthrow";
 import kill from "tree-kill";
 
 import { processEnv } from "../processEnvFacade.ts";
@@ -38,29 +37,22 @@ function prepareEnvironment() {
 	Bun.spawnSync(["bunx", "playwright", "install"]);
 }
 
-function findOrStartDevServer() {
-	const findDevServer = ResultAsync.fromThrowable(
-		find,
-		(e) => new Error(`Failed to find dev server: ${e}`),
-	);
-
-	return findDevServer("port", processEnv.PORT).match(
-		(procList) => {
-			const match = procList.find(
-				(proc) => proc.name === "bun" && proc.cmd.includes("start"),
-			);
-			if (match) {
-				console.log(`Dev server already running. PID: ${match.pid}`);
-				return match;
-			}
-			console.log("Dev server not found. Starting new server");
-			return startDevServer();
-		},
-		() => {
-			console.log("Starting dev server");
-			return startDevServer();
-		},
-	);
+async function findOrStartDevServer() {
+	try {
+		const procList = await find("port", processEnv.PORT);
+		const match = procList.find(
+			(proc) => proc.name === "bun" && proc.cmd.includes("start"),
+		);
+		if (match) {
+			console.log(`Dev server already running. PID: ${match.pid}`);
+			return match;
+		}
+		console.log("Dev server not found. Starting new server");
+		return startDevServer();
+	} catch {
+		console.log("Starting dev server");
+		return startDevServer();
+	}
 }
 
 function startDevServer() {

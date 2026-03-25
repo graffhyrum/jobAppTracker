@@ -1,6 +1,8 @@
 import { describe, expect, it } from "bun:test";
+import { Either } from "effect";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import type { InterviewStageForCreate } from "#src/domain/entities/interview-stage.ts";
 import type { JobApplicationId } from "#src/domain/entities/job-application.ts";
 
@@ -34,11 +36,11 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const data = createValidStageData();
 
-			const result = await repository.create(data);
+			const result = await runEffect(repository.create(data));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const stage = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const stage = result.right;
 				expect(stage.jobApplicationId).toBe(data.jobApplicationId);
 				expect(stage.round).toBe(data.round);
 				expect(stage.interviewType).toBe(data.interviewType);
@@ -54,11 +56,11 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository(mockGenerator);
 			const data = createValidStageData();
 
-			const result = await repository.create(data);
+			const result = await runEffect(repository.create(data));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.id).toBe("123e4567-e89b-12d3-a456-000000000000");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.id).toBe("123e4567-e89b-12d3-a456-000000000000");
 			}
 		});
 
@@ -72,11 +74,11 @@ describe("InMemoryInterviewStageRepository", () => {
 				questions: [],
 			} as InterviewStageForCreate;
 
-			const result = await repository.create(invalidData);
+			const result = await runEffect(repository.create(invalidData));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("Failed to create interview stage");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("Failed to create interview stage");
 			}
 		});
 
@@ -84,17 +86,17 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const data = createValidStageData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const stage = createResult.value;
-				const getResult = await repository.getById(stage.id);
+			if (Either.isRight(createResult)) {
+				const stage = createResult.right;
+				const getResult = await runEffect(repository.getById(stage.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					expect(getResult.value.id).toBe(stage.id);
-					expect(getResult.value.round).toBe(stage.round);
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					expect(getResult.right.id).toBe(stage.id);
+					expect(getResult.right.round).toBe(stage.round);
 				}
 			}
 		});
@@ -105,17 +107,17 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const data = createValidStageData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
-				const getResult = await repository.getById(created.id);
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
+				const getResult = await runEffect(repository.getById(created.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					expect(getResult.value.id).toBe(created.id);
-					expect(getResult.value.interviewType).toBe(data.interviewType);
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					expect(getResult.right.id).toBe(created.id);
+					expect(getResult.right.interviewType).toBe(data.interviewType);
 				}
 			}
 		});
@@ -124,11 +126,11 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.getById(nonExistentId);
+			const result = await runEffect(repository.getById(nonExistentId));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 	});
@@ -137,27 +139,31 @@ describe("InMemoryInterviewStageRepository", () => {
 		it("should return empty array when no stages for job application", async () => {
 			const repository = createInMemoryInterviewStageRepository();
 
-			const result = await repository.getByJobApplicationId(jobAppId1);
+			const result = await runEffect(
+				repository.getByJobApplicationId(jobAppId1),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toEqual([]);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual([]);
 			}
 		});
 
 		it("should return stages for specific job application", async () => {
 			const repository = createInMemoryInterviewStageRepository();
 
-			await repository.create(createValidStageData(jobAppId1, 1));
-			await repository.create(createValidStageData(jobAppId1, 2));
-			await repository.create(createValidStageData(jobAppId2, 1));
+			await runEffect(repository.create(createValidStageData(jobAppId1, 1)));
+			await runEffect(repository.create(createValidStageData(jobAppId1, 2)));
+			await runEffect(repository.create(createValidStageData(jobAppId2, 1)));
 
-			const result = await repository.getByJobApplicationId(jobAppId1);
+			const result = await runEffect(
+				repository.getByJobApplicationId(jobAppId1),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.length).toBe(2);
-				for (const stage of result.value) {
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.length).toBe(2);
+				for (const stage of result.right) {
 					expect(stage.jobApplicationId).toBe(jobAppId1);
 				}
 			}
@@ -167,15 +173,17 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 
 			// Create stages in reverse order
-			await repository.create(createValidStageData(jobAppId1, 3));
-			await repository.create(createValidStageData(jobAppId1, 1));
-			await repository.create(createValidStageData(jobAppId1, 2));
+			await runEffect(repository.create(createValidStageData(jobAppId1, 3)));
+			await runEffect(repository.create(createValidStageData(jobAppId1, 1)));
+			await runEffect(repository.create(createValidStageData(jobAppId1, 2)));
 
-			const result = await repository.getByJobApplicationId(jobAppId1);
+			const result = await runEffect(
+				repository.getByJobApplicationId(jobAppId1),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const stages = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const stages = result.right;
 				expect(stages.length).toBe(3);
 				const firstStage = stages[0];
 				const secondStage = stages[1];
@@ -195,24 +203,26 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const data = createValidStageData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
 				const scheduledDate = new Date().toISOString();
-				const updateResult = await repository.update(created.id, {
-					interviewType: "behavioral",
-					isFinalRound: true,
-					scheduledDate,
-				});
+				const updateResult = await runEffect(
+					repository.update(created.id, {
+						interviewType: "behavioral",
+						isFinalRound: true,
+						scheduledDate,
+					}),
+				);
 
-				expect(updateResult.isOk()).toBe(true);
-				if (updateResult.isOk()) {
-					expect(updateResult.value.interviewType).toBe("behavioral");
-					expect(updateResult.value.isFinalRound).toBe(true);
-					expect(updateResult.value.scheduledDate).toBe(scheduledDate);
-					expect(updateResult.value.round).toBe(data.round);
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					expect(updateResult.right.interviewType).toBe("behavioral");
+					expect(updateResult.right.isFinalRound).toBe(true);
+					expect(updateResult.right.scheduledDate).toBe(scheduledDate);
+					expect(updateResult.right.round).toBe(data.round);
 				}
 			}
 		});
@@ -221,23 +231,25 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const data = createValidStageData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
 				const originalUpdatedAt = created.updatedAt;
 
 				// Wait a bit to ensure timestamp changes
 				await new Promise((resolve) => setTimeout(resolve, 10));
 
-				const updateResult = await repository.update(created.id, {
-					notes: "Updated notes",
-				});
+				const updateResult = await runEffect(
+					repository.update(created.id, {
+						notes: "Updated notes",
+					}),
+				);
 
-				expect(updateResult.isOk()).toBe(true);
-				if (updateResult.isOk()) {
-					expect(updateResult.value.updatedAt).not.toBe(originalUpdatedAt);
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					expect(updateResult.right.updatedAt).not.toBe(originalUpdatedAt);
 				}
 			}
 		});
@@ -246,13 +258,15 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.update(nonExistentId, {
-				notes: "Updated notes",
-			});
+			const result = await runEffect(
+				repository.update(nonExistentId, {
+					notes: "Updated notes",
+				}),
+			);
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 	});
@@ -262,18 +276,18 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const data = createValidStageData();
 
-			const createResult = await repository.create(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(repository.create(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const stage = createResult.value;
-				const deleteResult = await repository.delete(stage.id);
+			if (Either.isRight(createResult)) {
+				const stage = createResult.right;
+				const deleteResult = await runEffect(repository.delete(stage.id));
 
-				expect(deleteResult.isOk()).toBe(true);
+				expect(Either.isRight(deleteResult)).toBe(true);
 
 				// Verify it's actually deleted
-				const getResult = await repository.getById(stage.id);
-				expect(getResult.isErr()).toBe(true);
+				const getResult = await runEffect(repository.getById(stage.id));
+				expect(Either.isLeft(getResult)).toBe(true);
 			}
 		});
 
@@ -281,9 +295,9 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository = createInMemoryInterviewStageRepository();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.delete(nonExistentId);
+			const result = await runEffect(repository.delete(nonExistentId));
 
-			expect(result.isOk()).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
 		});
 	});
 
@@ -292,17 +306,21 @@ describe("InMemoryInterviewStageRepository", () => {
 			const repository1 = createInMemoryInterviewStageRepository();
 			const repository2 = createInMemoryInterviewStageRepository();
 
-			await repository1.create(createValidStageData());
+			await runEffect(repository1.create(createValidStageData()));
 
-			const result1 = await repository1.getByJobApplicationId(jobAppId1);
-			const result2 = await repository2.getByJobApplicationId(jobAppId1);
+			const result1 = await runEffect(
+				repository1.getByJobApplicationId(jobAppId1),
+			);
+			const result2 = await runEffect(
+				repository2.getByJobApplicationId(jobAppId1),
+			);
 
-			expect(result1.isOk()).toBe(true);
-			expect(result2.isOk()).toBe(true);
+			expect(Either.isRight(result1)).toBe(true);
+			expect(Either.isRight(result2)).toBe(true);
 
-			if (result1.isOk() && result2.isOk()) {
-				expect(result1.value.length).toBe(1);
-				expect(result2.value.length).toBe(0);
+			if (Either.isRight(result1) && Either.isRight(result2)) {
+				expect(result1.right.length).toBe(1);
+				expect(result2.right.length).toBe(0);
 			}
 		});
 	});

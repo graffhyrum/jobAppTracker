@@ -1,4 +1,6 @@
 import { describe, expect, it } from "bun:test";
+import { Effect, Either } from "effect";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
 import type { JobApplicationForCreate } from "#src/domain/entities/job-application.ts";
@@ -27,11 +29,11 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const data = createValidJobAppData();
 
-			const result = await manager.createJobApplication(data);
+			const result = await runEffect(manager.createJobApplication(data));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const app = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const app = result.right;
 				expect(app.company).toBe(data.company);
 				expect(app.positionTitle).toBe(data.positionTitle);
 				assertDefined(app.id);
@@ -46,11 +48,11 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager(mockGenerator);
 			const data = createValidJobAppData();
 
-			const result = await manager.createJobApplication(data);
+			const result = await runEffect(manager.createJobApplication(data));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.id).toBe("123e4567-e89b-12d3-a456-000000000000");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.id).toBe("123e4567-e89b-12d3-a456-000000000000");
 			}
 		});
 
@@ -58,11 +60,11 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const data = createValidJobAppData();
 
-			const result = await manager.createJobApplication(data);
+			const result = await runEffect(manager.createJobApplication(data));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const app = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const app = result.right;
 				expect(app.statusLog.length).toBe(1);
 				const statusEntry = app.statusLog[0];
 				assertDefined(statusEntry);
@@ -79,17 +81,17 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const data = createValidJobAppData();
 
-			const createResult = await manager.createJobApplication(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(manager.createJobApplication(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
-				const getResult = await manager.getJobApplication(created.id);
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
+				const getResult = await runEffect(manager.getJobApplication(created.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					expect(getResult.value.id).toBe(created.id);
-					expect(getResult.value.company).toBe(data.company);
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					expect(getResult.right.id).toBe(created.id);
+					expect(getResult.right.company).toBe(data.company);
 				}
 			}
 		});
@@ -98,11 +100,11 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await manager.getJobApplication(nonExistentId);
+			const result = await runEffect(manager.getJobApplication(nonExistentId));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 	});
@@ -111,11 +113,11 @@ describe("InMemoryJobApplicationManager", () => {
 		it("should return empty array when no applications exist", async () => {
 			const manager = createInMemoryJobApplicationManager();
 
-			const result = await manager.getAllJobApplications();
+			const result = await runEffect(manager.getAllJobApplications());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toEqual([]);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual([]);
 			}
 		});
 
@@ -127,14 +129,14 @@ describe("InMemoryJobApplicationManager", () => {
 				company: "Different Company",
 			};
 
-			await manager.createJobApplication(data1);
-			await manager.createJobApplication(data2);
+			await runEffect(manager.createJobApplication(data1));
+			await runEffect(manager.createJobApplication(data2));
 
-			const result = await manager.getAllJobApplications();
+			const result = await runEffect(manager.getAllJobApplications());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.length).toBe(2);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.length).toBe(2);
 			}
 		});
 	});
@@ -144,19 +146,19 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const data = createValidJobAppData();
 
-			const createResult = await manager.createJobApplication(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(manager.createJobApplication(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
-				const updateResult = await manager.updateJobApplication(created.id, {
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
+				const updateResult = await runEffect(manager.updateJobApplication(created.id, {
 					company: "Updated Company",
-				});
+				}));
 
-				expect(updateResult.isOk()).toBe(true);
-				if (updateResult.isOk()) {
-					expect(updateResult.value.company).toBe("Updated Company");
-					expect(updateResult.value.positionTitle).toBe(data.positionTitle);
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					expect(updateResult.right.company).toBe("Updated Company");
+					expect(updateResult.right.positionTitle).toBe(data.positionTitle);
 				}
 			}
 		});
@@ -165,23 +167,23 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const data = createValidJobAppData();
 
-			const createResult = await manager.createJobApplication(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(manager.createJobApplication(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
 				const originalUpdatedAt = created.updatedAt;
 
 				// Wait a bit to ensure timestamp changes
 				await new Promise((resolve) => setTimeout(resolve, 10));
 
-				const updateResult = await manager.updateJobApplication(created.id, {
+				const updateResult = await runEffect(manager.updateJobApplication(created.id, {
 					company: "Updated Company",
-				});
+				}));
 
-				expect(updateResult.isOk()).toBe(true);
-				if (updateResult.isOk()) {
-					expect(updateResult.value.updatedAt).not.toBe(originalUpdatedAt);
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					expect(updateResult.right.updatedAt).not.toBe(originalUpdatedAt);
 				}
 			}
 		});
@@ -190,13 +192,13 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await manager.updateJobApplication(nonExistentId, {
+			const result = await runEffect(manager.updateJobApplication(nonExistentId, {
 				company: "Updated Company",
-			});
+			}));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 	});
@@ -206,18 +208,18 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const data = createValidJobAppData();
 
-			const createResult = await manager.createJobApplication(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(manager.createJobApplication(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
-				const deleteResult = await manager.deleteJobApplication(created.id);
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
+				const deleteResult = await runEffect(manager.deleteJobApplication(created.id));
 
-				expect(deleteResult.isOk()).toBe(true);
+				expect(Either.isRight(deleteResult)).toBe(true);
 
 				// Verify it's actually deleted
-				const getResult = await manager.getJobApplication(created.id);
-				expect(getResult.isErr()).toBe(true);
+				const getResult = await runEffect(manager.getJobApplication(created.id));
+				expect(Either.isLeft(getResult)).toBe(true);
 			}
 		});
 
@@ -225,10 +227,10 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await manager.deleteJobApplication(nonExistentId);
+			const result = await runEffect(manager.deleteJobApplication(nonExistentId));
 
 			// Map.delete returns void regardless of whether key existed
-			expect(result.isOk()).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
 		});
 	});
 
@@ -237,15 +239,15 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const activeData = createValidJobAppData();
 
-			const createResult = await manager.createJobApplication(activeData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(manager.createJobApplication(activeData));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			const result = await manager.getActiveJobApplications();
+			const result = await runEffect(manager.getActiveJobApplications());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.length).toBe(1);
-				const firstApp = result.value[0];
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.length).toBe(1);
+				const firstApp = result.right[0];
 				assertDefined(firstApp);
 				expect(firstApp.company).toBe(activeData.company);
 			}
@@ -254,11 +256,11 @@ describe("InMemoryJobApplicationManager", () => {
 		it("should return empty array when no active applications", async () => {
 			const manager = createInMemoryJobApplicationManager();
 
-			const result = await manager.getActiveJobApplications();
+			const result = await runEffect(manager.getActiveJobApplications());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toEqual([]);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual([]);
 			}
 		});
 
@@ -267,14 +269,14 @@ describe("InMemoryJobApplicationManager", () => {
 			const activeData = createValidJobAppData();
 
 			// Create active application
-			const createActiveResult = await manager.createJobApplication(activeData);
-			expect(createActiveResult.isOk()).toBe(true);
+			const createActiveResult = await runEffect(manager.createJobApplication(activeData));
+			expect(Either.isRight(createActiveResult)).toBe(true);
 
-			if (createActiveResult.isOk()) {
-				const activeApp = createActiveResult.value;
+			if (Either.isRight(createActiveResult)) {
+				const activeApp = createActiveResult.right;
 
 				// Update to inactive status
-				await manager.updateJobApplication(activeApp.id, {
+				await Effect.runPromise(manager.updateJobApplication(activeApp.id, {
 					statusLog: [
 						...activeApp.statusLog,
 						[
@@ -282,13 +284,13 @@ describe("InMemoryJobApplicationManager", () => {
 							{ category: "inactive", label: "rejected" },
 						],
 					],
-				});
+				}));
 
-				const result = await manager.getActiveJobApplications();
+				const result = await runEffect(manager.getActiveJobApplications());
 
-				expect(result.isOk()).toBe(true);
-				if (result.isOk()) {
-					expect(result.value.length).toBe(0);
+				expect(Either.isRight(result)).toBe(true);
+				if (Either.isRight(result)) {
+					expect(result.right.length).toBe(0);
 				}
 			}
 		});
@@ -299,14 +301,14 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const data = createValidJobAppData();
 
-			const createResult = await manager.createJobApplication(data);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await runEffect(manager.createJobApplication(data));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const app = createResult.value;
+			if (Either.isRight(createResult)) {
+				const app = createResult.right;
 
 				// Update to inactive status
-				await manager.updateJobApplication(app.id, {
+				await Effect.runPromise(manager.updateJobApplication(app.id, {
 					statusLog: [
 						...app.statusLog,
 						[
@@ -314,14 +316,14 @@ describe("InMemoryJobApplicationManager", () => {
 							{ category: "inactive", label: "rejected" },
 						],
 					],
-				});
+				}));
 
-				const result = await manager.getInactiveJobApplications();
+				const result = await runEffect(manager.getInactiveJobApplications());
 
-				expect(result.isOk()).toBe(true);
-				if (result.isOk()) {
-					expect(result.value.length).toBe(1);
-					const firstApp = result.value[0];
+				expect(Either.isRight(result)).toBe(true);
+				if (Either.isRight(result)) {
+					expect(result.right.length).toBe(1);
+					const firstApp = result.right[0];
 					assertDefined(firstApp);
 					expect(firstApp.company).toBe(data.company);
 				}
@@ -331,11 +333,11 @@ describe("InMemoryJobApplicationManager", () => {
 		it("should return empty array when no inactive applications", async () => {
 			const manager = createInMemoryJobApplicationManager();
 
-			const result = await manager.getInactiveJobApplications();
+			const result = await runEffect(manager.getInactiveJobApplications());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toEqual([]);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual([]);
 			}
 		});
 	});
@@ -349,25 +351,25 @@ describe("InMemoryJobApplicationManager", () => {
 				company: "Different Company",
 			};
 
-			await manager.createJobApplication(data1);
-			await manager.createJobApplication(data2);
+			await runEffect(manager.createJobApplication(data1));
+			await runEffect(manager.createJobApplication(data2));
 
-			const clearResult = await manager.clearAllJobApplications();
-			expect(clearResult.isOk()).toBe(true);
+			const clearResult = await runEffect(manager.clearAllJobApplications());
+			expect(Either.isRight(clearResult)).toBe(true);
 
-			const getAllResult = await manager.getAllJobApplications();
-			expect(getAllResult.isOk()).toBe(true);
-			if (getAllResult.isOk()) {
-				expect(getAllResult.value).toEqual([]);
+			const getAllResult = await runEffect(manager.getAllJobApplications());
+			expect(Either.isRight(getAllResult)).toBe(true);
+			if (Either.isRight(getAllResult)) {
+				expect(getAllResult.right).toEqual([]);
 			}
 		});
 
 		it("should not error on empty state", async () => {
 			const manager = createInMemoryJobApplicationManager();
 
-			const result = await manager.clearAllJobApplications();
+			const result = await runEffect(manager.clearAllJobApplications());
 
-			expect(result.isOk()).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
 		});
 	});
 
@@ -377,17 +379,17 @@ describe("InMemoryJobApplicationManager", () => {
 			const manager2 = createInMemoryJobApplicationManager();
 
 			const data = createValidJobAppData();
-			await manager1.createJobApplication(data);
+			await Effect.runPromise(manager1.createJobApplication(data));
 
-			const result1 = await manager1.getAllJobApplications();
-			const result2 = await manager2.getAllJobApplications();
+			const result1 = await runEffect(manager1.getAllJobApplications());
+			const result2 = await runEffect(manager2.getAllJobApplications());
 
-			expect(result1.isOk()).toBe(true);
-			expect(result2.isOk()).toBe(true);
+			expect(Either.isRight(result1)).toBe(true);
+			expect(Either.isRight(result2)).toBe(true);
 
-			if (result1.isOk() && result2.isOk()) {
-				expect(result1.value.length).toBe(1);
-				expect(result2.value.length).toBe(0);
+			if (Either.isRight(result1) && Either.isRight(result2)) {
+				expect(result1.right.length).toBe(1);
+				expect(result2.right.length).toBe(0);
 			}
 		});
 	});

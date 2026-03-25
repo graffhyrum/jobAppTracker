@@ -1,9 +1,18 @@
 import { describe, expect, it } from "bun:test";
 
+import { Effect, Either } from "effect";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
 import type { JobBoardForCreate } from "#src/domain/entities/job-board.ts";
 
 import { createInMemoryJobBoardRepository } from "./in-memory-job-board-repository.ts";
+
+/** Run an Effect and return an Either for test assertions. */
+async function run<T, E>(
+	effect: Effect.Effect<T, E>,
+): Promise<Either.Either<T, E>> {
+	return Effect.runPromise(Effect.either(effect));
+}
 
 describe("InMemoryJobBoardRepository", () => {
 	// Test data
@@ -30,11 +39,11 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should create job board with valid data", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const result = await repository.create(validJobBoardData);
+			const result = await run(repository.create(validJobBoardData));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const board = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const board = result.right;
 				expect(board.name).toBe(validJobBoardData.name);
 				expect(board.rootDomain).toBe(validJobBoardData.rootDomain);
 				expect(board.domains).toEqual(validJobBoardData.domains);
@@ -47,11 +56,13 @@ describe("InMemoryJobBoardRepository", () => {
 			const mockGenerator = createMockUuidGenerator();
 			const repository = createInMemoryJobBoardRepository(mockGenerator);
 
-			const result = await repository.create(validJobBoardData);
+			const result = await run(repository.create(validJobBoardData));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.id).toBe("123e4567-e89b-12d3-a456-000000000000");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.id).toBe(
+					"123e4567-e89b-12d3-a456-000000000000",
+				);
 			}
 		});
 
@@ -63,27 +74,29 @@ describe("InMemoryJobBoardRepository", () => {
 				domains: [],
 			} as JobBoardForCreate;
 
-			const result = await repository.create(invalidData);
+			const result = await run(repository.create(invalidData));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("Failed to create job board");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("Failed to create job board");
 			}
 		});
 
 		it("should persist job board in memory", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(
+				repository.create(validJobBoardData),
+			);
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const board = createResult.value;
-				const getResult = await repository.getById(board.id);
+			if (Either.isRight(createResult)) {
+				const board = createResult.right;
+				const getResult = await run(repository.getById(board.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					const retrieved = getResult.value;
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					const retrieved = getResult.right;
 					expect(retrieved.id).toBe(board.id);
 					expect(retrieved.name).toBe(board.name);
 					expect(retrieved.rootDomain).toBe(board.rootDomain);
@@ -97,30 +110,33 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should retrieve existing job board", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(
+				repository.create(validJobBoardData),
+			);
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const created = createResult.value;
-				const getResult = await repository.getById(created.id);
+			if (Either.isRight(createResult)) {
+				const created = createResult.right;
+				const getResult = await run(repository.getById(created.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					expect(getResult.value.id).toBe(created.id);
-					expect(getResult.value.name).toBe(validJobBoardData.name);
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					expect(getResult.right.id).toBe(created.id);
+					expect(getResult.right.name).toBe(validJobBoardData.name);
 				}
 			}
 		});
 
 		it("should return error for non-existent ID", async () => {
 			const repository = createInMemoryJobBoardRepository();
-			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
+			const nonExistentId =
+				"123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.getById(nonExistentId);
+			const result = await run(repository.getById(nonExistentId));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 	});
@@ -129,25 +145,25 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should return empty array when no boards exist", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const result = await repository.getAll();
+			const result = await run(repository.getAll());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toEqual([]);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual([]);
 			}
 		});
 
 		it("should return all job boards", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			await repository.create(validJobBoardData);
-			await repository.create(validJobBoardData2);
+			await run(repository.create(validJobBoardData));
+			await run(repository.create(validJobBoardData2));
 
-			const result = await repository.getAll();
+			const result = await run(repository.getAll());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.length).toBe(2);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.length).toBe(2);
 			}
 		});
 
@@ -155,27 +171,33 @@ describe("InMemoryJobBoardRepository", () => {
 			const repository = createInMemoryJobBoardRepository();
 
 			// Create boards in reverse alphabetical order
-			await repository.create({
-				name: "Zebra Board",
-				rootDomain: "zebra.com",
-				domains: ["zebra.com"],
-			});
-			await repository.create({
-				name: "Alpha Board",
-				rootDomain: "alpha.com",
-				domains: ["alpha.com"],
-			});
-			await repository.create({
-				name: "Middle Board",
-				rootDomain: "middle.com",
-				domains: ["middle.com"],
-			});
+			await run(
+				repository.create({
+					name: "Zebra Board",
+					rootDomain: "zebra.com",
+					domains: ["zebra.com"],
+				}),
+			);
+			await run(
+				repository.create({
+					name: "Alpha Board",
+					rootDomain: "alpha.com",
+					domains: ["alpha.com"],
+				}),
+			);
+			await run(
+				repository.create({
+					name: "Middle Board",
+					rootDomain: "middle.com",
+					domains: ["middle.com"],
+				}),
+			);
 
-			const result = await repository.getAll();
+			const result = await run(repository.getAll());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const boards = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const boards = result.right;
 				const firstBoard = boards[0];
 				const secondBoard = boards[1];
 				const thirdBoard = boards[2];
@@ -193,28 +215,32 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should find board by rootDomain", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			await repository.create(validJobBoardData);
+			await run(repository.create(validJobBoardData));
 
-			const result = await repository.findByDomain("testboard.com");
+			const result = await run(
+				repository.findByDomain("testboard.com"),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				assertDefined(result.value);
-				expect(result.value.name).toBe(validJobBoardData.name);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				assertDefined(result.right);
+				expect(result.right.name).toBe(validJobBoardData.name);
 			}
 		});
 
 		it("should find board by domain in domains array", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			await repository.create(validJobBoardData);
+			await run(repository.create(validJobBoardData));
 
-			const result = await repository.findByDomain("www.testboard.com");
+			const result = await run(
+				repository.findByDomain("www.testboard.com"),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				assertDefined(result.value);
-				expect(result.value.name).toBe(validJobBoardData.name);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				assertDefined(result.right);
+				expect(result.right.name).toBe(validJobBoardData.name);
 			}
 		});
 
@@ -222,36 +248,44 @@ describe("InMemoryJobBoardRepository", () => {
 			const repository = createInMemoryJobBoardRepository();
 
 			// Create board with rootDomain matching another board's domains array
-			await repository.create({
-				name: "Root Domain Board",
-				rootDomain: "priority.com",
-				domains: ["priority.com"],
-			});
-			await repository.create({
-				name: "Domains Array Board",
-				rootDomain: "other.com",
-				domains: ["other.com", "priority.com"],
-			});
+			await run(
+				repository.create({
+					name: "Root Domain Board",
+					rootDomain: "priority.com",
+					domains: ["priority.com"],
+				}),
+			);
+			await run(
+				repository.create({
+					name: "Domains Array Board",
+					rootDomain: "other.com",
+					domains: ["other.com", "priority.com"],
+				}),
+			);
 
-			const result = await repository.findByDomain("priority.com");
+			const result = await run(
+				repository.findByDomain("priority.com"),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				assertDefined(result.value);
-				expect(result.value.name).toBe("Root Domain Board");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				assertDefined(result.right);
+				expect(result.right.name).toBe("Root Domain Board");
 			}
 		});
 
 		it("should return null for non-existent domain", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			await repository.create(validJobBoardData);
+			await run(repository.create(validJobBoardData));
 
-			const result = await repository.findByDomain("nonexistent.com");
+			const result = await run(
+				repository.findByDomain("nonexistent.com"),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toBeNull();
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toBeNull();
 			}
 		});
 	});
@@ -260,29 +294,32 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should delete existing job board", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(
+				repository.create(validJobBoardData),
+			);
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const board = createResult.value;
-				const deleteResult = await repository.delete(board.id);
+			if (Either.isRight(createResult)) {
+				const board = createResult.right;
+				const deleteResult = await run(repository.delete(board.id));
 
-				expect(deleteResult.isOk()).toBe(true);
+				expect(Either.isRight(deleteResult)).toBe(true);
 
 				// Verify it's actually deleted
-				const getResult = await repository.getById(board.id);
-				expect(getResult.isErr()).toBe(true);
+				const getResult = await run(repository.getById(board.id));
+				expect(Either.isLeft(getResult)).toBe(true);
 			}
 		});
 
 		it("should not error when deleting non-existent ID", async () => {
 			const repository = createInMemoryJobBoardRepository();
-			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
+			const nonExistentId =
+				"123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await repository.delete(nonExistentId);
+			const result = await run(repository.delete(nonExistentId));
 
 			// Map.delete returns void regardless of whether key existed
-			expect(result.isOk()).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
 		});
 	});
 
@@ -290,9 +327,9 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should return success", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const result = await repository.seedCommonBoards();
+			const result = await run(repository.seedCommonBoards());
 
-			expect(result.isOk()).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
 		});
 	});
 
@@ -301,17 +338,17 @@ describe("InMemoryJobBoardRepository", () => {
 			const repository1 = createInMemoryJobBoardRepository();
 			const repository2 = createInMemoryJobBoardRepository();
 
-			await repository1.create(validJobBoardData);
+			await run(repository1.create(validJobBoardData));
 
-			const result1 = await repository1.getAll();
-			const result2 = await repository2.getAll();
+			const result1 = await run(repository1.getAll());
+			const result2 = await run(repository2.getAll());
 
-			expect(result1.isOk()).toBe(true);
-			expect(result2.isOk()).toBe(true);
+			expect(Either.isRight(result1)).toBe(true);
+			expect(Either.isRight(result2)).toBe(true);
 
-			if (result1.isOk() && result2.isOk()) {
-				expect(result1.value.length).toBe(1);
-				expect(result2.value.length).toBe(0);
+			if (Either.isRight(result1) && Either.isRight(result2)) {
+				expect(result1.right.length).toBe(1);
+				expect(result2.right.length).toBe(0);
 			}
 		});
 	});

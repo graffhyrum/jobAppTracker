@@ -1,5 +1,6 @@
-import { errAsync, okAsync, type ResultAsync } from "neverthrow";
+import { Effect, Either } from "effect";
 
+import { JobBoardError } from "#src/domain/entities/job-board-error.ts";
 import type {
 	JobBoard,
 	JobBoardForCreate,
@@ -14,59 +15,73 @@ export function createInMemoryJobBoardRepository(
 	const boards = new Map<JobBoardId, JobBoard>();
 
 	return {
-		create(data: JobBoardForCreate): ResultAsync<JobBoard, string> {
+		create(
+			data: JobBoardForCreate,
+		): Effect.Effect<JobBoard, JobBoardError> {
 			const result = createJobBoard(data, generateUUID);
-			if (result.isErr()) {
-				return errAsync(`Failed to create job board: ${result.error.message}`);
+			if (Either.isLeft(result)) {
+				return Effect.fail(
+					new JobBoardError({
+						detail: `Failed to create job board: ${result.left.detail}`,
+						operation: "create",
+					}),
+				);
 			}
-			const board = result.value;
+			const board = result.right;
 			boards.set(board.id, board);
-			return okAsync(board);
+			return Effect.succeed(board);
 		},
 
-		getById(id: JobBoardId): ResultAsync<JobBoard, string> {
+		getById(id: JobBoardId): Effect.Effect<JobBoard, JobBoardError> {
 			const board = boards.get(id);
 			if (!board) {
-				return errAsync(`Job board with id ${id} not found`);
+				return Effect.fail(
+					new JobBoardError({
+						detail: `Job board with id ${id} not found`,
+						operation: "getById",
+					}),
+				);
 			}
-			return okAsync(board);
+			return Effect.succeed(board);
 		},
 
-		getAll(): ResultAsync<JobBoard[], string> {
+		getAll(): Effect.Effect<JobBoard[], JobBoardError> {
 			// Sort by name like SQLite implementation
 			const sorted = Array.from(boards.values()).sort((a, b) =>
 				a.name.localeCompare(b.name),
 			);
-			return okAsync(sorted);
+			return Effect.succeed(sorted);
 		},
 
-		findByDomain(domain: string): ResultAsync<JobBoard | null, string> {
+		findByDomain(
+			domain: string,
+		): Effect.Effect<JobBoard | null, JobBoardError> {
 			// Search by rootDomain first
 			for (const board of boards.values()) {
 				if (board.rootDomain === domain) {
-					return okAsync(board);
+					return Effect.succeed(board);
 				}
 			}
 
 			// Then search in domains array
 			for (const board of boards.values()) {
 				if (board.domains.includes(domain)) {
-					return okAsync(board);
+					return Effect.succeed(board);
 				}
 			}
 
-			return okAsync(null);
+			return Effect.succeed(null);
 		},
 
-		delete(id: JobBoardId): ResultAsync<void, string> {
+		delete(id: JobBoardId): Effect.Effect<void, JobBoardError> {
 			boards.delete(id);
-			return okAsync(undefined);
+			return Effect.succeed(undefined);
 		},
 
-		seedCommonBoards(): ResultAsync<void, string> {
+		seedCommonBoards(): Effect.Effect<void, JobBoardError> {
 			// For tests, seeding is optional - just return success
 			// If needed, can implement using COMMON_JOB_BOARDS
-			return okAsync(undefined);
+			return Effect.succeed(undefined);
 		},
 	};
 }

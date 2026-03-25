@@ -13,6 +13,9 @@
 import { join } from "node:path";
 
 import { ArkErrors } from "arktype";
+import { Effect, Either } from "effect";
+
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 
 import {
 	type BaseDataJobApplication,
@@ -104,12 +107,12 @@ async function findDuplicateApplication(
 	positionTitle: string,
 	jobAppManager: JobApplicationManager,
 ): Promise<string | null> {
-	const allAppsResult = await jobAppManager.getAllJobApplications();
-	if (allAppsResult.isErr()) {
+	const allAppsResult = await runEffect(jobAppManager.getAllJobApplications());
+	if (Either.isLeft(allAppsResult)) {
 		return null;
 	}
 
-	const existingApp = allAppsResult.value.find(
+	const existingApp = allAppsResult.right.find(
 		(app) =>
 			app.company.toLowerCase().trim() === company.toLowerCase().trim() &&
 			app.positionTitle.toLowerCase().trim() ===
@@ -235,10 +238,12 @@ async function findOrCreateJobBoard(
 	}
 
 	const rootDomain = baseDataJobBoard.root_domain;
-	const findResult = await jobBoardRepo.findByDomain(rootDomain);
+	const findResult = await Effect.runPromise(
+		Effect.either(jobBoardRepo.findByDomain(rootDomain)),
+	);
 
-	if (findResult.isOk() && findResult.value) {
-		return findResult.value.id;
+	if (Either.isRight(findResult) && findResult.right) {
+		return findResult.right.id;
 	}
 
 	const jobBoardData: JobBoardForCreate = {
@@ -247,8 +252,10 @@ async function findOrCreateJobBoard(
 		domains: baseDataJobBoard.domains,
 	};
 
-	const createResult = await jobBoardRepo.create(jobBoardData);
-	return createResult.isOk() ? createResult.value.id : null;
+	const createResult = await Effect.runPromise(
+		Effect.either(jobBoardRepo.create(jobBoardData)),
+	);
+	return Either.isRight(createResult) ? createResult.right.id : null;
 }
 
 // Transform BaseData data to application format
@@ -440,14 +447,18 @@ async function updateJobApplicationStatus(
 		baseDataStatus,
 	];
 
-	const updateResult = await jobAppManager.updateJobApplication(jobAppId, {
-		statusLog: [correctStatusLog],
-	});
+	const updateResult = await runEffect(
+		jobAppManager.updateJobApplication(jobAppId, {
+			statusLog: [correctStatusLog],
+		}),
+	);
 
-	if (updateResult.isOk()) {
+	if (Either.isRight(updateResult)) {
 		console.log(`  ✅ Updated status log to: ${baseDataStatus.label}`);
 	} else {
-		console.warn(`  ⚠️  Failed to update status log: ${updateResult.error}`);
+		console.warn(
+			`  ⚠️  Failed to update status log: ${updateResult.left.detail}`,
+		);
 	}
 }
 
@@ -461,11 +472,13 @@ async function createContacts(
 			...contactData,
 			jobApplicationId: jobAppId,
 		};
-		const contactResult = await contactRepo.create(contactForCreate);
-		if (contactResult.isErr()) {
-			console.warn(`  ⚠️  Failed to create contact: ${contactResult.error}`);
+		const contactResult = await Effect.runPromise(
+			Effect.either(contactRepo.create(contactForCreate)),
+		);
+		if (Either.isLeft(contactResult)) {
+			console.warn(`  Failed to create contact: ${contactResult.left.detail}`);
 		} else {
-			console.log(`  ✅ Created contact: ${contactResult.value.id}`);
+			console.log(`  Created contact: ${contactResult.right.id}`);
 		}
 	}
 }
@@ -485,13 +498,13 @@ async function createInterviewStages(
 				answer: q.answer,
 			})),
 		};
-		const stageResult = await interviewStageRepo.create(stageForCreate);
-		if (stageResult.isErr()) {
+		const stageResult = await runEffect(interviewStageRepo.create(stageForCreate));
+		if (Either.isLeft(stageResult)) {
 			console.warn(
-				`  ⚠️  Failed to create interview stage: ${stageResult.error}`,
+				`  ⚠️  Failed to create interview stage: ${stageResult.left.detail}`,
 			);
 		} else {
-			console.log(`  ✅ Created interview stage: ${stageResult.value.id}`);
+			console.log(`  ✅ Created interview stage: ${stageResult.right.id}`);
 		}
 	}
 }
@@ -521,15 +534,17 @@ async function processApplication(
 
 	const transformed = await transformBaseDataApplication(baseDataApp, repos);
 
-	const createResult = await jobAppManager.createJobApplication(
-		transformed.jobApp,
+	const createResult = await runEffect(
+		jobAppManager.createJobApplication(transformed.jobApp),
 	);
 
-	if (createResult.isErr()) {
-		throw new Error(`Failed to create job application: ${createResult.error}`);
+	if (Either.isLeft(createResult)) {
+		throw new Error(
+			`Failed to create job application: ${createResult.left.detail}`,
+		);
 	}
 
-	const jobApp = createResult.value;
+	const jobApp = createResult.right;
 	console.log(`  ✅ Created job application: ${jobApp.id}`);
 
 	await updateJobApplicationStatus(jobAppManager, jobApp.id, baseDataApp);
