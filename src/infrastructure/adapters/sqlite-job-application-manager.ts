@@ -170,8 +170,7 @@ export function createSQLiteJobAppManager(db: Database): JobApplicationManager {
 								(updated.jobDescription as string | undefined) ?? null,
 							$sourceType: updated.sourceType as string,
 							$jobBoardId: (updated.jobBoardId as string | undefined) ?? null,
-							$sourceNotes:
-								(updated.sourceNotes as string | undefined) ?? null,
+							$sourceNotes: (updated.sourceNotes as string | undefined) ?? null,
 							$isRemote: (updated.isRemote as boolean) ? 1 : 0,
 							$updatedAt: updated.updatedAt as string,
 							$notes:
@@ -257,10 +256,7 @@ export function createSQLiteJobAppManager(db: Database): JobApplicationManager {
 			}).pipe(Effect.flatMap(parseJobAppArray));
 		},
 
-		clearAllJobApplications: (): Effect.Effect<
-			void,
-			JobApplicationError
-		> => {
+		clearAllJobApplications: (): Effect.Effect<void, JobApplicationError> => {
 			return Effect.tryPromise({
 				try: () =>
 					Promise.resolve().then(() => {

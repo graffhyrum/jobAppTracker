@@ -1,4 +1,5 @@
 import { Either } from "effect";
+
 import {
 	getJobAppCurrentStatusEntry,
 	type JobApplication,

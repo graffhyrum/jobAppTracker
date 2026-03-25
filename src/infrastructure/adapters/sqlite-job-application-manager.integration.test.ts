@@ -3,16 +3,16 @@ import { describe, expect, it } from "bun:test";
 import { Effect, Either } from "effect";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
+import type { ForUpdate } from "#src/domain/ports/common-types.ts";
 
+import { runEffect } from "../../application/server/utils/run-effect.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
 	JobApplicationId,
 } from "../../domain/entities/job-application.ts";
 import type { JobApplicationManager } from "../../domain/ports/job-application-manager.ts";
-import { runEffect } from "../../application/server/utils/run-effect.ts";
 import { jobAppManagerRegistry } from "../sqlite/sqlite-registry.ts";
-import type { ForUpdate } from "#src/domain/ports/common-types.ts";
 
 // Get the test manager for testing
 const jobApplicationManager = jobAppManagerRegistry.getManager("test");
@@ -70,9 +70,9 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 	describe("createJobApplication", () => {
 		it("should successfully create application with valid data", async () => {
 			const manager = createTestManager();
-			const result = await runEffect(manager.createJobApplication(
-				validJobApplicationData,
-			));
+			const result = await runEffect(
+				manager.createJobApplication(validJobApplicationData),
+			);
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -97,9 +97,11 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 
 		it("should handle validation errors for invalid input data", async () => {
 			const manager = createTestManager();
-			const result = await runEffect(manager.createJobApplication(
-				invalidJobApplicationData as JobApplicationForCreate,
-			));
+			const result = await runEffect(
+				manager.createJobApplication(
+					invalidJobApplicationData as JobApplicationForCreate,
+				),
+			);
 
 			expect(Either.isLeft(result)).toBe(true);
 			if (Either.isLeft(result)) {
@@ -114,16 +116,18 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// First, create an application
-			const createResult = await runEffect(manager.createJobApplication(
-				validJobApplicationData,
-			));
+			const createResult = await runEffect(
+				manager.createJobApplication(validJobApplicationData),
+			);
 			expect(Either.isRight(createResult)).toBe(true);
 
 			if (Either.isRight(createResult)) {
 				const createdApp = createResult.right;
 
 				// Then retrieve it using the same manager instance
-				const getResult = await runEffect(manager.getJobApplication(createdApp.id));
+				const getResult = await runEffect(
+					manager.getJobApplication(createdApp.id),
+				);
 
 				expect(Either.isRight(getResult)).toBe(true);
 
@@ -174,11 +178,15 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			await Effect.runPromise(manager.clearAllJobApplications());
 
 			// Create two applications
-			await Effect.runPromise(manager.createJobApplication(validJobApplicationData));
-			await Effect.runPromise(manager.createJobApplication({
-				...validJobApplicationData,
-				company: "Another Company",
-			}));
+			await Effect.runPromise(
+				manager.createJobApplication(validJobApplicationData),
+			);
+			await Effect.runPromise(
+				manager.createJobApplication({
+					...validJobApplicationData,
+					company: "Another Company",
+				}),
+			);
 
 			const getAllResult = await runEffect(manager.getAllJobApplications());
 
@@ -194,19 +202,18 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// First, create an application
-			const createResult = await runEffect(manager.createJobApplication(
-				validJobApplicationData,
-			));
+			const createResult = await runEffect(
+				manager.createJobApplication(validJobApplicationData),
+			);
 			expect(Either.isRight(createResult)).toBe(true);
 
 			if (Either.isRight(createResult)) {
 				const createdApp = createResult.right;
 
 				// Update the application
-				const updateResult = await runEffect(manager.updateJobApplication(
-					createdApp.id,
-					validUpdateData,
-				));
+				const updateResult = await runEffect(
+					manager.updateJobApplication(createdApp.id, validUpdateData),
+				);
 
 				expect(Either.isRight(updateResult)).toBe(true);
 				if (Either.isRight(updateResult)) {
@@ -227,10 +234,9 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 			const fakeId = "123e4567-e89b-12d3-a456-426614174000" as JobApplicationId;
 
-			const result = await runEffect(manager.updateJobApplication(
-				fakeId,
-				validUpdateData,
-			));
+			const result = await runEffect(
+				manager.updateJobApplication(fakeId, validUpdateData),
+			);
 
 			expect(Either.isLeft(result)).toBe(true);
 			if (Either.isLeft(result)) {
@@ -245,16 +251,18 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// First, create an application
-			const createResult = await runEffect(manager.createJobApplication(
-				validJobApplicationData,
-			));
+			const createResult = await runEffect(
+				manager.createJobApplication(validJobApplicationData),
+			);
 			expect(Either.isRight(createResult)).toBe(true);
 
 			if (Either.isRight(createResult)) {
 				const createdApp = createResult.right;
 
 				// Delete the application
-				const deleteResult = await runEffect(manager.deleteJobApplication(createdApp.id));
+				const deleteResult = await runEffect(
+					manager.deleteJobApplication(createdApp.id),
+				);
 
 				expect(Either.isRight(deleteResult)).toBe(true);
 				if (Either.isRight(deleteResult)) {
@@ -262,7 +270,9 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 				}
 
 				// Verify it's actually deleted by trying to retrieve it
-				const getResult = await runEffect(manager.getJobApplication(createdApp.id));
+				const getResult = await runEffect(
+					manager.getJobApplication(createdApp.id),
+				);
 				expect(Either.isLeft(getResult)).toBe(true);
 			}
 		});
@@ -328,10 +338,12 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 
 			// Create some applications
 			await runEffect(manager.createJobApplication(validJobApplicationData));
-			await Effect.runPromise(manager.createJobApplication({
-				...validJobApplicationData,
-				company: "Another Company",
-			}));
+			await Effect.runPromise(
+				manager.createJobApplication({
+					...validJobApplicationData,
+					company: "Another Company",
+				}),
+			);
 
 			// Clear all
 			const clearResult = await runEffect(manager.clearAllJobApplications());

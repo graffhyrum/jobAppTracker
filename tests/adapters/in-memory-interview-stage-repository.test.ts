@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { Either } from "effect";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
@@ -78,7 +79,9 @@ describe("InMemoryInterviewStageRepository", () => {
 
 			expect(Either.isLeft(result)).toBe(true);
 			if (Either.isLeft(result)) {
-				expect(result.left.detail).toContain("Failed to create interview stage");
+				expect(result.left.detail).toContain(
+					"Failed to create interview stage",
+				);
 			}
 		});
 

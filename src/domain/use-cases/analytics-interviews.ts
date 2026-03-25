@@ -1,4 +1,5 @@
 import { Either } from "effect";
+
 import type {
 	InterviewStage,
 	InterviewType,
@@ -97,6 +98,22 @@ export function computeInterviewAnalytics(
 		interviewCompletionRate: computeInterviewCompletionRate(interviewStages),
 	};
 }
+function computeAverageDaysToFirstInterview(
+	applications: JobApplication[],
+	interviewsByApp: Map<string, InterviewStage[]>,
+): number {
+	return computeAverage(
+		collectDaysToFirstInterview(applications, interviewsByApp),
+	);
+}
+function computeMedianDaysToFirstInterview(
+	applications: JobApplication[],
+	interviewsByApp: Map<string, InterviewStage[]>,
+): number {
+	return computeMedian(
+		collectDaysToFirstInterview(applications, interviewsByApp),
+	);
+}
 function computeAverageDaysBetweenRounds(
 	interviewsByApp: Map<string, InterviewStage[]>,
 ): number {
@@ -137,18 +154,6 @@ function collectDaysToFirstInterview(
 		}
 	}
 	return days;
-}
-function computeMedianDaysToFirstInterview(
-	applications: JobApplication[],
-	interviewsByApp: Map<string, InterviewStage[]>,
-): number {
-	return computeMedian(collectDaysToFirstInterview(applications, interviewsByApp));
-}
-function computeAverageDaysToFirstInterview(
-	applications: JobApplication[],
-	interviewsByApp: Map<string, InterviewStage[]>,
-): number {
-	return computeAverage(collectDaysToFirstInterview(applications, interviewsByApp));
 }
 function computeRoundsToOffer(
 	applications: JobApplication[],
@@ -199,7 +204,10 @@ function computeInterviewConversionRate(
 		if (interviews.length > 0) {
 			appsWithInterviews++;
 			const statusResult = getCurrentStatus(app);
-			if (Either.isRight(statusResult) && statusResult.right.label === "offer") {
+			if (
+				Either.isRight(statusResult) &&
+				statusResult.right.label === "offer"
+			) {
 				offersWithInterviews++;
 			}
 		}

@@ -46,9 +46,7 @@ test.describe("Application table sorting - column name validation", () => {
 		},
 		page,
 	}) => {
-		await page.goto(
-			"/?sortColumn=lastUpdated&sortDirection=asc",
-		);
+		await page.goto("/?sortColumn=lastUpdated&sortDirection=asc");
 
 		await pipelineTable.assertions.tableIsVisible();
 	});
@@ -59,9 +57,7 @@ test.describe("Application table sorting - column name validation", () => {
 		},
 		page,
 	}) => {
-		await page.goto(
-			"/?sortColumn=position&sortDirection=asc",
-		);
+		await page.goto("/?sortColumn=position&sortDirection=asc");
 
 		await pipelineTable.assertions.tableIsVisible();
 	});

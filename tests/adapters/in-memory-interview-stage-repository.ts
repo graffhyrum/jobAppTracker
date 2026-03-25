@@ -11,8 +11,8 @@ import {
 	updateInterviewStage,
 } from "#src/domain/entities/interview-stage.ts";
 import type { JobApplicationId } from "#src/domain/entities/job-application.ts";
-import type { InterviewStageRepository } from "#src/domain/ports/interview-stage-repository.ts";
 import type { ForUpdate } from "#src/domain/ports/common-types.ts";
+import type { InterviewStageRepository } from "#src/domain/ports/interview-stage-repository.ts";
 
 export function createInMemoryInterviewStageRepository(
 	generateUUID: () => string = () => crypto.randomUUID(),
@@ -84,9 +84,7 @@ export function createInMemoryInterviewStageRepository(
 			return Effect.succeed(updated);
 		},
 
-		delete(
-			id: InterviewStageId,
-		): Effect.Effect<void, InterviewStageError> {
+		delete(id: InterviewStageId): Effect.Effect<void, InterviewStageError> {
 			stages.delete(id);
 			return Effect.succeed(undefined);
 		},

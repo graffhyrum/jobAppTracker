@@ -1,10 +1,11 @@
 import { describe, expect, it } from "bun:test";
+
 import { Effect, Either } from "effect";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
 
-import { runEffect } from "../../application/server/utils/run-effect.ts";
 import { createInMemoryJobApplicationManager } from "../../../tests/adapters/in-memory-job-application-manager.ts";
+import { runEffect } from "../../application/server/utils/run-effect.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
@@ -142,9 +143,7 @@ describe("JobApplicationManager (Unit Tests)", () => {
 			const manager = createInMemoryJobApplicationManager();
 			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
-			const result = await runEffect(
-				manager.getJobApplication(nonExistentId),
-			);
+			const result = await runEffect(manager.getJobApplication(nonExistentId));
 
 			expect(Either.isLeft(result)).toBe(true);
 			if (Either.isLeft(result)) {
@@ -293,9 +292,7 @@ describe("JobApplicationManager (Unit Tests)", () => {
 
 			expect(Either.isRight(createResult)).toBe(true);
 			if (Either.isRight(createResult)) {
-				const result = await runEffect(
-					manager.getActiveJobApplications(),
-				);
+				const result = await runEffect(manager.getActiveJobApplications());
 
 				expect(Either.isRight(result)).toBe(true);
 				if (Either.isRight(result)) {
@@ -330,9 +327,7 @@ describe("JobApplicationManager (Unit Tests)", () => {
 					}),
 				);
 
-				const result = await runEffect(
-					manager.getActiveJobApplications(),
-				);
+				const result = await runEffect(manager.getActiveJobApplications());
 
 				expect(Either.isRight(result)).toBe(true);
 				if (Either.isRight(result)) {
@@ -343,9 +338,7 @@ describe("JobApplicationManager (Unit Tests)", () => {
 
 		it("should return empty array when no active applications", async () => {
 			const manager = createInMemoryJobApplicationManager();
-			const result = await runEffect(
-				manager.getActiveJobApplications(),
-			);
+			const result = await runEffect(manager.getActiveJobApplications());
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -377,9 +370,7 @@ describe("JobApplicationManager (Unit Tests)", () => {
 					}),
 				);
 
-				const result = await runEffect(
-					manager.getInactiveJobApplications(),
-				);
+				const result = await runEffect(manager.getInactiveJobApplications());
 
 				expect(Either.isRight(result)).toBe(true);
 				if (Either.isRight(result)) {
@@ -393,9 +384,7 @@ describe("JobApplicationManager (Unit Tests)", () => {
 
 		it("should return empty array when no inactive applications", async () => {
 			const manager = createInMemoryJobApplicationManager();
-			const result = await runEffect(
-				manager.getInactiveJobApplications(),
-			);
+			const result = await runEffect(manager.getInactiveJobApplications());
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -418,14 +407,10 @@ describe("JobApplicationManager (Unit Tests)", () => {
 				}),
 			);
 
-			const clearResult = await runEffect(
-				manager.clearAllJobApplications(),
-			);
+			const clearResult = await runEffect(manager.clearAllJobApplications());
 			expect(Either.isRight(clearResult)).toBe(true);
 
-			const getAllResult = await runEffect(
-				manager.getAllJobApplications(),
-			);
+			const getAllResult = await runEffect(manager.getAllJobApplications());
 			expect(Either.isRight(getAllResult)).toBe(true);
 			if (Either.isRight(getAllResult)) {
 				expect(getAllResult.right).toEqual([]);
@@ -434,9 +419,7 @@ describe("JobApplicationManager (Unit Tests)", () => {
 
 		it("should not error on empty state", async () => {
 			const manager = createInMemoryJobApplicationManager();
-			const result = await runEffect(
-				manager.clearAllJobApplications(),
-			);
+			const result = await runEffect(manager.clearAllJobApplications());
 
 			expect(Either.isRight(result)).toBe(true);
 		});

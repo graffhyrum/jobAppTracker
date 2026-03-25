@@ -18,10 +18,7 @@ export interface JobApplicationManager {
 		id: JobApplicationId,
 	): Effect.Effect<JobApplication, JobApplicationError>;
 
-	getAllJobApplications(): Effect.Effect<
-		JobApplication[],
-		JobApplicationError
-	>;
+	getAllJobApplications(): Effect.Effect<JobApplication[], JobApplicationError>;
 
 	updateJobApplication(
 		id: UUID,

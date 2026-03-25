@@ -16,8 +16,9 @@ export const createPipelinePlugin = new Elysia({ prefix: "/api" })
 			const sortDirection = query.sortDirection;
 
 			// Fetch fresh applications data
-			const applicationsResult =
-				await runEffect(jobApplicationManager.getAllJobApplications());
+			const applicationsResult = await runEffect(
+				jobApplicationManager.getAllJobApplications(),
+			);
 			const applications = Either.isRight(applicationsResult)
 				? applicationsResult.right
 				: [];

@@ -4,9 +4,9 @@ import { type } from "arktype";
 import { Effect, Either } from "effect";
 import { Elysia } from "elysia";
 
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 import { jobAppManagerRegistry } from "#src/infrastructure/sqlite/sqlite-registry.ts";
-import { runEffect } from "#src/application/server/utils/run-effect.ts";
 
 // Get the test manager for testing
 const jobApplicationManager = jobAppManagerRegistry.getManager("test");
@@ -87,9 +87,7 @@ const createTestExtensionApiPlugin = new Elysia({ prefix: "/api" })
 
 						// Create the application
 						const result = await runEffect(
-							jobApplicationManager.createJobApplication(
-								validationResult,
-							),
+							jobApplicationManager.createJobApplication(validationResult),
 						);
 
 						if (Either.isLeft(result)) {
@@ -287,7 +285,9 @@ describe("Extension API Plugin", () => {
 			expect(data.success).toBe(true);
 
 			// Verify the application was created with "applied" status
-			const getResult = await runEffect(jobApplicationManager.getJobApplication(data.id));
+			const getResult = await runEffect(
+				jobApplicationManager.getJobApplication(data.id),
+			);
 			if (Either.isRight(getResult)) {
 				const statusLog = getResult.right.statusLog;
 				expect(statusLog.length).toBeGreaterThan(0);
@@ -325,7 +325,9 @@ describe("Extension API Plugin", () => {
 			expect(data.id).toBeDefined();
 
 			// Verify the application was actually created with correct data
-			const getResult = await runEffect(jobApplicationManager.getJobApplication(data.id));
+			const getResult = await runEffect(
+				jobApplicationManager.getJobApplication(data.id),
+			);
 			expect(Either.isRight(getResult)).toBe(true);
 
 			if (Either.isRight(getResult)) {
@@ -471,9 +473,9 @@ describe("Extension API Plugin", () => {
 			const result = await response.json();
 			expect(response.status).toBe(201);
 
-			const getResult = await runEffect(jobApplicationManager.getJobApplication(
-				result.id,
-			));
+			const getResult = await runEffect(
+				jobApplicationManager.getJobApplication(result.id),
+			);
 			if (Either.isRight(getResult)) {
 				expect(getResult.right.company).toBe("Tech Co. & Partners, Inc.");
 				expect(getResult.right.positionTitle).toBe(
@@ -529,9 +531,9 @@ describe("Extension API Plugin", () => {
 			const result = await response.json();
 			expect(response.status).toBe(201);
 
-			const getResult = await runEffect(jobApplicationManager.getJobApplication(
-				result.id,
-			));
+			const getResult = await runEffect(
+				jobApplicationManager.getJobApplication(result.id),
+			);
 			if (Either.isRight(getResult)) {
 				expect(getResult.right.jobPostingUrl).toContain("id=12345");
 				expect(getResult.right.jobPostingUrl).toContain("source=linkedin");
@@ -580,7 +582,9 @@ describe("Extension API Plugin", () => {
 			}
 
 			// Verify all were created
-			const allApps = await runEffect(jobApplicationManager.getAllJobApplications());
+			const allApps = await runEffect(
+				jobApplicationManager.getAllJobApplications(),
+			);
 			if (Either.isRight(allApps)) {
 				expect(allApps.right.length).toBeGreaterThanOrEqual(5);
 			}

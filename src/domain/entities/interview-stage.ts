@@ -56,7 +56,12 @@ export function createInterviewStage(
 		updatedAt: now,
 	});
 	if (stage instanceof ArkErrors) {
-		return Either.left(new InterviewStageError({ detail: stage.summary, operation: "createInterviewStage" }));
+		return Either.left(
+			new InterviewStageError({
+				detail: stage.summary,
+				operation: "createInterviewStage",
+			}),
+		);
 	}
 	return Either.right(stage);
 }

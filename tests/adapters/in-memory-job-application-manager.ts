@@ -11,8 +11,8 @@ import {
 	isActive,
 	isInactive,
 } from "#src/domain/entities/job-application.ts";
-import type { JobApplicationManager } from "#src/domain/ports/job-application-manager.ts";
 import type { ForUpdate } from "#src/domain/ports/common-types.ts";
+import type { JobApplicationManager } from "#src/domain/ports/job-application-manager.ts";
 
 export function createInMemoryJobApplicationManager(
 	generateUUID: () => string = () => crypto.randomUUID(),

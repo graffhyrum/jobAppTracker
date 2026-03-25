@@ -3,6 +3,7 @@ import type { Database } from "bun:sqlite";
 import { ArkErrors } from "arktype";
 import { Effect, Either } from "effect";
 
+import { JobBoardError } from "../../domain/entities/job-board-error.ts";
 import type {
 	JobBoard,
 	JobBoardForCreate,
@@ -13,7 +14,6 @@ import {
 	createJobBoard,
 	jobBoardModule,
 } from "../../domain/entities/job-board.ts";
-import { JobBoardError } from "../../domain/entities/job-board-error.ts";
 import type { JobBoardRepository } from "../../domain/ports/job-board-repository.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
 import { normalizeJobBoardRow } from "../sqlite/normalize-sqlite-row.ts";
@@ -22,9 +22,7 @@ export function createSQLiteJobBoardRepository(
 	db: Database,
 ): JobBoardRepository {
 	return {
-		create(
-			data: JobBoardForCreate,
-		): Effect.Effect<JobBoard, JobBoardError> {
+		create(data: JobBoardForCreate): Effect.Effect<JobBoard, JobBoardError> {
 			const jobBoardResult = createJobBoard(data, uuidProvider.generateUUID);
 			if (Either.isLeft(jobBoardResult)) {
 				return Effect.fail(
@@ -67,9 +65,7 @@ export function createSQLiteJobBoardRepository(
 			return Effect.tryPromise({
 				try: () =>
 					Promise.resolve().then(() => {
-						const query = db.prepare(
-							"SELECT * FROM job_boards WHERE id = $id",
-						);
+						const query = db.prepare("SELECT * FROM job_boards WHERE id = $id");
 						const result = query.get({ $id: id });
 						if (!result) {
 							throw new Error(`Job board with id ${id} not found`);
@@ -155,9 +151,7 @@ export function createSQLiteJobBoardRepository(
 			return Effect.tryPromise({
 				try: () =>
 					Promise.resolve().then(() => {
-						const query = db.prepare(
-							"DELETE FROM job_boards WHERE id = $id",
-						);
+						const query = db.prepare("DELETE FROM job_boards WHERE id = $id");
 						query.run({ $id: id });
 					}),
 				catch: (err) =>

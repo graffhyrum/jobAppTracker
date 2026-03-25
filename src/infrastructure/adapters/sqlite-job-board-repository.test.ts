@@ -273,9 +273,7 @@ describe("SQLiteJobBoardRepository", () => {
 			const createResult = await run(repository.create(validJobBoardData));
 			expect(Either.isRight(createResult)).toBe(true);
 
-			const result = await run(
-				repository.findByDomain("www.testboard.com"),
-			);
+			const result = await run(repository.findByDomain("www.testboard.com"));
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -290,9 +288,7 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should return null when domain not found", async () => {
 			await clearJobBoards();
 
-			const result = await run(
-				repository.findByDomain("nonexistent.com"),
-			);
+			const result = await run(repository.findByDomain("nonexistent.com"));
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {

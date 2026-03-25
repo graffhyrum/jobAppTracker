@@ -3,6 +3,7 @@ import { describe, expect, it } from "bun:test";
 import { Effect, Either } from "effect";
 
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
+
 import { jobAppManagerRegistry } from "../../infrastructure/sqlite/sqlite-registry.ts";
 
 describe("JobAppManagerRegistry", () => {
@@ -55,14 +56,16 @@ describe("JobAppManagerRegistry", () => {
 
 		// Clear test database and create a test application
 		await Effect.runPromise(testManager.clearAllJobApplications());
-		const testAppResult = await runEffect(testManager.createJobApplication({
-			company: "Test Company",
-			positionTitle: "Test Position",
-			applicationDate: new Date().toISOString(),
-			interestRating: 3,
-			sourceType: "company_website",
-			isRemote: false,
-		}));
+		const testAppResult = await runEffect(
+			testManager.createJobApplication({
+				company: "Test Company",
+				positionTitle: "Test Position",
+				applicationDate: new Date().toISOString(),
+				interestRating: 3,
+				sourceType: "company_website",
+				isRemote: false,
+			}),
+		);
 
 		expect(Either.isRight(testAppResult)).toBe(true);
 

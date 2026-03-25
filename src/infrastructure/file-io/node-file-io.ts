@@ -19,7 +19,11 @@ export function createNodeFileIO(): FileIO {
 				}
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "exists", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "exists",
+					path: filePath,
+				}),
 		});
 	}
 
@@ -30,7 +34,11 @@ export function createNodeFileIO(): FileIO {
 				return await fs.promises.readFile(filePath, "utf8");
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "readText", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "readText",
+					path: filePath,
+				}),
 		});
 	}
 
@@ -44,7 +52,11 @@ export function createNodeFileIO(): FileIO {
 				await fs.promises.writeFile(filePath, content, "utf8");
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "writeText", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "writeText",
+					path: filePath,
+				}),
 		});
 	}
 
@@ -55,7 +67,11 @@ export function createNodeFileIO(): FileIO {
 				await fs.promises.mkdir(dirPath, { recursive: true });
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "ensureDir", path: dirPath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "ensureDir",
+					path: dirPath,
+				}),
 		});
 	}
 
@@ -66,7 +82,11 @@ export function createNodeFileIO(): FileIO {
 				await fs.promises.mkdir(dirPath, { recursive: true });
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "createDir", path: dirPath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "createDir",
+					path: dirPath,
+				}),
 		});
 	}
 
@@ -77,7 +97,11 @@ export function createNodeFileIO(): FileIO {
 				await fs.promises.unlink(filePath);
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "deleteFile", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "deleteFile",
+					path: filePath,
+				}),
 		});
 	}
 

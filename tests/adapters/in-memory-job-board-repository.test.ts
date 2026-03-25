@@ -60,9 +60,7 @@ describe("InMemoryJobBoardRepository", () => {
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
-				expect(result.right.id).toBe(
-					"123e4567-e89b-12d3-a456-000000000000",
-				);
+				expect(result.right.id).toBe("123e4567-e89b-12d3-a456-000000000000");
 			}
 		});
 
@@ -85,9 +83,7 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should persist job board in memory", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const createResult = await run(
-				repository.create(validJobBoardData),
-			);
+			const createResult = await run(repository.create(validJobBoardData));
 			expect(Either.isRight(createResult)).toBe(true);
 
 			if (Either.isRight(createResult)) {
@@ -110,9 +106,7 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should retrieve existing job board", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const createResult = await run(
-				repository.create(validJobBoardData),
-			);
+			const createResult = await run(repository.create(validJobBoardData));
 			expect(Either.isRight(createResult)).toBe(true);
 
 			if (Either.isRight(createResult)) {
@@ -129,8 +123,7 @@ describe("InMemoryJobBoardRepository", () => {
 
 		it("should return error for non-existent ID", async () => {
 			const repository = createInMemoryJobBoardRepository();
-			const nonExistentId =
-				"123e4567-e89b-12d3-a456-999999999999" as const;
+			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
 			const result = await run(repository.getById(nonExistentId));
 
@@ -217,9 +210,7 @@ describe("InMemoryJobBoardRepository", () => {
 
 			await run(repository.create(validJobBoardData));
 
-			const result = await run(
-				repository.findByDomain("testboard.com"),
-			);
+			const result = await run(repository.findByDomain("testboard.com"));
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -233,9 +224,7 @@ describe("InMemoryJobBoardRepository", () => {
 
 			await run(repository.create(validJobBoardData));
 
-			const result = await run(
-				repository.findByDomain("www.testboard.com"),
-			);
+			const result = await run(repository.findByDomain("www.testboard.com"));
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -263,9 +252,7 @@ describe("InMemoryJobBoardRepository", () => {
 				}),
 			);
 
-			const result = await run(
-				repository.findByDomain("priority.com"),
-			);
+			const result = await run(repository.findByDomain("priority.com"));
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -279,9 +266,7 @@ describe("InMemoryJobBoardRepository", () => {
 
 			await run(repository.create(validJobBoardData));
 
-			const result = await run(
-				repository.findByDomain("nonexistent.com"),
-			);
+			const result = await run(repository.findByDomain("nonexistent.com"));
 
 			expect(Either.isRight(result)).toBe(true);
 			if (Either.isRight(result)) {
@@ -294,9 +279,7 @@ describe("InMemoryJobBoardRepository", () => {
 		it("should delete existing job board", async () => {
 			const repository = createInMemoryJobBoardRepository();
 
-			const createResult = await run(
-				repository.create(validJobBoardData),
-			);
+			const createResult = await run(repository.create(validJobBoardData));
 			expect(Either.isRight(createResult)).toBe(true);
 
 			if (Either.isRight(createResult)) {
@@ -313,8 +296,7 @@ describe("InMemoryJobBoardRepository", () => {
 
 		it("should not error when deleting non-existent ID", async () => {
 			const repository = createInMemoryJobBoardRepository();
-			const nonExistentId =
-				"123e4567-e89b-12d3-a456-999999999999" as const;
+			const nonExistentId = "123e4567-e89b-12d3-a456-999999999999" as const;
 
 			const result = await run(repository.delete(nonExistentId));
 

@@ -49,7 +49,9 @@ export function createContact(
 		updatedAt: now,
 	});
 	if (contact instanceof ArkErrors) {
-		return Either.left(new ContactError({ detail: contact.summary, operation: "createContact" }));
+		return Either.left(
+			new ContactError({ detail: contact.summary, operation: "createContact" }),
+		);
 	}
 	return Either.right(contact);
 }

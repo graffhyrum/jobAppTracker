@@ -3,13 +3,13 @@ import type { Database } from "bun:sqlite";
 import { ArkErrors } from "arktype";
 import { Effect, Either } from "effect";
 
+import { ContactError } from "../../domain/entities/contact-error.ts";
 import type {
 	Contact,
 	ContactForCreate,
 	ContactId,
 } from "../../domain/entities/contact.ts";
 import { contactModule, createContact } from "../../domain/entities/contact.ts";
-import { ContactError } from "../../domain/entities/contact-error.ts";
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
 import type { ForUpdate } from "../../domain/ports/common-types.ts";
 import type { ContactRepository } from "../../domain/ports/contact-repository.ts";

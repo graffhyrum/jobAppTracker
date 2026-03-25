@@ -124,9 +124,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 	.get(
 		"/interview-stages/:id",
 		async ({ interviewStageRepository, params: { id }, set }) => {
-			const result = await runEffect(
-				interviewStageRepository.getById(id),
-			);
+			const result = await runEffect(interviewStageRepository.getById(id));
 
 			if (Either.isLeft(result)) {
 				throw new NotFoundError(`Error: ${result.left.detail}`);
@@ -136,9 +134,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 			// Return just the stage card
 			set.headers["Content-Type"] = "text/html";
 			const stagesResult = await runEffect(
-				interviewStageRepository.getByJobApplicationId(
-					stage.jobApplicationId,
-				),
+				interviewStageRepository.getByJobApplicationId(stage.jobApplicationId),
 			);
 			return Either.isRight(stagesResult)
 				? renderInterviewStagesList(stagesResult.right, stage.jobApplicationId)
@@ -153,9 +149,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 	.get(
 		"/interview-stages/:id/edit",
 		async ({ interviewStageRepository, params: { id }, set }) => {
-			const result = await runEffect(
-				interviewStageRepository.getById(id),
-			);
+			const result = await runEffect(interviewStageRepository.getById(id));
 
 			if (Either.isLeft(result)) {
 				throw new NotFoundError(`Error: ${result.left.detail}`);
@@ -225,9 +219,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 		"/interview-stages/:id",
 		async ({ interviewStageRepository, params: { id }, set }) => {
 			// Get the stage first to know the job application ID
-			const stageResult = await runEffect(
-				interviewStageRepository.getById(id),
-			);
+			const stageResult = await runEffect(interviewStageRepository.getById(id));
 			if (Either.isLeft(stageResult)) {
 				set.status = 404;
 				return `Error: ${stageResult.left.detail}`;
@@ -235,9 +227,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 
 			const jobAppId = stageResult.right.jobApplicationId;
 
-			const result = await runEffect(
-				interviewStageRepository.delete(id),
-			);
+			const result = await runEffect(interviewStageRepository.delete(id));
 			if (Either.isLeft(result)) {
 				set.status = 500;
 				return `Error: ${result.left.detail}`;

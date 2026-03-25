@@ -14,9 +14,7 @@ export interface JobBoardRepository {
 
 	getAll(): Effect.Effect<JobBoard[], JobBoardError>;
 
-	findByDomain(
-		domain: string,
-	): Effect.Effect<JobBoard | null, JobBoardError>;
+	findByDomain(domain: string): Effect.Effect<JobBoard | null, JobBoardError>;
 
 	delete(id: JobBoardId): Effect.Effect<void, JobBoardError>;
 

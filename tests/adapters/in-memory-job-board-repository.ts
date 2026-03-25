@@ -15,9 +15,7 @@ export function createInMemoryJobBoardRepository(
 	const boards = new Map<JobBoardId, JobBoard>();
 
 	return {
-		create(
-			data: JobBoardForCreate,
-		): Effect.Effect<JobBoard, JobBoardError> {
+		create(data: JobBoardForCreate): Effect.Effect<JobBoard, JobBoardError> {
 			const result = createJobBoard(data, generateUUID);
 			if (Either.isLeft(result)) {
 				return Effect.fail(

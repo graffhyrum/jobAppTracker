@@ -1,15 +1,15 @@
 import { Effect, Either } from "effect";
 
+import { ContactError } from "#src/domain/entities/contact-error.ts";
 import type {
 	Contact,
 	ContactForCreate,
 	ContactId,
 } from "#src/domain/entities/contact.ts";
 import { createContact, updateContact } from "#src/domain/entities/contact.ts";
-import { ContactError } from "#src/domain/entities/contact-error.ts";
 import type { JobApplicationId } from "#src/domain/entities/job-application.ts";
-import type { ContactRepository } from "#src/domain/ports/contact-repository.ts";
 import type { ForUpdate } from "#src/domain/ports/common-types.ts";
+import type { ContactRepository } from "#src/domain/ports/contact-repository.ts";
 
 export function createInMemoryContactRepository(
 	generateUUID: () => string = () => crypto.randomUUID(),

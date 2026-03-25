@@ -16,7 +16,6 @@ import { ArkErrors } from "arktype";
 import { Effect, Either } from "effect";
 
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
-
 import {
 	type BaseDataJobApplication,
 	baseDataModule,
@@ -498,7 +497,9 @@ async function createInterviewStages(
 				answer: q.answer,
 			})),
 		};
-		const stageResult = await runEffect(interviewStageRepo.create(stageForCreate));
+		const stageResult = await runEffect(
+			interviewStageRepo.create(stageForCreate),
+		);
 		if (Either.isLeft(stageResult)) {
 			console.warn(
 				`  ⚠️  Failed to create interview stage: ${stageResult.left.detail}`,

@@ -11,7 +11,11 @@ export function createBunFileIO(): FileIO {
 		return Effect.tryPromise({
 			try: () => Bun.file(filePath).exists(),
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "exists", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "exists",
+					path: filePath,
+				}),
 		});
 	}
 
@@ -26,7 +30,11 @@ export function createBunFileIO(): FileIO {
 				return await file.text();
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "readText", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "readText",
+					path: filePath,
+				}),
 		});
 	}
 
@@ -39,7 +47,11 @@ export function createBunFileIO(): FileIO {
 				await Bun.write(filePath, content);
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "writeText", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "writeText",
+					path: filePath,
+				}),
 		});
 	}
 
@@ -50,7 +62,11 @@ export function createBunFileIO(): FileIO {
 				await fs.promises.mkdir(dirPath, { recursive: true });
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "ensureDir", path: dirPath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "ensureDir",
+					path: dirPath,
+				}),
 		});
 	}
 
@@ -61,7 +77,11 @@ export function createBunFileIO(): FileIO {
 				await fs.promises.mkdir(dirPath, { recursive: true });
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "createDir", path: dirPath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "createDir",
+					path: dirPath,
+				}),
 		});
 	}
 
@@ -72,7 +92,11 @@ export function createBunFileIO(): FileIO {
 				await fs.promises.unlink(filePath);
 			},
 			catch: (error) =>
-				new FileIOError({ detail: String(error), operation: "deleteFile", path: filePath }),
+				new FileIOError({
+					detail: String(error),
+					operation: "deleteFile",
+					path: filePath,
+				}),
 		});
 	}
 

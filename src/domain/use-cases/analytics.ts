@@ -1,4 +1,5 @@
 import { Either } from "effect";
+
 import type {
 	ApplicationStatusLabel,
 	JobApplication,
@@ -121,7 +122,9 @@ export function computeDefaultDateRange(
 	// Filter to only active applications
 	const activeApplications = applications.filter((app) => {
 		const statusResult = getCurrentStatus(app);
-		return Either.isRight(statusResult) && statusResult.right.category === "active";
+		return (
+			Either.isRight(statusResult) && statusResult.right.category === "active"
+		);
 	});
 
 	// If no active applications, return empty range

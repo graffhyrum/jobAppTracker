@@ -77,7 +77,12 @@ export function createJobBoard(
 		createdAt: now,
 	});
 	if (jobBoard instanceof ArkErrors) {
-		return Either.left(new JobBoardError({ detail: jobBoard.summary, operation: "createJobBoard" }));
+		return Either.left(
+			new JobBoardError({
+				detail: jobBoard.summary,
+				operation: "createJobBoard",
+			}),
+		);
 	}
 	return Either.right(jobBoard);
 }

@@ -22,8 +22,9 @@ export const createPagesPlugin = (jobBoardRepo: JobBoardRepository) =>
 			"/",
 			async ({ jobApplicationManager, jobBoardRepository, set, cookie }) => {
 				// Fetch applications to show in the pipeline
-				const applicationsResult =
-					await runEffect(jobApplicationManager.getAllJobApplications());
+				const applicationsResult = await runEffect(
+					jobApplicationManager.getAllJobApplications(),
+				);
 				const applications = Either.isRight(applicationsResult)
 					? applicationsResult.right
 					: [];
@@ -37,7 +38,9 @@ export const createPagesPlugin = (jobBoardRepo: JobBoardRepository) =>
 
 				// Fetch job boards for the form
 				const jobBoardsResult = await runEffect(jobBoardRepository.getAll());
-				const jobBoards = Either.isRight(jobBoardsResult) ? jobBoardsResult.right : [];
+				const jobBoards = Either.isRight(jobBoardsResult)
+					? jobBoardsResult.right
+					: [];
 
 				if (Either.isLeft(jobBoardsResult)) {
 					console.error(

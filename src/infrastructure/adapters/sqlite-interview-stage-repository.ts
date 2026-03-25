@@ -200,9 +200,7 @@ export function createSQLiteInterviewStageRepository(
 			}).pipe(Effect.flatMap(parseInterviewStage));
 		},
 
-		delete(
-			id: InterviewStageId,
-		): Effect.Effect<void, InterviewStageError> {
+		delete(id: InterviewStageId): Effect.Effect<void, InterviewStageError> {
 			return Effect.tryPromise({
 				try: () =>
 					Promise.resolve().then(() => {

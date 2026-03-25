@@ -176,9 +176,7 @@ export const createContactOperationsPlugin = new Elysia()
 			// Return updated list
 			set.headers["Content-Type"] = "text/html";
 			const contactsResult = await runEffect(
-				contactRepository.getByJobApplicationId(
-					result.right.jobApplicationId,
-				),
+				contactRepository.getByJobApplicationId(result.right.jobApplicationId),
 			);
 			return Either.isRight(contactsResult)
 				? renderContactsList(

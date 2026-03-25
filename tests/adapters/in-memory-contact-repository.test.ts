@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+
 import { Effect, Either } from "effect";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
@@ -156,9 +157,15 @@ describe("InMemoryContactRepository", () => {
 		it("should return contacts for specific job application", async () => {
 			const repository = createInMemoryContactRepository();
 
-			await Effect.runPromise(repository.create(createValidContactData(jobAppId1)));
-			await Effect.runPromise(repository.create(createValidContactData(jobAppId1)));
-			await Effect.runPromise(repository.create(createValidContactData(jobAppId2)));
+			await Effect.runPromise(
+				repository.create(createValidContactData(jobAppId1)),
+			);
+			await Effect.runPromise(
+				repository.create(createValidContactData(jobAppId1)),
+			);
+			await Effect.runPromise(
+				repository.create(createValidContactData(jobAppId2)),
+			);
 
 			const result = await run(repository.getByJobApplicationId(jobAppId1));
 
