@@ -1,7 +1,4 @@
-import { expect } from "bun:test";
-
-import { ArkErrors, type TraversalError, type Type, type } from "arktype";
-import { err, ok, type Result } from "neverthrow";
+import { ArkErrors, type } from "arktype";
 
 export const jobDataSchema = type({
 	company: "string",
@@ -12,31 +9,9 @@ export const jobDataSchema = type({
 export type JobData = typeof jobDataSchema.infer;
 
 export function getAndAssertJobData(x: unknown): JobData {
-	return assertValidPerSchema(jobDataSchema, x);
-}
-
-// oxlint-disable-next-line no-explicit-any
-function assertValidPerSchema<const ArkType extends Type<any, any>>(
-	arkType: ArkType,
-	input: unknown,
-) {
-	const res = toArkResult(arkType, input);
-	expect(res.isOk()).toBe(true);
-	return res._unsafeUnwrap();
-}
-
-// oxlint-disable-next-line no-explicit-any
-function toArkResult<const ArkType extends Type<any, any>>(
-	arkType: ArkType,
-	input: unknown,
-): Result<ArkTypeOut<ArkType>, TraversalError> {
-	const result = arkType(input);
-
+	const result = jobDataSchema(x);
 	if (result instanceof ArkErrors) {
-		return err(result.toTraversalError());
+		throw new TypeError(result.summary);
 	}
-
-	return ok(result as ArkTypeOut<ArkType>);
+	return result;
 }
-
-type ArkTypeOut<T> = T extends Type<infer Out, infer _Scope> ? Out : never;
