@@ -15,6 +15,7 @@ logs
 _.log
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 test-results/
+/docs/post-mortems/
 
 # dotenv environment variable files
 .env
@@ -53,3 +54,4 @@ playwright-report
 
 # bv (beads viewer) local config and caches
 .bv/
+
