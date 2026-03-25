@@ -1,5 +1,5 @@
 /* oxlint-disable no-empty-pattern */
-import { type APIRequestContext, request, test as base } from "@playwright/test";
+import { type APIRequestContext, test as base } from "@playwright/test";
 
 import type { PageLinkKeys } from "#src/presentation/components/pageConfig.ts";
 import type { createApplicationBodySchema } from "#src/presentation/schemas/application-routes.schemas.ts";
@@ -66,13 +66,13 @@ export type TestFixtures = {
 
 export const test = base.extend<TestFixtures, WorkerFixtures>({
 	immutableApp: [
-		async ({}, use, workerInfo) => {
+		async ({ browser }, use, workerInfo) => {
 			const baseURL = workerInfo.project.use.baseURL;
 			if (!baseURL) {
 				throw new Error("baseURL not configured in playwright.config.ts");
 			}
 
-			const requestContext = await request.newContext({ baseURL });
+			const requestContext = (await browser.newPage()).request;
 			let app: CreatedApp | undefined;
 
 			try {
@@ -93,6 +93,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 					}
 				}
 				await requestContext.dispose();
+				await browser.close();
 			}
 		},
 		{ scope: "worker" },
@@ -122,9 +123,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 		const factory: AppFactory = async (overrides) => {
 			const position = createdCount++;
 			const app = await createAppViaApi(request, {
-				company:
-					overrides?.company ??
-					`W${testInfo.workerIndex}-Factory Co`,
+				company: overrides?.company ?? `W${testInfo.workerIndex}-Factory Co`,
 				positionTitle:
 					overrides?.positionTitle ??
 					`W${testInfo.workerIndex}-Factory Position ${position}`,
