@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
+import { Effect, Either } from "effect";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
 
 import type {
@@ -8,8 +10,9 @@ import type {
 	JobApplicationId,
 } from "../../domain/entities/job-application.ts";
 import type { JobApplicationManager } from "../../domain/ports/job-application-manager.ts";
+import { runEffect } from "../../application/server/utils/run-effect.ts";
 import { jobAppManagerRegistry } from "../sqlite/sqlite-registry.ts";
-import type { ForUpdate } from "../storage/storage-provider-interface.ts";
+import type { ForUpdate } from "#src/domain/ports/common-types.ts";
 
 // Get the test manager for testing
 const jobApplicationManager = jobAppManagerRegistry.getManager("test");
@@ -67,13 +70,13 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 	describe("createJobApplication", () => {
 		it("should successfully create application with valid data", async () => {
 			const manager = createTestManager();
-			const result = await manager.createJobApplication(
+			const result = await runEffect(manager.createJobApplication(
 				validJobApplicationData,
-			);
+			));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const application = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const application = result.right;
 				expect(application.company).toBe(validJobApplicationData.company);
 				expect(application.positionTitle).toBe(
 					validJobApplicationData.positionTitle,
@@ -94,14 +97,14 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 
 		it("should handle validation errors for invalid input data", async () => {
 			const manager = createTestManager();
-			const result = await manager.createJobApplication(
+			const result = await runEffect(manager.createJobApplication(
 				invalidJobApplicationData as JobApplicationForCreate,
-			);
+			));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(typeof result.error).toBe("string");
-				expect(result.error.length).toBeGreaterThan(0);
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(typeof result.left.detail).toBe("string");
+				expect(result.left.detail.length).toBeGreaterThan(0);
 			}
 		});
 	});
@@ -111,21 +114,21 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// First, create an application
-			const createResult = await manager.createJobApplication(
+			const createResult = await runEffect(manager.createJobApplication(
 				validJobApplicationData,
-			);
-			expect(createResult.isOk()).toBe(true);
+			));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const createdApp = createResult.value;
+			if (Either.isRight(createResult)) {
+				const createdApp = createResult.right;
 
 				// Then retrieve it using the same manager instance
-				const getResult = await manager.getJobApplication(createdApp.id);
+				const getResult = await runEffect(manager.getJobApplication(createdApp.id));
 
-				expect(getResult.isOk()).toBe(true);
+				expect(Either.isRight(getResult)).toBe(true);
 
-				if (getResult.isOk()) {
-					const retrievedApp = getResult.value;
+				if (Either.isRight(getResult)) {
+					const retrievedApp = getResult.right;
 					expect(retrievedApp.id).toBe(createdApp.id);
 					expect(retrievedApp.company).toBe(createdApp.company);
 					expect(retrievedApp.positionTitle).toBe(createdApp.positionTitle);
@@ -138,12 +141,12 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 			const fakeId = "123e4567-e89b-12d3-a456-426614174000" as JobApplicationId;
 
-			const result = await manager.getJobApplication(fakeId);
+			const result = await runEffect(manager.getJobApplication(fakeId));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(typeof result.error).toBe("string");
-				expect(result.error.length).toBeGreaterThan(0);
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(typeof result.left.detail).toBe("string");
+				expect(result.left.detail.length).toBeGreaterThan(0);
 			}
 		});
 	});
@@ -153,14 +156,14 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// Clear all first
-			await manager.clearAllJobApplications();
+			await Effect.runPromise(manager.clearAllJobApplications());
 
-			const getAllResult = await manager.getAllJobApplications();
+			const getAllResult = await runEffect(manager.getAllJobApplications());
 
-			expect(getAllResult.isOk()).toBe(true);
-			if (getAllResult.isOk()) {
-				expect(Array.isArray(getAllResult.value)).toBe(true);
-				expect(getAllResult.value.length).toBe(0);
+			expect(Either.isRight(getAllResult)).toBe(true);
+			if (Either.isRight(getAllResult)) {
+				expect(Array.isArray(getAllResult.right)).toBe(true);
+				expect(getAllResult.right.length).toBe(0);
 			}
 		});
 
@@ -168,20 +171,20 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// Clear all first
-			await manager.clearAllJobApplications();
+			await Effect.runPromise(manager.clearAllJobApplications());
 
 			// Create two applications
-			await manager.createJobApplication(validJobApplicationData);
-			await manager.createJobApplication({
+			await Effect.runPromise(manager.createJobApplication(validJobApplicationData));
+			await Effect.runPromise(manager.createJobApplication({
 				...validJobApplicationData,
 				company: "Another Company",
-			});
+			}));
 
-			const getAllResult = await manager.getAllJobApplications();
+			const getAllResult = await runEffect(manager.getAllJobApplications());
 
-			expect(getAllResult.isOk()).toBe(true);
-			if (getAllResult.isOk()) {
-				expect(getAllResult.value.length).toBe(2);
+			expect(Either.isRight(getAllResult)).toBe(true);
+			if (Either.isRight(getAllResult)) {
+				expect(getAllResult.right.length).toBe(2);
 			}
 		});
 	});
@@ -191,23 +194,23 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// First, create an application
-			const createResult = await manager.createJobApplication(
+			const createResult = await runEffect(manager.createJobApplication(
 				validJobApplicationData,
-			);
-			expect(createResult.isOk()).toBe(true);
+			));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const createdApp = createResult.value;
+			if (Either.isRight(createResult)) {
+				const createdApp = createResult.right;
 
 				// Update the application
-				const updateResult = await manager.updateJobApplication(
+				const updateResult = await runEffect(manager.updateJobApplication(
 					createdApp.id,
 					validUpdateData,
-				);
+				));
 
-				expect(updateResult.isOk()).toBe(true);
-				if (updateResult.isOk()) {
-					const updatedApp = updateResult.value;
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					const updatedApp = updateResult.right;
 					expect(updatedApp.id).toBe(createdApp.id);
 					expect(updatedApp.company).toBe(validUpdateData.company);
 					expect(updatedApp.interestRating).toBe(
@@ -224,15 +227,15 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 			const fakeId = "123e4567-e89b-12d3-a456-426614174000" as JobApplicationId;
 
-			const result = await manager.updateJobApplication(
+			const result = await runEffect(manager.updateJobApplication(
 				fakeId,
 				validUpdateData,
-			);
+			));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(typeof result.error).toBe("string");
-				expect(result.error.length).toBeGreaterThan(0);
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(typeof result.left.detail).toBe("string");
+				expect(result.left.detail.length).toBeGreaterThan(0);
 			}
 		});
 	});
@@ -242,25 +245,25 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// First, create an application
-			const createResult = await manager.createJobApplication(
+			const createResult = await runEffect(manager.createJobApplication(
 				validJobApplicationData,
-			);
-			expect(createResult.isOk()).toBe(true);
+			));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const createdApp = createResult.value;
+			if (Either.isRight(createResult)) {
+				const createdApp = createResult.right;
 
 				// Delete the application
-				const deleteResult = await manager.deleteJobApplication(createdApp.id);
+				const deleteResult = await runEffect(manager.deleteJobApplication(createdApp.id));
 
-				expect(deleteResult.isOk()).toBe(true);
-				if (deleteResult.isOk()) {
-					expect(deleteResult.value).toBeUndefined();
+				expect(Either.isRight(deleteResult)).toBe(true);
+				if (Either.isRight(deleteResult)) {
+					expect(deleteResult.right).toBeUndefined();
 				}
 
 				// Verify it's actually deleted by trying to retrieve it
-				const getResult = await manager.getJobApplication(createdApp.id);
-				expect(getResult.isErr()).toBe(true);
+				const getResult = await runEffect(manager.getJobApplication(createdApp.id));
+				expect(Either.isLeft(getResult)).toBe(true);
 			}
 		});
 
@@ -269,11 +272,11 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const fakeId = "123e4567-e89b-12d3-a456-426614174000" as JobApplicationId;
 
 			// SQLite delete operations succeed even for non-existent records
-			const result = await manager.deleteJobApplication(fakeId);
+			const result = await runEffect(manager.deleteJobApplication(fakeId));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toBeUndefined();
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toBeUndefined();
 			}
 		});
 	});
@@ -283,17 +286,17 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// Clear all first
-			await manager.clearAllJobApplications();
+			await runEffect(manager.clearAllJobApplications());
 
 			// Create an active application (default status is "applied" which is active)
-			await manager.createJobApplication(validJobApplicationData);
+			await runEffect(manager.createJobApplication(validJobApplicationData));
 
-			const result = await manager.getActiveJobApplications();
+			const result = await runEffect(manager.getActiveJobApplications());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value.length).toBeGreaterThanOrEqual(1);
-				for (const app of result.value) {
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.length).toBeGreaterThanOrEqual(1);
+				for (const app of result.right) {
 					// Verify all returned apps are active
 					const lastStatus = app.statusLog[app.statusLog.length - 1];
 					assertDefined(lastStatus);
@@ -308,13 +311,13 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// Clear all first
-			await manager.clearAllJobApplications();
+			await runEffect(manager.clearAllJobApplications());
 
-			const result = await manager.getInactiveJobApplications();
+			const result = await runEffect(manager.getInactiveJobApplications());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(Array.isArray(result.value)).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(Array.isArray(result.right)).toBe(true);
 			}
 		});
 	});
@@ -324,21 +327,21 @@ describe("SQLite JobApplicationManager (Integration Tests)", () => {
 			const manager = createTestManager();
 
 			// Create some applications
-			await manager.createJobApplication(validJobApplicationData);
-			await manager.createJobApplication({
+			await runEffect(manager.createJobApplication(validJobApplicationData));
+			await Effect.runPromise(manager.createJobApplication({
 				...validJobApplicationData,
 				company: "Another Company",
-			});
+			}));
 
 			// Clear all
-			const clearResult = await manager.clearAllJobApplications();
-			expect(clearResult.isOk()).toBe(true);
+			const clearResult = await runEffect(manager.clearAllJobApplications());
+			expect(Either.isRight(clearResult)).toBe(true);
 
 			// Verify empty
-			const getAllResult = await manager.getAllJobApplications();
-			expect(getAllResult.isOk()).toBe(true);
-			if (getAllResult.isOk()) {
-				expect(getAllResult.value.length).toBe(0);
+			const getAllResult = await runEffect(manager.getAllJobApplications());
+			expect(Either.isRight(getAllResult)).toBe(true);
+			if (Either.isRight(getAllResult)) {
+				expect(getAllResult.right.length).toBe(0);
 			}
 		});
 	});

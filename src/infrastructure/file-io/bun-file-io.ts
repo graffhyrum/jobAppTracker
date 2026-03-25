@@ -1,78 +1,79 @@
-import { ResultAsync } from "neverthrow";
+import { Effect } from "effect";
 
-import type { FileIO, FileIOError } from "./file-io.ts";
-import { createFileIOError } from "./file-io.ts";
+import { FileIOError } from "./file-io-error.ts";
+import type { FileIO } from "./file-io.ts";
 
 /**
  * Bun-specific File IO implementation
  */
 export function createBunFileIO(): FileIO {
-	function exists(filePath: string): ResultAsync<boolean, FileIOError> {
-		return ResultAsync.fromPromise(
-			(async () => {
-				const file = Bun.file(filePath);
-				return await file.exists();
-			})(),
-			(error) => createFileIOError("exists", filePath, error),
-		);
+	function exists(filePath: string): Effect.Effect<boolean, FileIOError> {
+		return Effect.tryPromise({
+			try: () => Bun.file(filePath).exists(),
+			catch: (error) =>
+				new FileIOError({ detail: String(error), operation: "exists", path: filePath }),
+		});
 	}
 
-	function readText(filePath: string): ResultAsync<string, FileIOError> {
-		return ResultAsync.fromPromise(
-			(async () => {
+	function readText(filePath: string): Effect.Effect<string, FileIOError> {
+		return Effect.tryPromise({
+			try: async () => {
 				const file = Bun.file(filePath);
 				const fileExists = await file.exists();
 				if (!fileExists) {
 					throw new Error("File not found");
 				}
 				return await file.text();
-			})(),
-			(error) => createFileIOError("readText", filePath, error),
-		);
+			},
+			catch: (error) =>
+				new FileIOError({ detail: String(error), operation: "readText", path: filePath }),
+		});
 	}
 
 	function writeText(
 		filePath: string,
 		content: string,
-	): ResultAsync<void, FileIOError> {
-		return ResultAsync.fromPromise(
-			(async () => {
+	): Effect.Effect<void, FileIOError> {
+		return Effect.tryPromise({
+			try: async () => {
 				await Bun.write(filePath, content);
-			})(),
-			(error) => createFileIOError("writeText", filePath, error),
-		);
+			},
+			catch: (error) =>
+				new FileIOError({ detail: String(error), operation: "writeText", path: filePath }),
+		});
 	}
 
-	function ensureDir(dirPath: string): ResultAsync<void, FileIOError> {
-		return ResultAsync.fromPromise(
-			(async () => {
-				// Bun doesn't have a built-in directory creation function
-				// We'll use the Node.js fs module which is available in Bun
+	function ensureDir(dirPath: string): Effect.Effect<void, FileIOError> {
+		return Effect.tryPromise({
+			try: async () => {
 				const fs = await import("node:fs");
 				await fs.promises.mkdir(dirPath, { recursive: true });
-			})(),
-			(error) => createFileIOError("ensureDir", dirPath, error),
-		);
+			},
+			catch: (error) =>
+				new FileIOError({ detail: String(error), operation: "ensureDir", path: dirPath }),
+		});
 	}
 
-	function createDir(dirPath: string): ResultAsync<void, FileIOError> {
-		return ResultAsync.fromPromise(
-			(async () => {
+	function createDir(dirPath: string): Effect.Effect<void, FileIOError> {
+		return Effect.tryPromise({
+			try: async () => {
 				const fs = await import("node:fs");
 				await fs.promises.mkdir(dirPath, { recursive: true });
-			})(),
-			(error) => createFileIOError("createDir", dirPath, error),
-		);
+			},
+			catch: (error) =>
+				new FileIOError({ detail: String(error), operation: "createDir", path: dirPath }),
+		});
 	}
 
-	function deleteFile(filePath: string): ResultAsync<void, FileIOError> {
-		return ResultAsync.fromPromise(
-			(async () => {
+	function deleteFile(filePath: string): Effect.Effect<void, FileIOError> {
+		return Effect.tryPromise({
+			try: async () => {
 				const fs = await import("node:fs");
 				await fs.promises.unlink(filePath);
-			})(),
-			(error) => createFileIOError("deleteFile", filePath, error),
-		);
+			},
+			catch: (error) =>
+				new FileIOError({ detail: String(error), operation: "deleteFile", path: filePath }),
+		});
 	}
 
 	return {

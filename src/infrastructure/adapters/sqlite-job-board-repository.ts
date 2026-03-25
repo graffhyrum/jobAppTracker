@@ -1,7 +1,7 @@
 import type { Database } from "bun:sqlite";
 
 import { ArkErrors } from "arktype";
-import { errAsync, okAsync, ResultAsync } from "neverthrow";
+import { Effect, Either } from "effect";
 
 import type {
 	JobBoard,
@@ -13,6 +13,7 @@ import {
 	createJobBoard,
 	jobBoardModule,
 } from "../../domain/entities/job-board.ts";
+import { JobBoardError } from "../../domain/entities/job-board-error.ts";
 import type { JobBoardRepository } from "../../domain/ports/job-board-repository.ts";
 import { uuidProvider } from "../di/uuid-provider.ts";
 import { normalizeJobBoardRow } from "../sqlite/normalize-sqlite-row.ts";
@@ -21,160 +22,219 @@ export function createSQLiteJobBoardRepository(
 	db: Database,
 ): JobBoardRepository {
 	return {
-		create(data: JobBoardForCreate): ResultAsync<JobBoard, string> {
+		create(
+			data: JobBoardForCreate,
+		): Effect.Effect<JobBoard, JobBoardError> {
 			const jobBoardResult = createJobBoard(data, uuidProvider.generateUUID);
-			if (jobBoardResult.isErr()) {
-				return errAsync(`Failed to create job board: ${jobBoardResult.error}`);
+			if (Either.isLeft(jobBoardResult)) {
+				return Effect.fail(
+					new JobBoardError({
+						detail: `Failed to create job board: ${jobBoardResult.left.detail}`,
+						operation: "create",
+					}),
+				);
 			}
 
-			const jobBoard = jobBoardResult.value;
+			const jobBoard = jobBoardResult.right;
 
-			return ResultAsync.fromPromise(
-				(async () => {
-					const query = db.prepare(`
+			return Effect.tryPromise({
+				try: () =>
+					Promise.resolve().then(() => {
+						const query = db.prepare(`
                         INSERT INTO job_boards (id, name, rootDomain, domains, createdAt)
                         VALUES ($id, $name, $rootDomain, $domains, $createdAt)
                     `);
 
-					query.run({
-						$id: jobBoard.id,
-						$name: jobBoard.name,
-						$rootDomain: jobBoard.rootDomain,
-						$domains: JSON.stringify(jobBoard.domains),
-						$createdAt: jobBoard.createdAt,
-					});
+						query.run({
+							$id: jobBoard.id,
+							$name: jobBoard.name,
+							$rootDomain: jobBoard.rootDomain,
+							$domains: JSON.stringify(jobBoard.domains),
+							$createdAt: jobBoard.createdAt,
+						});
 
-					return jobBoard;
-				})(),
-				(err) => `Failed to insert job board: ${err}`,
-			);
-		},
-
-		getById(id: JobBoardId): ResultAsync<JobBoard, string> {
-			return ResultAsync.fromPromise(
-				(async () => {
-					const query = db.prepare("SELECT * FROM job_boards WHERE id = $id");
-					const result = query.get({ $id: id });
-					if (!result) {
-						throw new Error(`Job board with id ${id} not found`);
-					}
-					return result;
-				})(),
-				(err) => `Failed to query job board: ${err}`,
-			).andThen(parseJobBoard);
-		},
-
-		getAll(): ResultAsync<JobBoard[], string> {
-			return ResultAsync.fromPromise(
-				(async () => {
-					const query = db.prepare(
-						"SELECT * FROM job_boards ORDER BY name ASC",
-					);
-					return query.all();
-				})(),
-				(err) => `Failed to query job boards: ${err}`,
-			).andThen(parseJobBoardArray);
-		},
-
-		findByDomain(domain: string): ResultAsync<JobBoard | null, string> {
-			return ResultAsync.fromPromise(
-				(async () => {
-					// Try exact match on rootDomain first
-					const exactQuery = db.prepare(
-						"SELECT * FROM job_boards WHERE rootDomain = $domain",
-					);
-					const exactResult = exactQuery.get({ $domain: domain });
-					if (exactResult) {
-						return exactResult;
-					}
-
-					// Then check domains array
-					const allQuery = db.prepare("SELECT * FROM job_boards");
-					const allBoards = allQuery.all();
-
-					for (const board of allBoards) {
-						const normalized = normalizeJobBoardRow(board);
-						if (
-							typeof normalized === "object" &&
-							normalized !== null &&
-							"domains" in normalized
-						) {
-							const domains = normalized.domains as string[];
-							if (domains.includes(domain)) {
-								return board;
-							}
-						}
-					}
-
-					return null;
-				})(),
-				(err) => `Failed to find job board by domain: ${err}`,
-			).andThen((result) => {
-				if (result === null) {
-					return okAsync(null);
-				}
-				return parseJobBoard(result).map((board) => board);
+						return jobBoard;
+					}),
+				catch: (err) =>
+					new JobBoardError({
+						detail: `Failed to insert job board: ${err}`,
+						operation: "create",
+					}),
 			});
 		},
 
-		delete(id: JobBoardId): ResultAsync<void, string> {
-			return ResultAsync.fromPromise(
-				(async () => {
-					const query = db.prepare("DELETE FROM job_boards WHERE id = $id");
-					query.run({ $id: id });
-				})(),
-				(err) => `Failed to delete job board: ${err}`,
+		getById(id: JobBoardId): Effect.Effect<JobBoard, JobBoardError> {
+			return Effect.tryPromise({
+				try: () =>
+					Promise.resolve().then(() => {
+						const query = db.prepare(
+							"SELECT * FROM job_boards WHERE id = $id",
+						);
+						const result = query.get({ $id: id });
+						if (!result) {
+							throw new Error(`Job board with id ${id} not found`);
+						}
+						return result;
+					}),
+				catch: (err) =>
+					new JobBoardError({
+						detail: `Failed to query job board: ${err}`,
+						operation: "getById",
+					}),
+			}).pipe(Effect.flatMap(parseJobBoard));
+		},
+
+		getAll(): Effect.Effect<JobBoard[], JobBoardError> {
+			return Effect.tryPromise({
+				try: () =>
+					Promise.resolve().then(() => {
+						const query = db.prepare(
+							"SELECT * FROM job_boards ORDER BY name ASC",
+						);
+						return query.all();
+					}),
+				catch: (err) =>
+					new JobBoardError({
+						detail: `Failed to query job boards: ${err}`,
+						operation: "getAll",
+					}),
+			}).pipe(Effect.flatMap(parseJobBoardArray));
+		},
+
+		findByDomain(
+			domain: string,
+		): Effect.Effect<JobBoard | null, JobBoardError> {
+			return Effect.tryPromise({
+				try: () =>
+					Promise.resolve().then(() => {
+						// Try exact match on rootDomain first
+						const exactQuery = db.prepare(
+							"SELECT * FROM job_boards WHERE rootDomain = $domain",
+						);
+						const exactResult = exactQuery.get({ $domain: domain });
+						if (exactResult) {
+							return exactResult;
+						}
+
+						// Then check domains array
+						const allQuery = db.prepare("SELECT * FROM job_boards");
+						const allBoards = allQuery.all();
+
+						for (const board of allBoards) {
+							const normalized = normalizeJobBoardRow(board);
+							if (
+								typeof normalized === "object" &&
+								normalized !== null &&
+								"domains" in normalized
+							) {
+								const domains = normalized.domains as string[];
+								if (domains.includes(domain)) {
+									return board;
+								}
+							}
+						}
+
+						return null;
+					}),
+				catch: (err) =>
+					new JobBoardError({
+						detail: `Failed to find job board by domain: ${err}`,
+						operation: "findByDomain",
+					}),
+			}).pipe(
+				Effect.flatMap((result) => {
+					if (result === null) {
+						return Effect.succeed(null);
+					}
+					return parseJobBoard(result);
+				}),
 			);
 		},
 
-		seedCommonBoards(): ResultAsync<void, string> {
-			return ResultAsync.fromPromise(
-				(async () => {
-					for (const boardData of COMMON_JOB_BOARDS) {
-						const boardResult = createJobBoard(
-							boardData,
-							uuidProvider.generateUUID,
+		delete(id: JobBoardId): Effect.Effect<void, JobBoardError> {
+			return Effect.tryPromise({
+				try: () =>
+					Promise.resolve().then(() => {
+						const query = db.prepare(
+							"DELETE FROM job_boards WHERE id = $id",
 						);
-						if (boardResult.isOk()) {
-							const board = boardResult.value;
-							const query = db.prepare(`
+						query.run({ $id: id });
+					}),
+				catch: (err) =>
+					new JobBoardError({
+						detail: `Failed to delete job board: ${err}`,
+						operation: "delete",
+					}),
+			});
+		},
+
+		seedCommonBoards(): Effect.Effect<void, JobBoardError> {
+			return Effect.tryPromise({
+				try: () =>
+					Promise.resolve().then(() => {
+						for (const boardData of COMMON_JOB_BOARDS) {
+							const boardResult = createJobBoard(
+								boardData,
+								uuidProvider.generateUUID,
+							);
+							if (Either.isRight(boardResult)) {
+								const board = boardResult.right;
+								const query = db.prepare(`
                                 INSERT OR IGNORE INTO job_boards (id, name, rootDomain, domains, createdAt)
                                 VALUES ($id, $name, $rootDomain, $domains, $createdAt)
                             `);
 
-							query.run({
-								$id: board.id,
-								$name: board.name,
-								$rootDomain: board.rootDomain,
-								$domains: JSON.stringify(board.domains),
-								$createdAt: board.createdAt,
-							});
+								query.run({
+									$id: board.id,
+									$name: board.name,
+									$rootDomain: board.rootDomain,
+									$domains: JSON.stringify(board.domains),
+									$createdAt: board.createdAt,
+								});
+							}
 						}
-					}
-				})(),
-				(err) => `Failed to seed job boards: ${err}`,
-			);
+					}),
+				catch: (err) =>
+					new JobBoardError({
+						detail: `Failed to seed job boards: ${err}`,
+						operation: "seedCommonBoards",
+					}),
+			});
 		},
 	};
 }
 
-function parseJobBoardArray(maybeArray: unknown) {
+function parseJobBoardArray(
+	maybeArray: unknown,
+): Effect.Effect<JobBoard[], JobBoardError> {
 	const normalizedArray = Array.isArray(maybeArray)
 		? maybeArray.map(normalizeJobBoardRow)
 		: maybeArray;
 
 	const parsedResult = jobBoardModule.JobBoard.array()(normalizedArray);
 	if (parsedResult instanceof ArkErrors) {
-		return errAsync(JSON.stringify(parsedResult, null, 2));
+		return Effect.fail(
+			new JobBoardError({
+				detail: JSON.stringify(parsedResult, null, 2),
+				operation: "parseJobBoardArray",
+			}),
+		);
 	}
-	return okAsync(parsedResult);
+	return Effect.succeed(parsedResult);
 }
 
-function parseJobBoard(maybeRecord: unknown) {
+function parseJobBoard(
+	maybeRecord: unknown,
+): Effect.Effect<JobBoard, JobBoardError> {
 	const normalized = normalizeJobBoardRow(maybeRecord);
 	const parseResult = jobBoardModule.JobBoard(normalized);
 	if (parseResult instanceof ArkErrors) {
-		return errAsync(JSON.stringify(parseResult, null, 2));
+		return Effect.fail(
+			new JobBoardError({
+				detail: JSON.stringify(parseResult, null, 2),
+				operation: "parseJobBoard",
+			}),
+		);
 	}
-	return okAsync(parseResult);
+	return Effect.succeed(parseResult);
 }

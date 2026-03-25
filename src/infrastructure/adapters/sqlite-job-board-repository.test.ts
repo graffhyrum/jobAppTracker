@@ -1,5 +1,7 @@
 import { describe, expect, it } from "bun:test";
 
+import { Effect, Either } from "effect";
+
 import { assertDefined } from "#helpers/assertDefined.ts";
 
 import type { JobBoardForCreate } from "../../domain/entities/job-board.ts";
@@ -10,6 +12,13 @@ import { createSQLiteJobBoardRepository } from "./sqlite-job-board-repository.ts
 // Get the test database for testing
 const testDb = jobAppManagerRegistry.getDatabase("test");
 const repository = createSQLiteJobBoardRepository(testDb);
+
+/** Run an Effect and return an Either for test assertions. */
+async function run<T, E>(
+	effect: Effect.Effect<T, E>,
+): Promise<Either.Either<T, E>> {
+	return Effect.runPromise(Effect.either(effect));
+}
 
 describe("SQLiteJobBoardRepository", () => {
 	// Test data
@@ -38,11 +47,11 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should successfully create job board with valid data", async () => {
 			await clearJobBoards();
 
-			const result = await repository.create(validJobBoardData);
+			const result = await run(repository.create(validJobBoardData));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const board = result.value;
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const board = result.right;
 				expect(board.name).toBe(validJobBoardData.name);
 				expect(board.rootDomain).toBe(validJobBoardData.rootDomain);
 				expect(board.domains).toEqual(validJobBoardData.domains);
@@ -60,27 +69,27 @@ describe("SQLiteJobBoardRepository", () => {
 				domains: [],
 			} as JobBoardForCreate;
 
-			const result = await repository.create(invalidData);
+			const result = await run(repository.create(invalidData));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("Failed to create job board");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("Failed to create job board");
 			}
 		});
 
 		it("should persist job board to database", async () => {
 			await clearJobBoards();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(validJobBoardData));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const board = createResult.value;
-				const getResult = await repository.getById(board.id);
+			if (Either.isRight(createResult)) {
+				const board = createResult.right;
+				const getResult = await run(repository.getById(board.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					const retrieved = getResult.value;
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					const retrieved = getResult.right;
 					expect(retrieved.id).toBe(board.id);
 					expect(retrieved.name).toBe(board.name);
 					expect(retrieved.rootDomain).toBe(board.rootDomain);
@@ -96,16 +105,16 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should successfully retrieve existing job board", async () => {
 			await clearJobBoards();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(validJobBoardData));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const board = createResult.value;
-				const getResult = await repository.getById(board.id);
+			if (Either.isRight(createResult)) {
+				const board = createResult.right;
+				const getResult = await run(repository.getById(board.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					const retrieved = getResult.value;
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					const retrieved = getResult.right;
 					expect(retrieved.id).toBe(board.id);
 					expect(retrieved.name).toBe(board.name);
 					expect(retrieved.rootDomain).toBe(board.rootDomain);
@@ -118,22 +127,24 @@ describe("SQLiteJobBoardRepository", () => {
 
 		it("should return error for non-existent ID", async () => {
 			const nonExistentId = uuidProvider.generateUUID();
-			const result = await repository.getById(nonExistentId);
+			const result = await run(repository.getById(nonExistentId));
 
-			expect(result.isErr()).toBe(true);
-			if (result.isErr()) {
-				expect(result.error).toContain("Failed to query job board");
-				expect(result.error).toContain("not found");
+			expect(Either.isLeft(result)).toBe(true);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain("Failed to query job board");
+				expect(result.left.detail).toContain("not found");
 			}
 		});
 
 		it("should preserve error message when board not found", async () => {
 			const nonExistentId = uuidProvider.generateUUID();
-			const result = await repository.getById(nonExistentId);
+			const result = await run(repository.getById(nonExistentId));
 
-			expect(result.isErr()).toBe(true);
+			expect(Either.isLeft(result)).toBe(true);
 			// Verify error includes both message and board ID
-			expect(result.isErr() && result.error).toContain(nonExistentId);
+			if (Either.isLeft(result)) {
+				expect(result.left.detail).toContain(nonExistentId);
+			}
 		});
 
 		it("should correctly parse JSON domains field", async () => {
@@ -150,16 +161,16 @@ describe("SQLiteJobBoardRepository", () => {
 				domains: domainsArray,
 			};
 
-			const createResult = await repository.create(boardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(boardData));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const board = createResult.value;
-				const getResult = await repository.getById(board.id);
+			if (Either.isRight(createResult)) {
+				const board = createResult.right;
+				const getResult = await run(repository.getById(board.id));
 
-				expect(getResult.isOk()).toBe(true);
-				if (getResult.isOk()) {
-					const retrieved = getResult.value;
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					const retrieved = getResult.right;
 					expect(Array.isArray(retrieved.domains)).toBe(true);
 					expect(retrieved.domains).toEqual(domainsArray);
 				}
@@ -173,12 +184,12 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should return empty array when no boards exist", async () => {
 			await clearJobBoards();
 
-			const result = await repository.getAll();
+			const result = await run(repository.getAll());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
 				// Filter out common boards that were seeded
-				const testBoards = result.value.filter(
+				const testBoards = result.right.filter(
 					(b) => b.name.startsWith("Test") || b.name.startsWith("Another"),
 				);
 				expect(testBoards.length).toBe(0);
@@ -188,14 +199,14 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should return all boards sorted by name", async () => {
 			await clearJobBoards();
 
-			await repository.create(validJobBoardData2); // "Another Board"
-			await repository.create(validJobBoardData); // "Test Board"
+			await run(repository.create(validJobBoardData2)); // "Another Board"
+			await run(repository.create(validJobBoardData)); // "Test Board"
 
-			const result = await repository.getAll();
+			const result = await run(repository.getAll());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const testBoards = result.value.filter(
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const testBoards = result.right.filter(
 					(b) => b.name.startsWith("Test") || b.name.startsWith("Another"),
 				);
 				expect(testBoards.length).toBe(2);
@@ -212,14 +223,14 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should parse all rows correctly", async () => {
 			await clearJobBoards();
 
-			await repository.create(validJobBoardData);
-			await repository.create(validJobBoardData2);
+			await run(repository.create(validJobBoardData));
+			await run(repository.create(validJobBoardData2));
 
-			const result = await repository.getAll();
+			const result = await run(repository.getAll());
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				const testBoards = result.value.filter(
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				const testBoards = result.right.filter(
 					(b) => b.name.startsWith("Test") || b.name.startsWith("Another"),
 				);
 
@@ -241,16 +252,16 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should find board by exact rootDomain match", async () => {
 			await clearJobBoards();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(validJobBoardData));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			const result = await repository.findByDomain("testboard.com");
+			const result = await run(repository.findByDomain("testboard.com"));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				assertDefined(result.value);
-				expect(result.value?.name).toBe("Test Board");
-				expect(result.value?.rootDomain).toBe("testboard.com");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				assertDefined(result.right);
+				expect(result.right?.name).toBe("Test Board");
+				expect(result.right?.rootDomain).toBe("testboard.com");
 			}
 
 			await clearJobBoards();
@@ -259,16 +270,18 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should find board by domain in domains array", async () => {
 			await clearJobBoards();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(validJobBoardData));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			const result = await repository.findByDomain("www.testboard.com");
+			const result = await run(
+				repository.findByDomain("www.testboard.com"),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				assertDefined(result.value);
-				expect(result.value?.name).toBe("Test Board");
-				expect(result.value?.rootDomain).toBe("testboard.com");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				assertDefined(result.right);
+				expect(result.right?.name).toBe("Test Board");
+				expect(result.right?.rootDomain).toBe("testboard.com");
 			}
 
 			await clearJobBoards();
@@ -277,11 +290,13 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should return null when domain not found", async () => {
 			await clearJobBoards();
 
-			const result = await repository.findByDomain("nonexistent.com");
+			const result = await run(
+				repository.findByDomain("nonexistent.com"),
+			);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toBeNull();
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toBeNull();
 			}
 
 			await clearJobBoards();
@@ -291,15 +306,15 @@ describe("SQLiteJobBoardRepository", () => {
 			await clearJobBoards();
 
 			// Insert board with valid data first
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(validJobBoardData));
+			expect(Either.isRight(createResult)).toBe(true);
 
 			// Even if there's a malformed entry, should still work
-			const result = await repository.findByDomain("testboard.com");
+			const result = await run(repository.findByDomain("testboard.com"));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				assertDefined(result.value);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				assertDefined(result.right);
 			}
 
 			await clearJobBoards();
@@ -322,17 +337,17 @@ describe("SQLiteJobBoardRepository", () => {
 				domains: ["other.com", "test.com"], // test.com is in the array
 			};
 
-			await repository.create(board1Data);
-			await repository.create(board2Data);
+			await run(repository.create(board1Data));
+			await run(repository.create(board2Data));
 
 			// Should find board1 first (exact rootDomain match)
-			const result = await repository.findByDomain("test.com");
+			const result = await run(repository.findByDomain("test.com"));
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				assertDefined(result.value);
-				expect(result.value?.name).toBe("Test Board 1");
-				expect(result.value?.rootDomain).toBe("test.com");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				assertDefined(result.right);
+				expect(result.right?.name).toBe("Test Board 1");
+				expect(result.right?.rootDomain).toBe("test.com");
 			}
 
 			await clearJobBoards();
@@ -343,23 +358,23 @@ describe("SQLiteJobBoardRepository", () => {
 		it("should successfully delete existing board", async () => {
 			await clearJobBoards();
 
-			const createResult = await repository.create(validJobBoardData);
-			expect(createResult.isOk()).toBe(true);
+			const createResult = await run(repository.create(validJobBoardData));
+			expect(Either.isRight(createResult)).toBe(true);
 
-			if (createResult.isOk()) {
-				const board = createResult.value;
+			if (Either.isRight(createResult)) {
+				const board = createResult.right;
 
 				// Verify board exists
-				const getBeforeResult = await repository.getById(board.id);
-				expect(getBeforeResult.isOk()).toBe(true);
+				const getBeforeResult = await run(repository.getById(board.id));
+				expect(Either.isRight(getBeforeResult)).toBe(true);
 
 				// Delete board
-				const deleteResult = await repository.delete(board.id);
-				expect(deleteResult.isOk()).toBe(true);
+				const deleteResult = await run(repository.delete(board.id));
+				expect(Either.isRight(deleteResult)).toBe(true);
 
 				// Verify board is deleted
-				const getAfterResult = await repository.getById(board.id);
-				expect(getAfterResult.isErr()).toBe(true);
+				const getAfterResult = await run(repository.getById(board.id));
+				expect(Either.isLeft(getAfterResult)).toBe(true);
 			}
 
 			await clearJobBoards();
@@ -367,10 +382,10 @@ describe("SQLiteJobBoardRepository", () => {
 
 		it("should succeed silently for non-existent board", async () => {
 			const nonExistentId = uuidProvider.generateUUID();
-			const result = await repository.delete(nonExistentId);
+			const result = await run(repository.delete(nonExistentId));
 
 			// SQLite DELETE doesn't error for non-existent rows
-			expect(result.isOk()).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
 		});
 	});
 
@@ -379,14 +394,14 @@ describe("SQLiteJobBoardRepository", () => {
 			// Clear all boards first
 			await testDb.prepare("DELETE FROM job_boards").run();
 
-			const seedResult = await repository.seedCommonBoards();
-			expect(seedResult.isOk()).toBe(true);
+			const seedResult = await run(repository.seedCommonBoards());
+			expect(Either.isRight(seedResult)).toBe(true);
 
-			const getAllResult = await repository.getAll();
-			expect(getAllResult.isOk()).toBe(true);
+			const getAllResult = await run(repository.getAll());
+			expect(Either.isRight(getAllResult)).toBe(true);
 
-			if (getAllResult.isOk()) {
-				const boards = getAllResult.value;
+			if (Either.isRight(getAllResult)) {
+				const boards = getAllResult.right;
 				expect(boards.length).toBeGreaterThan(0);
 
 				// Check for some common boards
@@ -402,29 +417,29 @@ describe("SQLiteJobBoardRepository", () => {
 			await testDb.prepare("DELETE FROM job_boards").run();
 
 			// First seed
-			const firstResult = await repository.seedCommonBoards();
-			expect(firstResult.isOk()).toBe(true);
+			const firstResult = await run(repository.seedCommonBoards());
+			expect(Either.isRight(firstResult)).toBe(true);
 
 			// Get count after first seed
-			const afterFirstSeed = await repository.getAll();
-			expect(afterFirstSeed.isOk()).toBe(true);
-			const firstCount = afterFirstSeed.isOk()
-				? afterFirstSeed.value.length
+			const afterFirstSeed = await run(repository.getAll());
+			expect(Either.isRight(afterFirstSeed)).toBe(true);
+			const firstCount = Either.isRight(afterFirstSeed)
+				? afterFirstSeed.right.length
 				: 0;
 
 			// Second seed - will create new IDs, so boards will be duplicated
 			// INSERT OR IGNORE prevents SQL errors but doesn't prevent functional duplicates
 			// since new UUIDs are generated each time
-			const secondResult = await repository.seedCommonBoards();
-			expect(secondResult.isOk()).toBe(true);
+			const secondResult = await run(repository.seedCommonBoards());
+			expect(Either.isRight(secondResult)).toBe(true);
 
 			// Count will double because new UUIDs mean no ID collision
-			const afterSecondSeed = await repository.getAll();
-			expect(afterSecondSeed.isOk()).toBe(true);
+			const afterSecondSeed = await run(repository.getAll());
+			expect(Either.isRight(afterSecondSeed)).toBe(true);
 
-			if (afterSecondSeed.isOk()) {
+			if (Either.isRight(afterSecondSeed)) {
 				// Each seed adds the same boards with different IDs
-				expect(afterSecondSeed.value.length).toBe(firstCount * 2);
+				expect(afterSecondSeed.right.length).toBe(firstCount * 2);
 			}
 		});
 	});

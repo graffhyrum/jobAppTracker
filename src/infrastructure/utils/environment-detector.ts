@@ -4,7 +4,7 @@
  * @returns "development" or "production"
  */
 export function getEnvironment(): "development" | "production" {
-    return isDevelopment() ? "development" : "production";
+	return isDevelopment() ? "development" : "production";
 }
 /* c8 ignore stop */
 /**
@@ -13,7 +13,7 @@ export function getEnvironment(): "development" | "production" {
  * @returns true if in production mode, false if in development
  */
 export function isProduction(): boolean {
-    return !isDevelopment();
+	return !isDevelopment();
 }
 /**
  * Environment detection utilities for distinguishing dev vs production contexts.
@@ -32,15 +32,15 @@ export function isProduction(): boolean {
  */
 /* c8 ignore start */
 export function isDevelopment(): boolean {
-    // Check if main file is in src/ directory (dev mode)
-    if (Bun.main.includes("/src/") || Bun.main.includes("\\src\\")) {
-        return true;
-    }
-    /* c8 ignore next */
-    // Check NODE_ENV
-    if (process.env.NODE_ENV === "development") {
-        return true;
-    }
-    // Default to production for safety
-    return false;
+	// Check if main file is in src/ directory (dev mode)
+	if (Bun.main.includes("/src/") || Bun.main.includes("\\src\\")) {
+		return true;
+	}
+	/* c8 ignore next */
+	// Check NODE_ENV
+	if (process.env.NODE_ENV === "development") {
+		return true;
+	}
+	// Default to production for safety
+	return false;
 }
