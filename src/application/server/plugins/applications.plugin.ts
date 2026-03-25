@@ -1,7 +1,9 @@
 import { type } from "arktype";
+import { Effect, Either } from "effect";
 import { Elysia, NotFoundError } from "elysia";
 
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import { createJobBoardRepositoryPlugin } from "#src/application/server/plugins/jobBoardRepository.plugin.ts";
 import {
@@ -9,6 +11,8 @@ import {
 	fetchAllApplicationsOrEmpty,
 	transformUpdateData,
 } from "#src/application/server/utils/application-route-helpers.ts";
+import { filterApplications } from "#src/application/use-cases/filterApplications.ts";
+import { generateRandomJobApplicationData } from "#src/application/use-cases/generateRandomApplications.ts";
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
 import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
 import {
@@ -38,14 +42,14 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		.get(
 			"/:id",
 			async ({ jobApplicationManager, params: { id }, set }) => {
-				const result = await jobApplicationManager.getJobApplication(id);
+				const result = await runEffect(jobApplicationManager.getJobApplication(id));
 
-				if (result.isErr()) {
-					throw new NotFoundError(`Error: ${result.error}`);
+				if (Either.isLeft(result)) {
+					throw new NotFoundError(`Error: ${result.left.detail}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
-				return renderApplicationTableRow(result.value);
+				return renderApplicationTableRow(result.right);
 			},
 			{
 				params: applicationIdParamSchema,
@@ -56,14 +60,14 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		.get(
 			"/:id/edit",
 			async ({ jobApplicationManager, params: { id }, set }) => {
-				const result = await jobApplicationManager.getJobApplication(id);
+				const result = await runEffect(jobApplicationManager.getJobApplication(id));
 
-				if (result.isErr()) {
-					throw new NotFoundError(`Error: ${result.error}`);
+				if (Either.isLeft(result)) {
+					throw new NotFoundError(`Error: ${result.left.detail}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
-				return renderEditableRow(result.value);
+				return renderEditableRow(result.right);
 			},
 			{
 				params: applicationIdParamSchema,
@@ -80,10 +84,10 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				request,
 				cookie,
 			}) => {
-				const result = await jobApplicationManager.getJobApplication(id);
+				const result = await runEffect(jobApplicationManager.getJobApplication(id));
 
-				if (result.isErr()) {
-					throw new NotFoundError(`Error: ${result.error}`);
+				if (Either.isLeft(result)) {
+					throw new NotFoundError(`Error: ${result.left.detail}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
@@ -103,12 +107,12 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				const needsFullPage = !isHtmxRequest || !isPartialUpdate;
 
 				return needsFullPage
-					? applicationDetailsPage(result.value, {
+					? applicationDetailsPage(result.right, {
 							navbar: {
 								currentDb: getCurrentDbFromCookie(cookie),
 							},
 						})
-					: renderApplicationDetailsView(result.value);
+					: renderApplicationDetailsView(result.right);
 			},
 			{
 				params: applicationIdParamSchema,
@@ -119,14 +123,14 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		.get(
 			"/:id/details/edit",
 			async ({ jobApplicationManager, params: { id }, set }) => {
-				const result = await jobApplicationManager.getJobApplication(id);
+				const result = await runEffect(jobApplicationManager.getJobApplication(id));
 
-				if (result.isErr()) {
-					throw new NotFoundError(`Error: ${result.error}`);
+				if (Either.isLeft(result)) {
+					throw new NotFoundError(`Error: ${result.left.detail}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
-				return renderApplicationDetailsEdit(result.value);
+				return renderApplicationDetailsEdit(result.right);
 			},
 			{
 				params: applicationIdParamSchema,
@@ -138,19 +142,19 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 			"/:id/details",
 			async ({ jobApplicationManager, params: { id }, body, set }) => {
 				// Update the application
-				const updateResult = await jobApplicationManager.updateJobApplication(
+				const updateResult = await runEffect(jobApplicationManager.updateJobApplication(
 					id,
 					body,
-				);
+				));
 
-				if (updateResult.isErr()) {
+				if (Either.isLeft(updateResult)) {
 					set.status = 500;
-					return `Error: ${updateResult.error}`;
+					return `Error: ${updateResult.left.detail}`;
 				}
 
 				// Return updated details view
 				set.headers["Content-Type"] = "text/html";
-				return renderApplicationDetailsView(updateResult.value);
+				return renderApplicationDetailsView(updateResult.right);
 			},
 			{
 				params: applicationIdParamSchema,
@@ -158,9 +162,9 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				async transform({ body, jobApplicationManager, params: { id } }) {
 					// Get current application to preserve existing statusLog
 					const currentAppResult =
-						await jobApplicationManager.getJobApplication(id);
-					const currentApp = currentAppResult.isOk()
-						? currentAppResult.value
+						await runEffect(jobApplicationManager.getJobApplication(id));
+					const currentApp = Either.isRight(currentAppResult)
+						? currentAppResult.right
 						: null;
 
 					body = transformUpdateData(body, currentApp);
@@ -172,19 +176,19 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 			"/:id",
 			async ({ jobApplicationManager, params: { id }, body, set }) => {
 				// Update the application
-				const updateResult = await jobApplicationManager.updateJobApplication(
+				const updateResult = await runEffect(jobApplicationManager.updateJobApplication(
 					id,
 					body,
-				);
+				));
 
-				if (updateResult.isErr()) {
+				if (Either.isLeft(updateResult)) {
 					set.status = 500;
-					return `Error: ${updateResult.error}`;
+					return `Error: ${updateResult.left.detail}`;
 				}
 
 				// Return the updated display row
 				set.headers["Content-Type"] = "text/html";
-				return renderApplicationTableRow(updateResult.value);
+				return renderApplicationTableRow(updateResult.right);
 			},
 			{
 				params: applicationIdParamSchema,
@@ -192,9 +196,9 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				async transform({ body, jobApplicationManager, params: { id } }) {
 					// Get current application to preserve existing statusLog
 					const currentAppResult =
-						await jobApplicationManager.getJobApplication(id);
-					const currentApp = currentAppResult.isOk()
-						? currentAppResult.value
+						await runEffect(jobApplicationManager.getJobApplication(id));
+					const currentApp = Either.isRight(currentAppResult)
+						? currentAppResult.right
 						: null;
 
 					body = transformUpdateData(body, currentApp);
@@ -205,10 +209,10 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		.delete(
 			"/:id",
 			async ({ jobApplicationManager, params: { id }, set, request }) => {
-				const result = await jobApplicationManager.deleteJobApplication(id);
-				if (result.isErr()) {
+				const result = await runEffect(jobApplicationManager.deleteJobApplication(id));
+				if (Either.isLeft(result)) {
 					set.status = 500;
-					return `Error: ${result.error}`;
+					return `Error: ${result.left.detail}`;
 				}
 				// If called from the details page (check referer), redirect to the homepage
 				const referer = request.headers.get("referer") || "";
@@ -229,8 +233,8 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 			async ({ jobApplicationManager, jobBoardRepository, body, set }) => {
 				// Helper to fetch job boards
 				const getJobBoards = async () => {
-					const result = await jobBoardRepository.getAll();
-					return result.isOk() ? result.value : [];
+					const result = await runEffect(jobBoardRepository.getAll());
+					return Either.isRight(result) ? result.right : [];
 				};
 
 				try {
@@ -238,10 +242,10 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 					const applicationData = extractApplicationData(body);
 
 					const result =
-						await jobApplicationManager.createJobApplication(applicationData);
+						await runEffect(jobApplicationManager.createJobApplication(applicationData));
 
-					if (result.isErr()) {
-						console.error("Failed to create application:", result.error);
+					if (Either.isLeft(result)) {
+						console.error("Failed to create application:", result.left.detail);
 						const currentApps = await fetchAllApplicationsOrEmpty(
 							jobApplicationManager,
 						);
@@ -252,19 +256,19 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						return formAndPipelineContent(
 							currentApps,
 							jobBoards,
-							`Error: ${result.error}`,
+							`Error: ${result.left.detail}`,
 						);
 					}
 
-					const newApplication = result.value;
+					const newApplication = result.right;
 
 					// Get all applications to refresh the pipeline view
 					const applicationsResult =
-						await jobApplicationManager.getAllJobApplications();
-					if (applicationsResult.isErr()) {
+						await runEffect(jobApplicationManager.getAllJobApplications());
+					if (Either.isLeft(applicationsResult)) {
 						console.error(
 							"Failed to fetch applications:",
-							applicationsResult.error,
+							applicationsResult.left.detail,
 						);
 						const jobBoards = await getJobBoards();
 						set.status = 500;
@@ -272,14 +276,14 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						return formAndPipelineContent(
 							[],
 							jobBoards,
-							`Error fetching applications: ${applicationsResult.error}`,
+							`Error fetching applications: ${applicationsResult.left.detail}`,
 						);
 					}
 
 					const jobBoards = await getJobBoards();
 					set.headers["Content-Type"] = "text/html";
 					set.headers["X-Application-ID"] = newApplication.id;
-					return formAndPipelineContent(applicationsResult.value, jobBoards);
+					return formAndPipelineContent(applicationsResult.right, jobBoards);
 				} catch (error) {
 					console.error("Unexpected error creating application:", error);
 					const currentApps = await fetchAllApplicationsOrEmpty(
@@ -308,12 +312,9 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 
 				// Fetch applications
 				const applicationsResult =
-					await jobApplicationManager.getAllJobApplications();
-				const all = applicationsResult.isOk() ? applicationsResult.value : [];
+					await runEffect(jobApplicationManager.getAllJobApplications());
+				const all = Either.isRight(applicationsResult) ? applicationsResult.right : [];
 
-				// Import filter function
-				const { filterApplications } =
-					await import("../../use-cases/filterApplications.ts");
 				const filtered = filterApplications(searchQuery, all);
 
 				const rows = filtered.length
@@ -331,17 +332,17 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		.post(
 			"/delete-all",
 			async ({ jobApplicationManager, jobBoardRepository, set }) => {
-				const result = await jobApplicationManager.clearAllJobApplications();
+				const result = await runEffect(jobApplicationManager.clearAllJobApplications());
 
-				if (result.isErr()) {
+				if (Either.isLeft(result)) {
 					set.status = 500;
 					set.headers["Content-Type"] = "text/html";
-					return `<div class="error-message">Error: ${result.error}</div>`;
+					return `<div class="error-message">Error: ${result.left.detail}</div>`;
 				}
 
 				// Get job boards to refresh the form
-				const jobBoardsResult = await jobBoardRepository.getAll();
-				const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
+				const jobBoardsResult = await runEffect(jobBoardRepository.getAll());
+				const jobBoards = Either.isRight(jobBoardsResult) ? jobBoardsResult.right : [];
 
 				// Return the updated pipeline with empty applications
 				set.headers["Content-Type"] = "text/html";
@@ -432,37 +433,33 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						return `<div class="error-message">Error: Count must be between 1 and 100</div>`;
 					}
 
-					// Import the generator function
-					const { generateRandomJobApplicationData } =
-						await import("../../use-cases/generateRandomApplications.ts");
-
 					// Get job boards for potential linking
-					const jobBoardsResult = await jobBoardRepository.getAll();
-					const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
+					const jobBoardsResult = await runEffect(jobBoardRepository.getAll());
+					const jobBoards = Either.isRight(jobBoardsResult) ? jobBoardsResult.right : [];
 
 					// Generate and create applications
 					for (let i = 0; i < count; i++) {
 						const data = generateRandomJobApplicationData(jobBoards);
-						await jobApplicationManager.createJobApplication(data);
+						await Effect.runPromise(jobApplicationManager.createJobApplication(data));
 					}
 
 					// Get all applications to refresh the pipeline view
 					const applicationsResult =
-						await jobApplicationManager.getAllJobApplications();
-					const applications = applicationsResult.isOk()
-						? applicationsResult.value
+						await runEffect(jobApplicationManager.getAllJobApplications());
+					const applications = Either.isRight(applicationsResult)
+						? applicationsResult.right
 						: [];
 
 					set.headers["Content-Type"] = "text/html";
 					return formAndPipelineContent(applications, jobBoards);
 				} catch (error) {
 					console.error("Error generating applications:", error);
-					const jobBoardsResult = await jobBoardRepository.getAll();
-					const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
+					const jobBoardsResult = await runEffect(jobBoardRepository.getAll());
+					const jobBoards = Either.isRight(jobBoardsResult) ? jobBoardsResult.right : [];
 					const applicationsResult =
-						await jobApplicationManager.getAllJobApplications();
-					const applications = applicationsResult.isOk()
-						? applicationsResult.value
+						await runEffect(jobApplicationManager.getAllJobApplications());
+					const applications = Either.isRight(applicationsResult)
+						? applicationsResult.right
 						: [];
 
 					set.status = 500;

@@ -1,14 +1,16 @@
 import { type } from "arktype";
+import { Either } from "effect";
 import { Elysia } from "elysia";
 import type { HTTPHeaders } from "elysia/types";
-import type { ResultAsync } from "neverthrow";
 
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
 } from "#src/domain/entities/job-application.ts";
 import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
+import type { JobApplicationError } from "#src/domain/entities/job-application-error.ts";
 import type { JobApplicationManager } from "#src/domain/ports/job-application-manager.ts";
 
 // Type definitions
@@ -181,8 +183,8 @@ const createApplicationModule = () => {
 	const createJobApplication = async (
 		jobApplicationManager: JobApplicationManager,
 		applicationData: JobApplicationForCreate,
-	): Promise<ResultAsync<JobApplication, string>> =>
-		jobApplicationManager.createJobApplication(applicationData);
+	): Promise<Either.Either<JobApplication, JobApplicationError>> =>
+		runEffect(jobApplicationManager.createJobApplication(applicationData));
 
 	return {
 		transformExtensionBodyToApplicationData,
@@ -276,13 +278,17 @@ const createExtensionApplicationCreationHandler = (
 			validationResult,
 		);
 
-		if (creationResult.isErr()) {
+		if (Either.isLeft(creationResult)) {
 			set.status = 500;
-			return responseModule.createCreationErrorResponse(creationResult.error);
+			return responseModule.createCreationErrorResponse(
+				creationResult.left.detail,
+			);
 		}
 
 		set.status = 201;
-		return responseModule.createSuccessResponse(creationResult);
+		return responseModule.createSuccessResponse({
+			value: creationResult.right,
+		});
 	};
 
 	return { handleExtensionApplicationCreation };
@@ -311,8 +317,7 @@ const createCorsPreflightHandler = (
 /**
  * Browser extension API endpoints
  */
-export const createExtensionApiPlugin = (() => {
-	// Initialize modules
+export function createExtensionApiPlugin() {
 	const authModule = createAuthModule();
 	const corsModule = createCorsModule();
 	const applicationModule = createApplicationModule();
@@ -324,37 +329,35 @@ export const createExtensionApiPlugin = (() => {
 		);
 	const { handleCorsPreflight } = createCorsPreflightHandler(corsModule);
 
-	return (
-		new Elysia({ prefix: "/api" })
-			.use(jobApplicationManagerPlugin)
-			.use(corsModule.extensionCors())
-			// Health check endpoint (public, no auth required)
-			.get("/health", responseModule.createHealthCheckResponse)
-			// POST /api/applications/from-extension - Create application from browser extension
-			.group("/applications", (app) =>
-				app
-					// OPTIONS handler for CORS preflight (no auth required)
-					.options("/from-extension", handleCorsPreflight)
-					.use(authModule.apiKeyAuth())
-					.post(
-						"/from-extension",
-						async ({ jobApplicationManager, body, set }) => {
-							try {
-								return await handleExtensionApplicationCreation(
-									jobApplicationManager,
-									body,
-									set,
-								);
-							} catch (error) {
-								console.error("Extension API error:", error);
-								set.status = 500;
-								return responseModule.createInternalServerErrorResponse(error);
-							}
-						},
-						{
-							body: extensionCreateApplicationSchema,
-						},
-					),
-			)
-	);
-})();
+	return new Elysia({ prefix: "/api" })
+		.use(jobApplicationManagerPlugin)
+		.use(corsModule.extensionCors())
+		// Health check endpoint (public, no auth required)
+		.get("/health", responseModule.createHealthCheckResponse)
+		// POST /api/applications/from-extension - Create application from browser extension
+		.group("/applications", (app) =>
+			app
+				// OPTIONS handler for CORS preflight (no auth required)
+				.options("/from-extension", handleCorsPreflight)
+				.use(authModule.apiKeyAuth())
+				.post(
+					"/from-extension",
+					async ({ jobApplicationManager, body, set }) => {
+						try {
+							return await handleExtensionApplicationCreation(
+								jobApplicationManager,
+								body,
+								set,
+							);
+						} catch (error) {
+							console.error("Extension API error:", error);
+							set.status = 500;
+							return responseModule.createInternalServerErrorResponse(error);
+						}
+					},
+					{
+						body: extensionCreateApplicationSchema,
+					},
+				),
+		);
+}

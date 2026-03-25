@@ -1,7 +1,9 @@
 import { scope, type } from "arktype";
+import { Either } from "effect";
 import { Elysia, NotFoundError } from "elysia";
 
 import { interviewStageRepositoryPlugin } from "#src/application/server/plugins/interviewStageRepository.plugin.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
 import { uuidProvider } from "#src/infrastructure/di/uuid-provider.ts";
 import {
@@ -41,16 +43,17 @@ export const createInterviewStagesPlugin = new Elysia({
 	.get(
 		"/:id/interview-stages",
 		async ({ interviewStageRepository, params: { id: appId }, set }) => {
-			const result =
-				await interviewStageRepository.getByJobApplicationId(appId);
+			const result = await runEffect(
+				interviewStageRepository.getByJobApplicationId(appId),
+			);
 
-			if (result.isErr()) {
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			set.headers["Content-Type"] = "text/html";
-			return renderInterviewStagesList(result.value, appId);
+			return renderInterviewStagesList(result.right, appId);
 		},
 		{
 			params: idParamSchema,
@@ -90,20 +93,23 @@ export const createInterviewStagesPlugin = new Elysia({
 					})) || [],
 			};
 
-			const result = await interviewStageRepository.create(stageData);
+			const result = await runEffect(
+				interviewStageRepository.create(stageData),
+			);
 
-			if (result.isErr()) {
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			// Return the new stage card
 			set.headers["Content-Type"] = "text/html";
-			const stages =
-				await interviewStageRepository.getByJobApplicationId(appId);
-			return stages.isOk()
-				? renderInterviewStagesList(stages.value, appId)
-				: `Error: ${stages.error}`;
+			const stages = await runEffect(
+				interviewStageRepository.getByJobApplicationId(appId),
+			);
+			return Either.isRight(stages)
+				? renderInterviewStagesList(stages.right, appId)
+				: `Error: ${stages.left.detail}`;
 		},
 		{
 			params: idParamSchema,
@@ -118,21 +124,25 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 	.get(
 		"/interview-stages/:id",
 		async ({ interviewStageRepository, params: { id }, set }) => {
-			const result = await interviewStageRepository.getById(id);
+			const result = await runEffect(
+				interviewStageRepository.getById(id),
+			);
 
-			if (result.isErr()) {
-				throw new NotFoundError(`Error: ${result.error}`);
+			if (Either.isLeft(result)) {
+				throw new NotFoundError(`Error: ${result.left.detail}`);
 			}
 
-			const stage = result.value;
+			const stage = result.right;
 			// Return just the stage card
 			set.headers["Content-Type"] = "text/html";
-			const stagesResult = await interviewStageRepository.getByJobApplicationId(
-				stage.jobApplicationId,
+			const stagesResult = await runEffect(
+				interviewStageRepository.getByJobApplicationId(
+					stage.jobApplicationId,
+				),
 			);
-			return stagesResult.isOk()
-				? renderInterviewStagesList(stagesResult.value, stage.jobApplicationId)
-				: `Error: ${stagesResult.error}`;
+			return Either.isRight(stagesResult)
+				? renderInterviewStagesList(stagesResult.right, stage.jobApplicationId)
+				: `Error: ${stagesResult.left.detail}`;
 		},
 		{
 			params: idParamSchema,
@@ -143,16 +153,18 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 	.get(
 		"/interview-stages/:id/edit",
 		async ({ interviewStageRepository, params: { id }, set }) => {
-			const result = await interviewStageRepository.getById(id);
+			const result = await runEffect(
+				interviewStageRepository.getById(id),
+			);
 
-			if (result.isErr()) {
-				throw new NotFoundError(`Error: ${result.error}`);
+			if (Either.isLeft(result)) {
+				throw new NotFoundError(`Error: ${result.left.detail}`);
 			}
 
 			set.headers["Content-Type"] = "text/html";
 			return renderInterviewStageForm(
-				result.value.jobApplicationId,
-				result.value,
+				result.right.jobApplicationId,
+				result.right,
 			);
 		},
 		{
@@ -180,24 +192,28 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 					})) || [],
 			};
 
-			const result = await interviewStageRepository.update(id, updates);
+			const result = await runEffect(
+				interviewStageRepository.update(id, updates),
+			);
 
-			if (result.isErr()) {
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			// Return updated list
 			set.headers["Content-Type"] = "text/html";
-			const stagesResult = await interviewStageRepository.getByJobApplicationId(
-				result.value.jobApplicationId,
+			const stagesResult = await runEffect(
+				interviewStageRepository.getByJobApplicationId(
+					result.right.jobApplicationId,
+				),
 			);
-			return stagesResult.isOk()
+			return Either.isRight(stagesResult)
 				? renderInterviewStagesList(
-						stagesResult.value,
-						result.value.jobApplicationId,
+						stagesResult.right,
+						result.right.jobApplicationId,
 					)
-				: `Error: ${stagesResult.error}`;
+				: `Error: ${stagesResult.left.detail}`;
 		},
 		{
 			params: idParamSchema,
@@ -209,27 +225,32 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 		"/interview-stages/:id",
 		async ({ interviewStageRepository, params: { id }, set }) => {
 			// Get the stage first to know the job application ID
-			const stageResult = await interviewStageRepository.getById(id);
-			if (stageResult.isErr()) {
+			const stageResult = await runEffect(
+				interviewStageRepository.getById(id),
+			);
+			if (Either.isLeft(stageResult)) {
 				set.status = 404;
-				return `Error: ${stageResult.error}`;
+				return `Error: ${stageResult.left.detail}`;
 			}
 
-			const jobAppId = stageResult.value.jobApplicationId;
+			const jobAppId = stageResult.right.jobApplicationId;
 
-			const result = await interviewStageRepository.delete(id);
-			if (result.isErr()) {
+			const result = await runEffect(
+				interviewStageRepository.delete(id),
+			);
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			// Return updated list
 			set.headers["Content-Type"] = "text/html";
-			const stagesResult =
-				await interviewStageRepository.getByJobApplicationId(jobAppId);
-			return stagesResult.isOk()
-				? renderInterviewStagesList(stagesResult.value, jobAppId)
-				: `Error: ${stagesResult.error}`;
+			const stagesListResult = await runEffect(
+				interviewStageRepository.getByJobApplicationId(jobAppId),
+			);
+			return Either.isRight(stagesListResult)
+				? renderInterviewStagesList(stagesListResult.right, jobAppId)
+				: `Error: ${stagesListResult.left.detail}`;
 		},
 		{
 			params: idParamSchema,

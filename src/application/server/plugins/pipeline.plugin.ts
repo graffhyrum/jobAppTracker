@@ -1,6 +1,8 @@
+import { Either } from "effect";
 import { Elysia } from "elysia";
 
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import type { Column } from "#src/presentation/components/pipeline.ts";
 import { pipelineQuerySchema } from "#src/presentation/schemas/pipeline-routes.schemas.ts";
 
@@ -15,9 +17,9 @@ export const createPipelinePlugin = new Elysia({ prefix: "/api" })
 
 			// Fetch fresh applications data
 			const applicationsResult =
-				await jobApplicationManager.getAllJobApplications();
-			const applications = applicationsResult.isOk()
-				? applicationsResult.value
+				await runEffect(jobApplicationManager.getAllJobApplications());
+			const applications = Either.isRight(applicationsResult)
+				? applicationsResult.right
 				: [];
 
 			// Import pipeline component to avoid circular dependency

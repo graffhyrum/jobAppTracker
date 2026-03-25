@@ -129,7 +129,7 @@ export function startElysiaServer() {
 					"src/presentation/.well-known/appspecific/com.chrome.devtools.json",
 				);
 				const exists = await file.exists();
-				return exists ? new Response(file) : "{}";
+				return exists ? await file.text() : "{}";
 			},
 		)
 		// Add custom route plugins with dependency injection
@@ -142,7 +142,7 @@ export function startElysiaServer() {
 		.use(createContactOperationsPlugin)
 		.use(createAnalyticsPlugin)
 		// Browser extension API
-		.use(createExtensionApiPlugin);
+		.use(createExtensionApiPlugin());
 
 	// Conditionally add dev tools plugin in development mode
 	if (isDevelopment()) {

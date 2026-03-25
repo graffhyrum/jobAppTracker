@@ -1,3 +1,4 @@
+import { Either } from "effect";
 import {
 	getJobAppCurrentStatusEntry,
 	isJobAppOverdue,
@@ -83,8 +84,8 @@ export const renderApplicationTableRow = (app: JobApplication): string => {
 // Render the row in edit mode (all fields as inputs)
 export function renderEditableRow(app: JobApplication): string {
 	const currentStatusResult = getJobAppCurrentStatusEntry(app);
-	const currentStatus = currentStatusResult.isOk()
-		? currentStatusResult.value[1]
+	const currentStatus = Either.isRight(currentStatusResult)
+		? currentStatusResult.right[1]
 		: null;
 	const isOverdue = isJobAppOverdue(app);
 

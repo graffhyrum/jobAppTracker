@@ -1,8 +1,10 @@
+import { Either } from "effect";
 import { Elysia } from "elysia";
 
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
 import { createJobBoardRepositoryPlugin } from "#src/application/server/plugins/jobBoardRepository.plugin.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import type { JobBoardRepository } from "#src/domain/ports/job-board-repository.ts";
 import { healthcheckPage } from "#src/presentation/pages/healthcheck.ts";
 import { homepagePage } from "#src/presentation/pages/homepage.ts";
@@ -21,26 +23,26 @@ export const createPagesPlugin = (jobBoardRepo: JobBoardRepository) =>
 			async ({ jobApplicationManager, jobBoardRepository, set, cookie }) => {
 				// Fetch applications to show in the pipeline
 				const applicationsResult =
-					await jobApplicationManager.getAllJobApplications();
-				const applications = applicationsResult.isOk()
-					? applicationsResult.value
+					await runEffect(jobApplicationManager.getAllJobApplications());
+				const applications = Either.isRight(applicationsResult)
+					? applicationsResult.right
 					: [];
 
-				if (applicationsResult.isErr()) {
+				if (Either.isLeft(applicationsResult)) {
 					console.error(
 						"❌ [Homepage] Failed to fetch applications:",
-						applicationsResult.error,
+						applicationsResult.left.detail,
 					);
 				}
 
 				// Fetch job boards for the form
-				const jobBoardsResult = await jobBoardRepository.getAll();
-				const jobBoards = jobBoardsResult.isOk() ? jobBoardsResult.value : [];
+				const jobBoardsResult = await runEffect(jobBoardRepository.getAll());
+				const jobBoards = Either.isRight(jobBoardsResult) ? jobBoardsResult.right : [];
 
-				if (jobBoardsResult.isErr()) {
+				if (Either.isLeft(jobBoardsResult)) {
 					console.error(
-						"❌ [Homepage] Failed to fetch job boards:",
-						jobBoardsResult.error,
+						"[Homepage] Failed to fetch job boards:",
+						jobBoardsResult.left.detail,
 					);
 				}
 

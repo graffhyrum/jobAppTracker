@@ -1,7 +1,9 @@
 import { scope, type } from "arktype";
+import { Either } from "effect";
 import { Elysia, NotFoundError } from "elysia";
 
 import { contactRepositoryPlugin } from "#src/application/server/plugins/contactRepository.plugin.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
 import {
 	renderContactForm,
@@ -34,15 +36,17 @@ export const createContactsPlugin = new Elysia({ prefix: "/applications" })
 	.get(
 		"/:id/contacts",
 		async ({ contactRepository, params: { id: appId }, set }) => {
-			const result = await contactRepository.getByJobApplicationId(appId);
+			const result = await runEffect(
+				contactRepository.getByJobApplicationId(appId),
+			);
 
-			if (result.isErr()) {
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			set.headers["Content-Type"] = "text/html";
-			return renderContactsList(result.value, appId);
+			return renderContactsList(result.right, appId);
 		},
 		{
 			params: idParamSchema,
@@ -78,19 +82,21 @@ export const createContactsPlugin = new Elysia({ prefix: "/applications" })
 				notes: body.notes,
 			};
 
-			const result = await contactRepository.create(contactData);
+			const result = await runEffect(contactRepository.create(contactData));
 
-			if (result.isErr()) {
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			// Return the updated list
 			set.headers["Content-Type"] = "text/html";
-			const contacts = await contactRepository.getByJobApplicationId(appId);
-			return contacts.isOk()
-				? renderContactsList(contacts.value, appId)
-				: `Error: ${contacts.error}`;
+			const contacts = await runEffect(
+				contactRepository.getByJobApplicationId(appId),
+			);
+			return Either.isRight(contacts)
+				? renderContactsList(contacts.right, appId)
+				: `Error: ${contacts.left.detail}`;
 		},
 		{
 			params: idParamSchema,
@@ -105,21 +111,21 @@ export const createContactOperationsPlugin = new Elysia()
 	.get(
 		"/contacts/:id",
 		async ({ contactRepository, params: { id }, set }) => {
-			const result = await contactRepository.getById(id);
+			const result = await runEffect(contactRepository.getById(id));
 
-			if (result.isErr()) {
-				throw new NotFoundError(`Error: ${result.error}`);
+			if (Either.isLeft(result)) {
+				throw new NotFoundError(`Error: ${result.left.detail}`);
 			}
 
-			const contact = result.value;
+			const contact = result.right;
 			// Return just the contact card
 			set.headers["Content-Type"] = "text/html";
-			const contactsResult = await contactRepository.getByJobApplicationId(
-				contact.jobApplicationId,
+			const contactsResult = await runEffect(
+				contactRepository.getByJobApplicationId(contact.jobApplicationId),
 			);
-			return contactsResult.isOk()
-				? renderContactsList(contactsResult.value, contact.jobApplicationId)
-				: `Error: ${contactsResult.error}`;
+			return Either.isRight(contactsResult)
+				? renderContactsList(contactsResult.right, contact.jobApplicationId)
+				: `Error: ${contactsResult.left.detail}`;
 		},
 		{
 			params: idParamSchema,
@@ -130,14 +136,14 @@ export const createContactOperationsPlugin = new Elysia()
 	.get(
 		"/contacts/:id/edit",
 		async ({ contactRepository, params: { id }, set }) => {
-			const result = await contactRepository.getById(id);
+			const result = await runEffect(contactRepository.getById(id));
 
-			if (result.isErr()) {
-				throw new NotFoundError(`Error: ${result.error}`);
+			if (Either.isLeft(result)) {
+				throw new NotFoundError(`Error: ${result.left.detail}`);
 			}
 
 			set.headers["Content-Type"] = "text/html";
-			return renderContactForm(result.value.jobApplicationId, result.value);
+			return renderContactForm(result.right.jobApplicationId, result.right);
 		},
 		{
 			params: idParamSchema,
@@ -160,24 +166,26 @@ export const createContactOperationsPlugin = new Elysia()
 				notes: body.notes,
 			};
 
-			const result = await contactRepository.update(id, updates);
+			const result = await runEffect(contactRepository.update(id, updates));
 
-			if (result.isErr()) {
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			// Return updated list
 			set.headers["Content-Type"] = "text/html";
-			const contactsResult = await contactRepository.getByJobApplicationId(
-				result.value.jobApplicationId,
+			const contactsResult = await runEffect(
+				contactRepository.getByJobApplicationId(
+					result.right.jobApplicationId,
+				),
 			);
-			return contactsResult.isOk()
+			return Either.isRight(contactsResult)
 				? renderContactsList(
-						contactsResult.value,
-						result.value.jobApplicationId,
+						contactsResult.right,
+						result.right.jobApplicationId,
 					)
-				: `Error: ${contactsResult.error}`;
+				: `Error: ${contactsResult.left.detail}`;
 		},
 		{
 			params: idParamSchema,
@@ -189,27 +197,28 @@ export const createContactOperationsPlugin = new Elysia()
 		"/contacts/:id",
 		async ({ contactRepository, params: { id }, set }) => {
 			// Get the contact first to know the job application ID
-			const contactResult = await contactRepository.getById(id);
-			if (contactResult.isErr()) {
+			const contactResult = await runEffect(contactRepository.getById(id));
+			if (Either.isLeft(contactResult)) {
 				set.status = 404;
-				return `Error: ${contactResult.error}`;
+				return `Error: ${contactResult.left.detail}`;
 			}
 
-			const jobAppId = contactResult.value.jobApplicationId;
+			const jobAppId = contactResult.right.jobApplicationId;
 
-			const result = await contactRepository.delete(id);
-			if (result.isErr()) {
+			const result = await runEffect(contactRepository.delete(id));
+			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.error}`;
+				return `Error: ${result.left.detail}`;
 			}
 
 			// Return updated list
 			set.headers["Content-Type"] = "text/html";
-			const contactsResult =
-				await contactRepository.getByJobApplicationId(jobAppId);
-			return contactsResult.isOk()
-				? renderContactsList(contactsResult.value, jobAppId)
-				: `Error: ${contactsResult.error}`;
+			const contactsResult = await runEffect(
+				contactRepository.getByJobApplicationId(jobAppId),
+			);
+			return Either.isRight(contactsResult)
+				? renderContactsList(contactsResult.right, jobAppId)
+				: `Error: ${contactsResult.left.detail}`;
 		},
 		{
 			params: idParamSchema,

@@ -1,3 +1,4 @@
+import { Either } from "effect";
 import {
 	getJobAppCurrentStatusEntry,
 	type JobApplication,
@@ -189,8 +190,8 @@ export const renderApplicationDetailsView = (app: JobApplication): string => {
 
 export const renderApplicationDetailsEdit = (app: JobApplication): string => {
 	const currentStatusResult = getJobAppCurrentStatusEntry(app);
-	const currentStatus = currentStatusResult.isOk()
-		? currentStatusResult.value[1]
+	const currentStatus = Either.isRight(currentStatusResult)
+		? currentStatusResult.right[1]
 		: null;
 	const _isOverdue = isApplicationOverdue(app);
 

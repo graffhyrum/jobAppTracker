@@ -1,9 +1,11 @@
+import { Either } from "effect";
 import { Elysia } from "elysia";
 
 import { contactRepositoryPlugin } from "#src/application/server/plugins/contactRepository.plugin.ts";
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
 import { interviewStageRepositoryPlugin } from "#src/application/server/plugins/interviewStageRepository.plugin.ts";
 import { jobApplicationManagerPlugin } from "#src/application/server/plugins/jobApplicationManager.plugin.ts";
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { createAnalyticsAggregator } from "#src/domain/use-cases/analytics-aggregator.ts";
 import { analyticsPage } from "#src/presentation/pages/analytics.ts";
 
@@ -30,28 +32,27 @@ export const createAnalyticsPlugin = new Elysia()
 		},
 	)
 	.get("/analytics", async ({ analyticsAggregator, set, cookie, query }) => {
-		// Determine date range from query params
 		const startDate = query.startDate as string | undefined;
 		const endDate = query.endDate as string | undefined;
 
-		// Compute application analytics using the aggregator
-		const result = await analyticsAggregator.computeApplicationAnalytics({
-			startDate,
-			endDate,
-		});
+		const result = await runEffect(
+			analyticsAggregator.computeApplicationAnalytics({
+				startDate,
+				endDate,
+			}),
+		);
 
-		if (result.isErr()) {
+		if (Either.isLeft(result)) {
 			console.error(
-				"❌ [Analytics] Failed to compute analytics:",
-				result.error,
+				"[Analytics] Failed to compute analytics:",
+				result.left.detail,
 			);
 			set.status = 500;
-			return `<div class="error-message">Failed to load analytics: ${result.error}</div>`;
+			return `<div class="error-message">Failed to load analytics: ${result.left.detail}</div>`;
 		}
 
-		const { analytics, dateRange } = result.value;
+		const { analytics, dateRange } = result.right;
 
-		// Render analytics page
 		set.headers["Content-Type"] = "text/html";
 		return analyticsPage(
 			analytics,
