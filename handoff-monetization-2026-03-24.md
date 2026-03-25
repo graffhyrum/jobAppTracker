@@ -9,26 +9,31 @@ Define and document a monetization strategy for the job application tracker — 
 ## Accomplished
 
 ### Strategy (via /grill-me interview)
+
 - Resolved 9 major design decisions across goal, scope, architecture, sequencing, and risk
 - Chose: open-core freemium model, one-time fixed price (~$15), Stripe via existing LLC, cloud LLM API (pay-per-call) behind a thin license-gated proxy, configurable inference endpoint (hosted or local model)
 - Rejected: activation-code executable, PWYW for premium, self-hosted GPU inference, subscription billing
 
 ### PRD & Issues
+
 - **Full PRD** for Phase 2 (Payment + License Infrastructure) → GitHub issue #9
 - **Stub issue** for Phase 1 (Polish Free Tier) → GitHub issue #10
 - **Stub issue** for Phase 3 (Smart Scrape — first premium feature) → GitHub issue #11
 
 ### Research
+
 - Reviewed 16 curated articles on digital product monetization, marketing, UI polish, distribution
 - Distilled findings with verification steps and feedback mechanisms
 - Created sequenced action plan with phase gates and kill signals
 
 ### Artifacts Written
+
 - `docs/monetization-research.md` — all 16 sources canonized with links, claims, verify steps
 - `docs/monetization-action-plan.md` — 6-phase plan with gates, guardrails, investment caps
 - `.claude/plans/wobbly-humming-squirrel.md` — original grilling summary and strategy plan
 
 ### Memory Updated
+
 - `project_monetization.md` — open-core model decisions, pricing, architecture
 - `user_product_experience.md` — first-time digital product seller, unemployed, revenue matters
 

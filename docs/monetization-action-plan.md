@@ -22,15 +22,18 @@ Without measurement, everything that follows is guesswork.
 ## Phase 1: Polish & Position (~1 week)
 
 ### 1a. CSS Quick Wins
+
 - [ ] Apply Krehel's CSS changes globally (see research doc, section 5a)
 - [ ] Before/after screenshots for marketing material
 
 ### 1b. Product Positioning
+
 - [ ] Draft 3 positioning variants (commodity / named methodology / pain-focused)
 - [ ] Write landing page copy for each — just the headline + subheadline + 3 bullets
 - [ ] Pick the strongest (gut check with 2-3 people), ship it as v1
 
 ### 1c. One Comparison Page
+
 - [ ] Write "Job App Tracker vs. Spreadsheets" page — lowest risk, broadest appeal
 - [ ] Host it as a route on the landing page site
 
@@ -43,20 +46,24 @@ Without measurement, everything that follows is guesswork.
 Test channels in parallel. Invest minimally in each, measure which moves the needle.
 
 ### 2a. Community Posts (budget: 0, time: 2-3 hours)
+
 - [ ] Show HN post with clear value prop + demo GIF
 - [ ] 3-5 genuine answers on r/cscareerquestions, r/selfhosted, r/webdev mentioning the tool where relevant
 - [ ] Track referral traffic per channel via UTM tags
 
 ### 2b. SEO Batch Test (budget: 0, time: 1 day)
+
 - [ ] Generate 5 SEO articles via Claude targeting long-tail keywords
 - [ ] Publish on the landing site or a blog subdirectory
 - [ ] Submit to Search Console, wait 2-4 weeks for indexing data
 
 ### 2c. Chrome Web Store (budget: $5 registration fee, time: half day)
+
 - [ ] Package the existing browser extension for Chrome Web Store submission
 - [ ] Track installs and conversion to app usage
 
 ### 2d. llms.txt (budget: 0, time: 30 min)
+
 - [ ] Create `llms.txt` and `llms-full.txt` at the landing page domain root
 
 **Gate:** 2 weeks of data. Identify which channel(s) drove >80% of traffic. Double down on winners, drop losers. Minimum viable signal: 200+ unique visitors from at least one channel.
@@ -68,16 +75,19 @@ Test channels in parallel. Invest minimally in each, measure which moves the nee
 Only start this after Phase 2 confirms people are finding the product.
 
 ### 3a. Stripe Integration
+
 - [ ] Set up Stripe product ($15 one-time) via existing LLC
 - [ ] Build checkout flow: app → Stripe hosted checkout → redirect to `/activate?key=...`
 - [ ] Webhook handler generates UUID license key on payment
 
 ### 3b. License Validation Proxy
+
 - [ ] Deploy thin proxy service (Cloudflare Workers or Fly.io)
 - [ ] `POST /validate` — check license key validity
 - [ ] `POST /extract` — validate key + proxy to LLM API (for Phase 5)
 
 ### 3c. App-Side Premium Gating
+
 - [ ] New `settings` table in SQLite (key/value + updated_at)
 - [ ] `/activate` route handles auto-injection from Stripe redirect
 - [ ] Settings page with manual key entry fallback
@@ -91,12 +101,14 @@ Only start this after Phase 2 confirms people are finding the product.
 ## Phase 4: First Revenue (~1 week)
 
 ### 4a. Premium Launch
+
 - [ ] Update landing page with premium tier description and Stripe checkout link
 - [ ] Update comparison page to include premium features
 - [ ] Post update to communities from Phase 2 that drove traffic
 - [ ] A/B test pricing copy once traffic > 50 visitors/week to the checkout page
 
 ### 4b. Companion Product (optional, parallel track)
+
 - [ ] Write a "Job Search Pipeline" guide/template bundle (Weekend Product playbook)
 - [ ] List on Gumroad for $10-20 as independent revenue + marketing funnel
 
@@ -121,12 +133,14 @@ Only start this after Phase 4 confirms people will pay.
 ## Phase 6: Evaluate & Decide
 
 After Phases 0-5, you have real data:
+
 - Which distribution channels work
 - Whether people pay $15 for premium
 - Whether smart scrape quality justifies the price
 - Monthly revenue vs. infrastructure cost
 
 **Decision fork:**
+
 - Revenue covers costs + provides income → keep iterating (analytics export, resume gen, more premium features)
 - Revenue is minimal despite traffic → positioning/pricing problem, revisit Phase 1b
 - Traffic is minimal → distribution problem, revisit Phase 2
@@ -136,14 +150,14 @@ After Phases 0-5, you have real data:
 
 ## Investment Guardrails
 
-| Phase | Max Time | Max Money | Kill Signal |
-|-------|----------|-----------|-------------|
-| 0 | 1 hour | $0 | — |
-| 1 | 1 week | $0 | — |
-| 2 | 2 weeks | $5 (Chrome store) | <50 visitors after 2 weeks |
-| 3 | 2 weeks | ~$5/mo hosting | Phase 2 gate not met |
-| 4 | 1 week + ongoing | Stripe fees only | <10 sales after 30 days |
-| 5 | 2-3 weeks | LLM API costs (pennies) | Phase 4 gate not met |
+| Phase | Max Time         | Max Money               | Kill Signal                |
+| ----- | ---------------- | ----------------------- | -------------------------- |
+| 0     | 1 hour           | $0                      | —                          |
+| 1     | 1 week           | $0                      | —                          |
+| 2     | 2 weeks          | $5 (Chrome store)       | <50 visitors after 2 weeks |
+| 3     | 2 weeks          | ~$5/mo hosting          | Phase 2 gate not met       |
+| 4     | 1 week + ongoing | Stripe fees only        | <10 sales after 30 days    |
+| 5     | 2-3 weeks        | LLM API costs (pennies) | Phase 4 gate not met       |
 
 **Total investment before first revenue signal: ~5-6 weeks, <$20.**
 

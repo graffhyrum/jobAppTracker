@@ -143,6 +143,7 @@
 **Source:** [Jakub Krehel — Details That Make Interfaces Feel Better](https://jakub.kr/writing/details-that-make-interfaces-feel-better)
 
 Specific changes:
+
 - `text-wrap: balance` on headings — prevents orphaned words
 - `-webkit-font-smoothing: antialiased` on body — crisper text on macOS
 - `font-variant-numeric: tabular-nums` on numeric displays — prevents layout shift
@@ -162,6 +163,7 @@ Specific changes:
 **Source:** [@om_patel5 — Startup design advice](#src-om-patel)
 
 Additional actionable items:
+
 - Add "How did you hear about us?" to onboarding (free attribution)
 - Dogfood the product daily
 - Bugs are fine; slow fixes aren't
@@ -266,21 +268,21 @@ Additional actionable items:
 
 ## 9. Source Index
 
-| ID | Title | Author | URL | Accessed |
-|----|-------|--------|-----|----------|
-| <a id="src-google-doc"></a>google-doc | INFO / DIGITAL PRODUCT SAUCE | (personal notes) | [Google Doc](https://docs.google.com/document/d/1IhPyYY2Wy5FkVKHJHAbeF8oQGz41ckSrWcmcvSxG470/edit?usp=drivesdk) | 2026-03-24 |
-| <a id="src-corbin-braun"></a>corbin-braun | How to get paying users for free | @corbin_braun | [x.com](https://x.com/i/status/2031028475096944942) | 2026-03-24 |
-| <a id="src-claude-seo"></a>claude-seo | Claude + SEO = mini millionaires | @bloggersarvesh | [x.com](https://x.com/i/status/2032130402043994191) | 2026-03-24 |
-| <a id="src-ecom-amin"></a>ecom-amin | $1M with 1 ad, 1 comparison page, 1 product page | @eCom_Amin | [x.com](https://x.com/eCom_Amin/status/2016565185251553589) | 2026-03-24 |
-| <a id="src-param-eth"></a>param-eth | Free money for startups ($1.3M+) | @Param_eth | [x.com](https://x.com/Param_eth/status/2019450730042781927) | 2026-03-24 |
-| <a id="src-karpathy-autoresearch"></a>karpathy-autoresearch | Karpathy's autoresearch for business | @ericosiu | [x.com](https://x.com/i/status/2031046227333443609) | 2026-03-24 |
-| <a id="src-vivo"></a>vivo | Never been a cheaper time to build | @vivoplt | [x.com](https://x.com/vivoplt/status/2035372452394774888) | 2026-03-24 |
-| <a id="src-gumroad"></a>gumroad | The Weekend Product playbook | @gumroad | [x.com](https://x.com/gumroad/status/2028574829977522605) | 2026-03-24 |
-| <a id="src-flavio"></a>flavio | Vibe-code websites with AI agent | @flaviocopes | [x.com](https://x.com/i/status/2026359790973186051) | 2026-03-24 |
-| <a id="src-aura"></a>aura | Aura — AI Website Builder | aura.build | [aura.build](https://www.aura.build/) | 2026-03-24 |
-| <a id="src-syntax"></a>syntax | Hosting Providers Compared | Syntax Podcast #615 | [syntax.fm](https://syntax.fm/show/615/where-should-you-host-your-app-hosting-providers-compared) | 2026-03-24 |
-| <a id="src-vercel-accel"></a>vercel-accel | Vercel AI Accelerator | Vercel | [vercel.com](https://vercel.com/ai-accelerator) | 2026-03-24 |
-| <a id="src-om-patel"></a>om-patel | Important startup design advice | @om_patel5 | [x.com](https://x.com/i/status/2013831858924978199) | 2026-03-24 |
-| <a id="src-krehel"></a>krehel | Details That Make Interfaces Feel Better | Jakub Krehel | [jakub.kr](https://jakub.kr/writing/details-that-make-interfaces-feel-better) | 2026-03-24 |
-| <a id="src-aakash-gupta"></a>aakash-gupta | Build a ChatGPT app right now | @aakashgupta | [x.com](https://x.com/i/status/2014845602463408620) | 2026-03-24 |
-| <a id="src-naval"></a>naval | How to Get Rich (without getting lucky) | Naval Ravikant | [nav.al/rich](https://nav.al/rich) | 2026-03-24 |
+| ID                                                          | Title                                            | Author              | URL                                                                                                             | Accessed   |
+| ----------------------------------------------------------- | ------------------------------------------------ | ------------------- | --------------------------------------------------------------------------------------------------------------- | ---------- |
+| <a id="src-google-doc"></a>google-doc                       | INFO / DIGITAL PRODUCT SAUCE                     | (personal notes)    | [Google Doc](https://docs.google.com/document/d/1IhPyYY2Wy5FkVKHJHAbeF8oQGz41ckSrWcmcvSxG470/edit?usp=drivesdk) | 2026-03-24 |
+| <a id="src-corbin-braun"></a>corbin-braun                   | How to get paying users for free                 | @corbin_braun       | [x.com](https://x.com/i/status/2031028475096944942)                                                             | 2026-03-24 |
+| <a id="src-claude-seo"></a>claude-seo                       | Claude + SEO = mini millionaires                 | @bloggersarvesh     | [x.com](https://x.com/i/status/2032130402043994191)                                                             | 2026-03-24 |
+| <a id="src-ecom-amin"></a>ecom-amin                         | $1M with 1 ad, 1 comparison page, 1 product page | @eCom_Amin          | [x.com](https://x.com/eCom_Amin/status/2016565185251553589)                                                     | 2026-03-24 |
+| <a id="src-param-eth"></a>param-eth                         | Free money for startups ($1.3M+)                 | @Param_eth          | [x.com](https://x.com/Param_eth/status/2019450730042781927)                                                     | 2026-03-24 |
+| <a id="src-karpathy-autoresearch"></a>karpathy-autoresearch | Karpathy's autoresearch for business             | @ericosiu           | [x.com](https://x.com/i/status/2031046227333443609)                                                             | 2026-03-24 |
+| <a id="src-vivo"></a>vivo                                   | Never been a cheaper time to build               | @vivoplt            | [x.com](https://x.com/vivoplt/status/2035372452394774888)                                                       | 2026-03-24 |
+| <a id="src-gumroad"></a>gumroad                             | The Weekend Product playbook                     | @gumroad            | [x.com](https://x.com/gumroad/status/2028574829977522605)                                                       | 2026-03-24 |
+| <a id="src-flavio"></a>flavio                               | Vibe-code websites with AI agent                 | @flaviocopes        | [x.com](https://x.com/i/status/2026359790973186051)                                                             | 2026-03-24 |
+| <a id="src-aura"></a>aura                                   | Aura — AI Website Builder                        | aura.build          | [aura.build](https://www.aura.build/)                                                                           | 2026-03-24 |
+| <a id="src-syntax"></a>syntax                               | Hosting Providers Compared                       | Syntax Podcast #615 | [syntax.fm](https://syntax.fm/show/615/where-should-you-host-your-app-hosting-providers-compared)               | 2026-03-24 |
+| <a id="src-vercel-accel"></a>vercel-accel                   | Vercel AI Accelerator                            | Vercel              | [vercel.com](https://vercel.com/ai-accelerator)                                                                 | 2026-03-24 |
+| <a id="src-om-patel"></a>om-patel                           | Important startup design advice                  | @om_patel5          | [x.com](https://x.com/i/status/2013831858924978199)                                                             | 2026-03-24 |
+| <a id="src-krehel"></a>krehel                               | Details That Make Interfaces Feel Better         | Jakub Krehel        | [jakub.kr](https://jakub.kr/writing/details-that-make-interfaces-feel-better)                                   | 2026-03-24 |
+| <a id="src-aakash-gupta"></a>aakash-gupta                   | Build a ChatGPT app right now                    | @aakashgupta        | [x.com](https://x.com/i/status/2014845602463408620)                                                             | 2026-03-24 |
+| <a id="src-naval"></a>naval                                 | How to Get Rich (without getting lucky)          | Naval Ravikant      | [nav.al/rich](https://nav.al/rich)                                                                              | 2026-03-24 |
