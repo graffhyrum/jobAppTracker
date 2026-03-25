@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test";
+import { Either } from "effect";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
 
@@ -127,10 +128,10 @@ describe("JobApplication Domain Entity", () => {
 			expect(application.statusLog).toHaveLength(1);
 
 			const statusResult = getCurrentStatus(application);
-			expect(statusResult.isOk()).toBe(true);
-			if (statusResult.isOk()) {
-				expect(statusResult.value.category).toBe("active");
-				expect(statusResult.value.label).toBe("applied");
+			expect(Either.isRight(statusResult)).toBe(true);
+			if (Either.isRight(statusResult)) {
+				expect(statusResult.right.category).toBe("active");
+				expect(statusResult.right.label).toBe("applied");
 			}
 		});
 
@@ -233,7 +234,7 @@ describe("JobApplication Domain Entity", () => {
 
 			const result = getCurrentStatus(application);
 
-			expect(result.isErr()).toBe(true);
+			expect(Either.isLeft(result)).toBe(true);
 		});
 
 		it("should return latest status when statusLog has entries", () => {
@@ -246,9 +247,9 @@ describe("JobApplication Domain Entity", () => {
 
 			const result = getCurrentStatus(updatedApp);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toEqual(validApplicationStatus);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual(validApplicationStatus);
 			}
 		});
 	});
@@ -260,7 +261,7 @@ describe("JobApplication Domain Entity", () => {
 
 			const result = getStatusCategory(application);
 
-			expect(result.isErr()).toBe(true);
+			expect(Either.isLeft(result)).toBe(true);
 		});
 
 		it("should return status category when status exists", () => {
@@ -273,9 +274,9 @@ describe("JobApplication Domain Entity", () => {
 
 			const result = getStatusCategory(updatedApp);
 
-			expect(result.isOk()).toBe(true);
-			if (result.isOk()) {
-				expect(result.value).toBe("active");
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toBe("active");
 			}
 		});
 	});

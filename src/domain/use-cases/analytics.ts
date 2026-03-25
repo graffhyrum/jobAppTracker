@@ -1,3 +1,4 @@
+import { Either } from "effect";
 import type {
 	ApplicationStatusLabel,
 	JobApplication,
@@ -120,7 +121,7 @@ export function computeDefaultDateRange(
 	// Filter to only active applications
 	const activeApplications = applications.filter((app) => {
 		const statusResult = getCurrentStatus(app);
-		return statusResult.isOk() && statusResult.value.category === "active";
+		return Either.isRight(statusResult) && statusResult.right.category === "active";
 	});
 
 	// If no active applications, return empty range
@@ -175,8 +176,8 @@ function computeSummary(applications: JobApplication[]): AnalyticsSummary {
 
 	for (const app of applications) {
 		const statusResult = getCurrentStatus(app);
-		if (statusResult.isOk()) {
-			const status = statusResult.value;
+		if (Either.isRight(statusResult)) {
+			const status = statusResult.right;
 			if (status.category === "active") {
 				activeCount++;
 				if (status.label === "offer") {
@@ -216,8 +217,8 @@ function computeStatusDistribution(
 
 	for (const app of applications) {
 		const statusResult = getCurrentStatus(app);
-		if (statusResult.isOk()) {
-			const status = statusResult.value;
+		if (Either.isRight(statusResult)) {
+			const status = statusResult.right;
 			const existing = statusMap.get(status.label);
 			if (existing) {
 				existing.count++;
@@ -274,8 +275,8 @@ function computeSourceEffectiveness(
 		existing.total++;
 
 		const statusResult = getCurrentStatus(app);
-		if (statusResult.isOk()) {
-			const status = statusResult.value;
+		if (Either.isRight(statusResult)) {
+			const status = statusResult.right;
 			if (status.category === "active") {
 				existing.active++;
 				if (status.label === "offer") {
@@ -380,8 +381,8 @@ function computeInterestRatingStats(
 		existing.total++;
 
 		const statusResult = getCurrentStatus(app);
-		if (statusResult.isOk()) {
-			const status = statusResult.value;
+		if (Either.isRight(statusResult)) {
+			const status = statusResult.right;
 			if (status.category === "active") {
 				existing.active++;
 				if (status.label === "offer") {
@@ -416,8 +417,8 @@ function computeResponseRate(
 
 	for (const app of applications) {
 		const statusResult = getCurrentStatus(app);
-		if (statusResult.isOk()) {
-			const status = statusResult.value;
+		if (Either.isRight(statusResult)) {
+			const status = statusResult.right;
 			if (status.label === "no response") {
 				noResponseCount++;
 			} else {

@@ -1,5 +1,5 @@
-import { ArkErrors, type TraversalError, type Type } from "arktype";
-import { err, ok, type Result } from "neverthrow";
+import { ArkErrors, type Type } from "arktype";
+import { Either } from "effect";
 
 type ArkTypeOut<T> = T extends Type<infer Out, infer _Scope> ? Out : never;
 
@@ -7,12 +7,12 @@ type ArkTypeOut<T> = T extends Type<infer Out, infer _Scope> ? Out : never;
 export function toArkResult<const ArkType extends Type<any, any>>(
 	arkType: ArkType,
 	input: unknown,
-): Result<ArkTypeOut<ArkType>, TraversalError> {
+): Either.Either<ArkTypeOut<ArkType>, ArkErrors> {
 	const result = arkType(input);
 
 	if (result instanceof ArkErrors) {
-		return err(result.toTraversalError());
+		return Either.left(result);
 	}
 
-	return ok(result as ArkTypeOut<ArkType>);
+	return Either.right(result as ArkTypeOut<ArkType>);
 }

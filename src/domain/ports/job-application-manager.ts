@@ -1,5 +1,6 @@
-import type { ResultAsync } from "neverthrow";
+import type { Effect } from "effect";
 
+import type { JobApplicationError } from "../entities/job-application-error.ts";
 import type {
 	JobApplication,
 	JobApplicationForCreate,
@@ -11,36 +12,35 @@ import type { ForUpdate } from "./common-types.ts";
 export interface JobApplicationManager {
 	createJobApplication(
 		data: JobApplicationForCreate,
-	): ResultAsync<JobApplication, string>;
+	): Effect.Effect<JobApplication, JobApplicationError>;
 
-	getJobApplication(id: JobApplicationId): ResultAsync<JobApplication, string>;
+	getJobApplication(
+		id: JobApplicationId,
+	): Effect.Effect<JobApplication, JobApplicationError>;
 
-	getAllJobApplications(): ResultAsync<JobApplication[], string>;
+	getAllJobApplications(): Effect.Effect<
+		JobApplication[],
+		JobApplicationError
+	>;
 
 	updateJobApplication(
 		id: UUID,
 		data: ForUpdate<JobApplication>,
-	): ResultAsync<JobApplication, string>;
+	): Effect.Effect<JobApplication, JobApplicationError>;
 
-	deleteJobApplication(id: JobApplicationId): ResultAsync<void, string>;
+	deleteJobApplication(
+		id: JobApplicationId,
+	): Effect.Effect<void, JobApplicationError>;
 
-	getActiveJobApplications(): ResultAsync<JobApplication[], string>;
+	getActiveJobApplications(): Effect.Effect<
+		JobApplication[],
+		JobApplicationError
+	>;
 
-	getInactiveJobApplications(): ResultAsync<JobApplication[], string>;
+	getInactiveJobApplications(): Effect.Effect<
+		JobApplication[],
+		JobApplicationError
+	>;
 
-	clearAllJobApplications(): ResultAsync<void, string>;
-}
-
-export class JobApplicationManagerError extends Error {
-	constructor(message: string, options?: ErrorOptions) {
-		super(message, options);
-		this.name = "JobApplicationManagerError";
-	}
-}
-
-export function createJobApplicationManagerError(
-	message: string,
-	options?: ErrorOptions,
-): JobApplicationManagerError {
-	return new JobApplicationManagerError(message, options);
+	clearAllJobApplications(): Effect.Effect<void, JobApplicationError>;
 }

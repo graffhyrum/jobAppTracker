@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
-import { type as AT, scope } from "arktype";
-import { ok } from "neverthrow";
+import { ArkErrors, type as AT, scope } from "arktype";
+import { Either, pipe } from "effect";
 
 import { toArkResult } from "./ark-results.ts";
 
@@ -43,18 +43,18 @@ describe("toArkResult", () => {
 		test("string", () => {
 			const testString = "hello";
 			const res = toArkResult(arkTypeSting, testString);
-			expect(res).toEqual(ok(testString));
+			expect(res).toEqual(Either.right(testString));
 		});
 
 		test("number", () => {
 			const testNumber = 123;
 			const res = toArkResult(arkTypeNumber, testNumber);
-			expect(res).toEqual(ok(testNumber));
+			expect(res).toEqual(Either.right(testNumber));
 		});
 
 		test("object", () => {
 			const res = toArkResult(arkTypePerson, goodTestPerson);
-			expect(res).toEqual(ok(goodTestPerson));
+			expect(res).toEqual(Either.right(goodTestPerson));
 		});
 
 		test("module", () => {
@@ -66,26 +66,28 @@ describe("toArkResult", () => {
 			const goodFooBar = goodBar;
 			const { foo, bar, fooBar } = testModule;
 			const fooRes = toArkResult(foo, goodFoo);
-			expect(fooRes).toEqual(ok(goodFoo));
+			expect(fooRes).toEqual(Either.right(goodFoo));
 			const barRes = toArkResult(bar, goodBar);
-			expect(barRes).toEqual(ok(goodBar));
+			expect(barRes).toEqual(Either.right(goodBar));
 			const fooBarRes = toArkResult(fooBar, goodFooBar);
-			expect(fooBarRes).toEqual(ok(goodFooBar));
+			expect(fooBarRes).toEqual(Either.right(goodFooBar));
 		});
 
 		test("keyof", () => {
 			const key = "bis";
 			const keyRes = toArkResult(keyOfBarSchema, key);
-			expect(keyRes).toEqual(ok(key));
+			expect(keyRes).toEqual(Either.right(key));
 		});
 
 		test("keyof - with get", () => {
 			const key = "bis";
 			const testBis = 123;
-			const res = toArkResult(keyOfBarSchema, key)
-				.map((k) => testModule.bar.get(k))
-				.andThen((schemaFromGet) => toArkResult(schemaFromGet, testBis));
-			expect(res).toEqual(ok(testBis));
+			const res = pipe(
+				toArkResult(keyOfBarSchema, key),
+				Either.map((k) => testModule.bar.get(k)),
+				Either.flatMap((schemaFromGet) => toArkResult(schemaFromGet, testBis)),
+			);
+			expect(res).toEqual(Either.right(testBis));
 		});
 	});
 
@@ -93,15 +95,19 @@ describe("toArkResult", () => {
 		test("string", () => {
 			const testString = 123;
 			const res = toArkResult(arkTypeSting, testString);
-			expect(res.isErr()).toBe(true);
-			expect(res._unsafeUnwrapErr()).toBeInstanceOf(Error);
+			expect(Either.isLeft(res)).toBe(true);
+			if (Either.isLeft(res)) {
+				expect(res.left).toBeInstanceOf(ArkErrors);
+			}
 		});
 
 		test("number", () => {
 			const testNumber = "hello";
 			const res = toArkResult(arkTypeNumber, testNumber);
-			expect(res.isErr()).toBe(true);
-			expect(res._unsafeUnwrapErr()).toBeInstanceOf(Error);
+			expect(Either.isLeft(res)).toBe(true);
+			if (Either.isLeft(res)) {
+				expect(res.left).toBeInstanceOf(ArkErrors);
+			}
 		});
 
 		test("object - bad key", () => {
@@ -110,8 +116,10 @@ describe("toArkResult", () => {
 				name: 123,
 			};
 			const res = toArkResult(arkTypePerson, badPerson);
-			expect(res.isErr()).toBe(true);
-			expect(res._unsafeUnwrapErr()).toBeInstanceOf(Error);
+			expect(Either.isLeft(res)).toBe(true);
+			if (Either.isLeft(res)) {
+				expect(res.left).toBeInstanceOf(ArkErrors);
+			}
 		});
 	});
 });

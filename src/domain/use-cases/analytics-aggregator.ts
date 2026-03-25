@@ -1,5 +1,8 @@
-import type { ResultAsync } from "neverthrow";
+import { Effect } from "effect";
 
+import type { ContactError } from "../entities/contact-error.ts";
+import type { InterviewStageError } from "../entities/interview-stage-error.ts";
+import type { JobApplicationError } from "../entities/job-application-error.ts";
 import type { JobApplication } from "../entities/job-application.ts";
 import type { ContactRepository } from "../ports/contact-repository.ts";
 import type { InterviewStageRepository } from "../ports/interview-stage-repository.ts";
@@ -25,6 +28,12 @@ export type CombinedAnalytics = {
 	dateRange: DateRange;
 };
 
+/** Union of all errors the aggregator can produce */
+export type AnalyticsError =
+	| JobApplicationError
+	| ContactError
+	| InterviewStageError;
+
 /**
  * Aggregates all analytics computations from different modules
  */
@@ -39,56 +48,45 @@ export function createAnalyticsAggregator(
 		 */
 		computeAllAnalytics(
 			dateRange?: DateRange,
-		): ResultAsync<CombinedAnalytics, string> {
-			return jobAppManager.getAllJobApplications().andThen((applications) => {
-				// Compute default date range if not provided
+		): Effect.Effect<CombinedAnalytics, AnalyticsError> {
+			return Effect.gen(function* () {
+				const applications = yield* jobAppManager.getAllJobApplications();
+
 				const effectiveDateRange =
 					dateRange && (dateRange.startDate || dateRange.endDate)
 						? dateRange
 						: computeDefaultDateRange(applications);
 
-				// Filter applications by date range
 				const filteredApplications = filterApplicationsByDateRange(
 					applications,
 					effectiveDateRange,
 				);
 
-				// Get all contacts and interviews in parallel
-				return contactRepository
-					.getAll()
-					.andThen((allContacts) => {
-						return interviewStageRepository.getAll().map((allInterviews) => {
-							// Filter contacts and interviews to only those belonging to filtered applications
-							const appIds = new Set(filteredApplications.map((app) => app.id));
-							const filteredContacts = allContacts.filter((contact) =>
-								appIds.has(contact.jobApplicationId),
-							);
-							const filteredInterviews = allInterviews.filter((interview) =>
-								appIds.has(interview.jobApplicationId),
-							);
+				const [allContacts, allInterviews] = yield* Effect.all([
+					contactRepository.getAll(),
+					interviewStageRepository.getAll(),
+				]);
 
-							return {
-								applications: filteredApplications,
-								contacts: filteredContacts,
-								interviews: filteredInterviews,
-								dateRange: effectiveDateRange,
-							};
-						});
-					})
-					.map((data) => {
-						return {
-							applications: computeAnalytics(data.applications),
-							contacts: computeContactAnalytics(
-								data.applications,
-								data.contacts,
-							),
-							interviews: computeInterviewAnalytics(
-								data.applications,
-								data.interviews,
-							),
-							dateRange: data.dateRange,
-						};
-					});
+				const appIds = new Set(filteredApplications.map((app) => app.id));
+				const filteredContacts = allContacts.filter((contact) =>
+					appIds.has(contact.jobApplicationId),
+				);
+				const filteredInterviews = allInterviews.filter((interview) =>
+					appIds.has(interview.jobApplicationId),
+				);
+
+				return {
+					applications: computeAnalytics(filteredApplications),
+					contacts: computeContactAnalytics(
+						filteredApplications,
+						filteredContacts,
+					),
+					interviews: computeInterviewAnalytics(
+						filteredApplications,
+						filteredInterviews,
+					),
+					dateRange: effectiveDateRange,
+				};
 			});
 		},
 
@@ -97,11 +95,13 @@ export function createAnalyticsAggregator(
 		 */
 		computeApplicationAnalytics(
 			dateRange?: DateRange,
-		): ResultAsync<
+		): Effect.Effect<
 			{ analytics: ApplicationsAnalytics; dateRange: DateRange },
-			string
+			JobApplicationError
 		> {
-			return jobAppManager.getAllJobApplications().map((applications) => {
+			return Effect.gen(function* () {
+				const applications = yield* jobAppManager.getAllJobApplications();
+
 				const effectiveDateRange =
 					dateRange && (dateRange.startDate || dateRange.endDate)
 						? dateRange
@@ -124,8 +124,9 @@ export function createAnalyticsAggregator(
 		 */
 		computeContactAnalyticsOnly(
 			applications: JobApplication[],
-		): ResultAsync<ContactAnalytics, string> {
-			return contactRepository.getAll().map((allContacts) => {
+		): Effect.Effect<ContactAnalytics, ContactError> {
+			return Effect.gen(function* () {
+				const allContacts = yield* contactRepository.getAll();
 				const appIds = new Set(applications.map((app) => app.id));
 				const filteredContacts = allContacts.filter((contact) =>
 					appIds.has(contact.jobApplicationId),
@@ -140,8 +141,9 @@ export function createAnalyticsAggregator(
 		 */
 		computeInterviewAnalyticsOnly(
 			applications: JobApplication[],
-		): ResultAsync<InterviewAnalytics, string> {
-			return interviewStageRepository.getAll().map((allInterviews) => {
+		): Effect.Effect<InterviewAnalytics, InterviewStageError> {
+			return Effect.gen(function* () {
+				const allInterviews = yield* interviewStageRepository.getAll();
 				const appIds = new Set(applications.map((app) => app.id));
 				const filteredInterviews = allInterviews.filter((interview) =>
 					appIds.has(interview.jobApplicationId),

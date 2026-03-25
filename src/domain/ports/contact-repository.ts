@@ -1,5 +1,6 @@
-import type { ResultAsync } from "neverthrow";
+import type { Effect } from "effect";
 
+import type { ContactError } from "../entities/contact-error.ts";
 import type {
 	Contact,
 	ContactForCreate,
@@ -9,17 +10,20 @@ import type { JobApplicationId } from "../entities/job-application.ts";
 import type { ForUpdate } from "./common-types.ts";
 
 export interface ContactRepository {
-	create(data: ContactForCreate): ResultAsync<Contact, string>;
+	create(data: ContactForCreate): Effect.Effect<Contact, ContactError>;
 
-	getById(id: ContactId): ResultAsync<Contact, string>;
+	getById(id: ContactId): Effect.Effect<Contact, ContactError>;
 
-	getAll(): ResultAsync<Contact[], string>;
+	getAll(): Effect.Effect<Contact[], ContactError>;
 
 	getByJobApplicationId(
 		jobAppId: JobApplicationId,
-	): ResultAsync<Contact[], string>;
+	): Effect.Effect<Contact[], ContactError>;
 
-	update(id: ContactId, data: ForUpdate<Contact>): ResultAsync<Contact, string>;
+	update(
+		id: ContactId,
+		data: ForUpdate<Contact>,
+	): Effect.Effect<Contact, ContactError>;
 
-	delete(id: ContactId): ResultAsync<void, string>;
+	delete(id: ContactId): Effect.Effect<void, ContactError>;
 }

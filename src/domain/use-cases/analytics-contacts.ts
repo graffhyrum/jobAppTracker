@@ -1,3 +1,4 @@
+import { Either } from "effect";
 import type {
 	Contact,
 	ContactChannel,
@@ -254,8 +255,8 @@ function computeContactCountCorrelation(
 		bucket.applications++;
 
 		const statusResult = getCurrentStatus(app);
-		if (statusResult.isOk()) {
-			const status = statusResult.value;
+		if (Either.isRight(statusResult)) {
+			const status = statusResult.right;
 			if (status.category === "active") {
 				if (status.label === "offer") {
 					bucket.offerRate++;

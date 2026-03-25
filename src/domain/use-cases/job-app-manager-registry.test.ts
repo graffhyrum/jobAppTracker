@@ -1,5 +1,8 @@
 import { describe, expect, it } from "bun:test";
 
+import { Effect, Either } from "effect";
+
+import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { jobAppManagerRegistry } from "../../infrastructure/sqlite/sqlite-registry.ts";
 
 describe("JobAppManagerRegistry", () => {
@@ -51,42 +54,42 @@ describe("JobAppManagerRegistry", () => {
 		const prodManager = jobAppManagerRegistry.getManager("prod");
 
 		// Clear test database and create a test application
-		await testManager.clearAllJobApplications();
-		const testAppResult = await testManager.createJobApplication({
+		await Effect.runPromise(testManager.clearAllJobApplications());
+		const testAppResult = await runEffect(testManager.createJobApplication({
 			company: "Test Company",
 			positionTitle: "Test Position",
 			applicationDate: new Date().toISOString(),
 			interestRating: 3,
 			sourceType: "company_website",
 			isRemote: false,
-		});
+		}));
 
-		expect(testAppResult.isOk()).toBe(true);
+		expect(Either.isRight(testAppResult)).toBe(true);
 
-		const testAppsResult = await testManager.getAllJobApplications();
-		expect(testAppsResult.isOk()).toBe(true);
+		const testAppsResult = await runEffect(testManager.getAllJobApplications());
+		expect(Either.isRight(testAppsResult)).toBe(true);
 
-		if (!testAppsResult.isOk()) {
+		if (!Either.isRight(testAppsResult)) {
 			throw new Error("Failed to get test applications");
 		}
 
-		const testApps = testAppsResult.value;
+		const testApps = testAppsResult.right;
 		expect(testApps).toHaveLength(1);
 
 		// Prod manager should have independent database
-		const prodAppsResult = await prodManager.getAllJobApplications();
-		expect(prodAppsResult.isOk()).toBe(true);
+		const prodAppsResult = await runEffect(prodManager.getAllJobApplications());
+		expect(Either.isRight(prodAppsResult)).toBe(true);
 
-		if (!prodAppsResult.isOk()) {
+		if (!Either.isRight(prodAppsResult)) {
 			throw new Error("Failed to get prod applications");
 		}
 
-		const prodApps = prodAppsResult.value;
+		const prodApps = prodAppsResult.right;
 
 		// Prod database should not have the test application
 		expect(prodApps).not.toContainEqual(testApps[0]);
 
 		// Clean up test database
-		await testManager.clearAllJobApplications();
+		await Effect.runPromise(testManager.clearAllJobApplications());
 	});
 });

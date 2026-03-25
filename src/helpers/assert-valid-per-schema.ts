@@ -1,6 +1,7 @@
 import { expect } from "bun:test";
 
 import type { Type } from "arktype";
+import { Either } from "effect";
 
 import { toArkResult } from "#helpers/ark-results.ts";
 
@@ -10,6 +11,7 @@ export function assertValidPerSchema<const ArkType extends Type<any, any>>(
 	input: unknown,
 ) {
 	const res = toArkResult(arkType, input);
-	expect(res.isOk()).toBe(true);
-	return res._unsafeUnwrap();
+	expect(Either.isRight(res)).toBe(true);
+	if (!Either.isRight(res)) throw new Error("Unexpected left");
+	return res.right;
 }

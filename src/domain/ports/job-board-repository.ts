@@ -1,5 +1,6 @@
-import type { ResultAsync } from "neverthrow";
+import type { Effect } from "effect";
 
+import type { JobBoardError } from "../entities/job-board-error.ts";
 import type {
 	JobBoard,
 	JobBoardForCreate,
@@ -7,15 +8,17 @@ import type {
 } from "../entities/job-board.ts";
 
 export interface JobBoardRepository {
-	create(data: JobBoardForCreate): ResultAsync<JobBoard, string>;
+	create(data: JobBoardForCreate): Effect.Effect<JobBoard, JobBoardError>;
 
-	getById(id: JobBoardId): ResultAsync<JobBoard, string>;
+	getById(id: JobBoardId): Effect.Effect<JobBoard, JobBoardError>;
 
-	getAll(): ResultAsync<JobBoard[], string>;
+	getAll(): Effect.Effect<JobBoard[], JobBoardError>;
 
-	findByDomain(domain: string): ResultAsync<JobBoard | null, string>;
+	findByDomain(
+		domain: string,
+	): Effect.Effect<JobBoard | null, JobBoardError>;
 
-	delete(id: JobBoardId): ResultAsync<void, string>;
+	delete(id: JobBoardId): Effect.Effect<void, JobBoardError>;
 
-	seedCommonBoards(): ResultAsync<void, string>;
+	seedCommonBoards(): Effect.Effect<void, JobBoardError>;
 }

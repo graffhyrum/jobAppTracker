@@ -1,5 +1,6 @@
-import type { ResultAsync } from "neverthrow";
+import type { Effect } from "effect";
 
+import type { InterviewStageError } from "../entities/interview-stage-error.ts";
 import type {
 	InterviewStage,
 	InterviewStageForCreate,
@@ -9,20 +10,24 @@ import type { JobApplicationId } from "../entities/job-application.ts";
 import type { ForUpdate } from "./common-types.ts";
 
 export interface InterviewStageRepository {
-	create(data: InterviewStageForCreate): ResultAsync<InterviewStage, string>;
+	create(
+		data: InterviewStageForCreate,
+	): Effect.Effect<InterviewStage, InterviewStageError>;
 
-	getById(id: InterviewStageId): ResultAsync<InterviewStage, string>;
+	getById(
+		id: InterviewStageId,
+	): Effect.Effect<InterviewStage, InterviewStageError>;
 
-	getAll(): ResultAsync<InterviewStage[], string>;
+	getAll(): Effect.Effect<InterviewStage[], InterviewStageError>;
 
 	getByJobApplicationId(
 		jobAppId: JobApplicationId,
-	): ResultAsync<InterviewStage[], string>;
+	): Effect.Effect<InterviewStage[], InterviewStageError>;
 
 	update(
 		id: InterviewStageId,
 		data: ForUpdate<InterviewStage>,
-	): ResultAsync<InterviewStage, string>;
+	): Effect.Effect<InterviewStage, InterviewStageError>;
 
-	delete(id: InterviewStageId): ResultAsync<void, string>;
+	delete(id: InterviewStageId): Effect.Effect<void, InterviewStageError>;
 }

@@ -1,5 +1,5 @@
 import { scope } from "arktype";
-import type { Result } from "neverthrow";
+import type { Either } from "effect";
 
 import { NonEmptyString } from "./non-empty-string.ts";
 import { uuidSchema } from "./uuid.ts";
@@ -34,13 +34,13 @@ export type NotesCollection = {
 };
 
 interface NoteCollectionOperations {
-	get(id: NoteId): Result<Note, Error>;
+	get(id: NoteId): Either.Either<Note, Error>;
 
-	getAll(): Result<Note[], Error>;
+	getAll(): Either.Either<Note[], Error>;
 
-	add(data: NoteForCreate): Result<Note, Error>;
+	add(data: NoteForCreate): Either.Either<Note, Error>;
 
-	update(id: NoteId, data: NoteForUpdate): Result<Note, Error>;
+	update(id: NoteId, data: NoteForUpdate): Either.Either<Note, Error>;
 
-	remove(id: NoteId): Result<void, Error>;
+	remove(id: NoteId): Either.Either<void, Error>;
 }
