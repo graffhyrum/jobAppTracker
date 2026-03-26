@@ -193,7 +193,7 @@ const createApplicationModule = () => {
 		const validationResult = jobApplicationModule.forCreate(applicationData);
 		return validationResult instanceof type.errors
 			? validationResult
-			: applicationData;
+			: validationResult;
 	};
 	/**
 	 * Transforms extension request body to application data
