@@ -1,5 +1,6 @@
 import type { InterviewStage } from "../../domain/entities/interview-stage.ts";
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
+import { escapeHtml } from "../utils/html-escape.ts";
 import { formatDate } from "../utils/pipeline-utils.ts";
 
 const interviewTypeLabels: Record<string, string> = {
@@ -39,7 +40,7 @@ export function renderInterviewStagesList(
 			<div class="stage-header">
 				<div class="stage-title">
 					<span class="stage-round">Round ${stage.round}</span>
-					<span class="stage-type">${interviewTypeLabels[stage.interviewType] || stage.interviewType}</span>
+					<span class="stage-type">${interviewTypeLabels[stage.interviewType] || escapeHtml(stage.interviewType)}</span>
 					${stage.isFinalRound ? '<span class="final-round-badge">Final Round</span>' : ""}
 				</div>
 				<div class="stage-actions">
@@ -68,7 +69,7 @@ export function renderInterviewStagesList(
 						stage.scheduledDate
 							? `<div class="stage-date">
 						<label>Scheduled:</label>
-						<span data-utc="${stage.scheduledDate}">${formatDate(stage.scheduledDate)}</span>
+						<span data-utc="${escapeHtml(stage.scheduledDate)}">${formatDate(stage.scheduledDate)}</span>
 					</div>`
 							: ""
 					}
@@ -76,7 +77,7 @@ export function renderInterviewStagesList(
 						stage.completedDate
 							? `<div class="stage-date">
 						<label>Completed:</label>
-						<span data-utc="${stage.completedDate}">${formatDate(stage.completedDate)}</span>
+						<span data-utc="${escapeHtml(stage.completedDate)}">${formatDate(stage.completedDate)}</span>
 					</div>`
 							: ""
 					}
@@ -85,7 +86,7 @@ export function renderInterviewStagesList(
 					stage.notes
 						? `<div class="stage-notes">
 					<label>Notes:</label>
-					<p>${stage.notes}</p>
+					<p>${escapeHtml(stage.notes)}</p>
 				</div>`
 						: ""
 				}
@@ -99,8 +100,8 @@ export function renderInterviewStagesList(
 								.map(
 									(q) => `
 								<div class="question-item">
-									<div class="question-title">${q.title}</div>
-									${q.answer ? `<div class="question-answer">${q.answer}</div>` : '<div class="question-answer no-answer">No answer recorded</div>'}
+									<div class="question-title">${escapeHtml(q.title)}</div>
+									${q.answer ? `<div class="question-answer">${escapeHtml(q.answer)}</div>` : '<div class="question-answer no-answer">No answer recorded</div>'}
 								</div>
 							`,
 								)
@@ -235,7 +236,7 @@ export function renderInterviewStageForm(
 						rows="3"
 						class="form-textarea"
 						data-testid="textarea-notes"
-						placeholder="Interview notes...">${stage?.notes || ""}</textarea>
+						placeholder="Interview notes...">${stage?.notes ? escapeHtml(stage.notes) : ""}</textarea>
 				</div>
 
 				<div class="form-field">
@@ -245,8 +246,8 @@ export function renderInterviewStageForm(
 							.map(
 								(q, idx) => `
 							<div class="question-form-item" data-question-id="${idx}">
-								<input type="text" name="questions[${idx}][title]" value="${q.title}" placeholder="Question" class="form-input" required />
-								<textarea name="questions[${idx}][answer]" placeholder="Answer (optional)" class="form-textarea" rows="2">${q.answer || ""}</textarea>
+								<input type="text" name="questions[${idx}][title]" value="${escapeHtml(q.title)}" placeholder="Question" class="form-input" required />
+								<textarea name="questions[${idx}][answer]" placeholder="Answer (optional)" class="form-textarea" rows="2">${q.answer ? escapeHtml(q.answer) : ""}</textarea>
 								<button type="button" class="btn-remove-question" onclick="this.parentElement.remove()">✖</button>
 							</div>
 						`,
