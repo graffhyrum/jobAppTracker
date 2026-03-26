@@ -11,6 +11,7 @@ import {
 	getStatusInfo,
 	isApplicationOverdue,
 } from "../utils/pipeline-utils";
+import { escapeHtml } from "../utils/html-escape";
 
 export const renderApplicationTableRow = (app: JobApplication): string => {
 	const isOverdue = isApplicationOverdue(app);
@@ -21,8 +22,8 @@ export const renderApplicationTableRow = (app: JobApplication): string => {
 		    class="application-row ${status.category} ${isOverdue ? "overdue" : ""}"
 		    data-testid="application-row-${app.id}"
 		    data-app-id="${app.id}">
-			<td class="company-cell" data-testid="company-cell-${app.id}">${app.company}</td>
-			<td class="position-cell" data-testid="position-cell-${app.id}">${app.positionTitle}</td>
+			<td class="company-cell" data-testid="company-cell-${app.id}">${escapeHtml(app.company)}</td>
+			<td class="position-cell" data-testid="position-cell-${app.id}">${escapeHtml(app.positionTitle)}</td>
 			<td class="status-cell" data-testid="status-cell-${app.id}">
 				<span class="status-badge ${status.category}" data-testid="status-badge-${app.id}">${status.label}</span>
 			</td>
@@ -117,7 +118,7 @@ export function renderEditableRow(app: JobApplication): string {
 				<input
 					type="text"
 					name="company"
-					value="${app.company}"
+					value="${escapeHtml(app.company)}"
 					class="edit-input"
 					data-testid="edit-input-company-${app.id}"
 					autofocus />
@@ -126,7 +127,7 @@ export function renderEditableRow(app: JobApplication): string {
 				<input
 					type="text"
 					name="positionTitle"
-					value="${app.positionTitle}"
+					value="${escapeHtml(app.positionTitle)}"
 					class="edit-input"
 					data-testid="edit-input-position-${app.id}" />
 			</td>
