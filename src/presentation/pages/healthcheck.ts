@@ -1,6 +1,7 @@
 import { getEntries } from "#rootTypes/entries.ts";
 
 import { type LayoutOptions, layout } from "../components/layout";
+import { escapeHtml } from "../utils/html-escape";
 
 export const healthcheckPage = (
 	dbStatusRecord: Parameters<typeof recordToHtml>[0],
@@ -70,7 +71,7 @@ export const healthcheckPage = (
 
 function recordToHtml(record: Record<string, unknown>): string {
 	return Object.entries(record)
-		.map(([key, value]) => `<p><strong>${key}:</strong> ${value}</p>`)
+		.map(([key, value]) => `<p><strong>${escapeHtml(String(key))}:</strong> ${escapeHtml(String(value))}</p>`)
 		.join("");
 }
 

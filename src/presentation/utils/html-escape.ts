@@ -9,7 +9,6 @@ export function escapeHtml(s: string): string {
 }
 
 const ALLOWED_SCHEME_RE = /^https?:/i;
-const DANGEROUS_SCHEME_RE = /^(javascript|data|vbscript):/i;
 
 /**
  * Validates and escapes a URL for use in href attributes.

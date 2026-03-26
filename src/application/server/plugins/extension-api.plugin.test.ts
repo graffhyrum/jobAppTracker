@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
 
 import { type } from "arktype";
 import { Effect, Either } from "effect";
@@ -133,6 +133,9 @@ const createTestExtensionApiPlugin = new Elysia({ prefix: "/api" })
 
 let app = new Elysia().use(createTestExtensionApiPlugin);
 
+const originalApiKey = process.env.BROWSER_EXTENSION_API_KEY;
+const originalManagerType = process.env.JOB_APP_MANAGER_TYPE;
+
 describe("Extension API Plugin", () => {
 	beforeEach(async () => {
 		// Set up test environment with API key
@@ -145,6 +148,19 @@ describe("Extension API Plugin", () => {
 
 		// Create test app with test manager
 		app = new Elysia().use(createTestExtensionApiPlugin);
+	});
+
+	afterEach(() => {
+		if (originalApiKey === undefined) {
+			delete process.env.BROWSER_EXTENSION_API_KEY;
+		} else {
+			process.env.BROWSER_EXTENSION_API_KEY = originalApiKey;
+		}
+		if (originalManagerType === undefined) {
+			delete process.env.JOB_APP_MANAGER_TYPE;
+		} else {
+			process.env.JOB_APP_MANAGER_TYPE = originalManagerType;
+		}
 	});
 
 	describe("GET /api/health", () => {

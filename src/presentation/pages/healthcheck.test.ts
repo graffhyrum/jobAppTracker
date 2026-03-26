@@ -47,4 +47,16 @@ describe("healthcheckPage", () => {
 		expect(html).toContain("sqlite");
 		expect(html).toContain("ok");
 	});
+
+	test("HTML-escapes values to prevent XSS", () => {
+		const xssEnv = {
+			BASE_URL: '<script>alert("xss")</script>',
+			PORT: "3000",
+			JOB_APP_MANAGER_TYPE: "test",
+		};
+		const html = healthcheckPage(dbStatus, xssEnv);
+
+		expect(html).not.toContain('<script>alert("xss")</script>');
+		expect(html).toContain("&lt;script&gt;");
+	});
 });
