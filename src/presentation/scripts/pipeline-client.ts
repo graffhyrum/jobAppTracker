@@ -290,8 +290,8 @@ const sortData = (
 		}
 		// Handle interest rating - use interestRating column instead of non-existent "interest"
 		if (column === "interestRating") {
-			aVal = a.interestRating || 0;
-			bVal = b.interestRating || 0;
+			aVal = a.interestRating ?? 0;
+			bVal = b.interestRating ?? 0;
 		}
 		// Handle strings
 		if (typeof aVal === "string" && typeof bVal === "string") {

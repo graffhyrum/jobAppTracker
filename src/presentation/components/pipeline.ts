@@ -203,8 +203,8 @@ function sortApplications(
 				bVal = new Date(b.applicationDate).getTime();
 				break;
 			case "interestRating":
-				aVal = a.interestRating || 0;
-				bVal = b.interestRating || 0;
+				aVal = a.interestRating ?? 0;
+				bVal = b.interestRating ?? 0;
 				break;
 			case "nextEventDate":
 				aVal = a.nextEventDate ? new Date(a.nextEventDate).getTime() : 0;

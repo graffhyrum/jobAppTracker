@@ -247,5 +247,30 @@ describe("Pipeline Utils", () => {
 			assertDefined(processedApp);
 			expect(processedApp.interestRating).toBe(0);
 		});
+
+		it("should preserve interestRating of 0 without replacing it with a default", () => {
+			// Regression: `app.interestRating || 0` treated 0 as falsy, which coincidentally
+			// returned 0 anyway but masked the source value. The fix uses `?? 0` so that an
+			// explicit 0 from the domain is preserved rather than coerced through falsy logic.
+			const app: JobApplication = {
+				id: "zero-interest-id",
+				company: "Zero Interest Company",
+				positionTitle: "Zero Interest Position",
+				applicationDate: "2024-01-01",
+				sourceType: "other",
+				isRemote: false,
+				updatedAt: "2024-01-01",
+				createdAt: "2024-01-01",
+				notes: [],
+				interestRating: 0,
+				statusLog: [["2024-01-01", { category: "active", label: "applied" }]],
+			} as JobApplication;
+
+			const result = processApplicationData([app]);
+
+			const processedApp = result.processedApps[0];
+			assertDefined(processedApp);
+			expect(processedApp.interestRating).toBe(0);
+		});
 	});
 });
