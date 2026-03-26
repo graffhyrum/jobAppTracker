@@ -59,7 +59,6 @@ export const healthcheckPage = (
 
 			</div>
 		</div>
-		</div>
 
 		<script>
 			document.getElementById('timestamp').textContent = new Date().toISOString();
