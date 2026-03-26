@@ -13,10 +13,4 @@ const schemaConfig = {
 const processEnvSchema = type(schemaConfig);
 export type ProcessEnvSchema = typeof processEnvSchema.infer;
 
-// console.dir(
-// 	Object.entries(process.env).filter(([k, _v]) =>
-// 		Object.keys(schemaConfig).includes(k),
-// 	),
-// );
-
 export const processEnv = processEnvSchema.assert(process.env);
