@@ -28,7 +28,11 @@ export const transformUpdateData = (
 	body: unknown,
 	currentApp: JobApplication | null,
 ) => {
-	const formData = objectJsonSchema(body);
+	const parseResult = objectJsonSchema(body);
+	if (parseResult instanceof ArkErrors) {
+		throw parseResult;
+	}
+	const formData = parseResult;
 	// Handle status field transformation
 	if ("status" in formData && typeof formData.status === "string") {
 		if (currentApp) {

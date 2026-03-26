@@ -166,7 +166,8 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 			{
 				params: applicationIdParamSchema,
 				body: jobApplicationModule.forUpdate,
-				async transform({ body, jobApplicationManager, params: { id } }) {
+				async transform(ctx) {
+					const { jobApplicationManager, params: { id } } = ctx;
 					// Get current application to preserve existing statusLog
 					const currentAppResult = await runEffect(
 						jobApplicationManager.getJobApplication(id),
@@ -175,7 +176,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						? currentAppResult.right
 						: null;
 
-					body = transformUpdateData(body, currentApp);
+					ctx.body = transformUpdateData(ctx.body, currentApp);
 				},
 			},
 		)
@@ -200,7 +201,8 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 			{
 				params: applicationIdParamSchema,
 				body: jobApplicationModule.forUpdate,
-				async transform({ body, jobApplicationManager, params: { id } }) {
+				async transform(ctx) {
+					const { jobApplicationManager, params: { id } } = ctx;
 					// Get current application to preserve existing statusLog
 					const currentAppResult = await runEffect(
 						jobApplicationManager.getJobApplication(id),
@@ -209,7 +211,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						? currentAppResult.right
 						: null;
 
-					body = transformUpdateData(body, currentApp);
+					ctx.body = transformUpdateData(ctx.body, currentApp);
 				},
 			},
 		)
