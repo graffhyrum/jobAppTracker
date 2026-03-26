@@ -82,7 +82,7 @@ describe("JobApplication Domain Entity", () => {
 			}
 			assertDefined(application.createdAt);
 			assertDefined(application.updatedAt);
-			expect(application.statusLog).toEqual([]);
+			expect(application.statusLog).toHaveLength(1);
 			expect(application.notes).toEqual([]);
 		});
 
@@ -196,8 +196,9 @@ describe("JobApplication Domain Entity", () => {
 				validApplicationStatus,
 			);
 
-			expect(updatedApplication.statusLog).toHaveLength(1);
-			expect(updatedApplication.statusLog[0]?.[1]).toEqual(
+			// createJobApplication seeds one initial "applied" entry, so after one update we have 2
+			expect(updatedApplication.statusLog).toHaveLength(2);
+			expect(updatedApplication.statusLog[1]?.[1]).toEqual(
 				validApplicationStatus,
 			);
 			expect(updatedApplication.updatedAt >= originalUpdatedAt).toBe(true);
@@ -222,20 +223,25 @@ describe("JobApplication Domain Entity", () => {
 				secondStatus,
 			);
 
-			expect(secondUpdate.statusLog).toHaveLength(2);
-			expect(secondUpdate.statusLog[0]?.[1]).toEqual(validApplicationStatus);
-			expect(secondUpdate.statusLog[1]?.[1]).toEqual(secondStatus);
+			// createJobApplication seeds one initial "applied" entry, plus two updates = 3 total
+			expect(secondUpdate.statusLog).toHaveLength(3);
+			expect(secondUpdate.statusLog[1]?.[1]).toEqual(validApplicationStatus);
+			expect(secondUpdate.statusLog[2]?.[1]).toEqual(secondStatus);
 		});
 	});
 
 	describe("getCurrentStatus", () => {
-		it("should return error when no status entries exist", () => {
+		it("should return initial applied status from a freshly created application", () => {
 			const id = createJobApplicationId(mockUuidGenerator);
 			const application = createJobApplication(validJobApplicationData, id);
 
 			const result = getCurrentStatus(application);
 
-			expect(Either.isLeft(result)).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right.category).toBe("active");
+				expect(result.right.label).toBe("applied");
+			}
 		});
 
 		it("should return latest status when statusLog has entries", () => {
@@ -256,13 +262,16 @@ describe("JobApplication Domain Entity", () => {
 	});
 
 	describe("getStatusCategory", () => {
-		it("should return error when no status exists", () => {
+		it("should return active category for freshly created application", () => {
 			const id = createJobApplicationId(mockUuidGenerator);
 			const application = createJobApplication(validJobApplicationData, id);
 
 			const result = getStatusCategory(application);
 
-			expect(Either.isLeft(result)).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toBe("active");
+			}
 		});
 
 		it("should return status category when status exists", () => {
@@ -309,11 +318,11 @@ describe("JobApplication Domain Entity", () => {
 	});
 
 	describe("hasStatus", () => {
-		it("should return false when no status entries exist", () => {
+		it("should return true for freshly created application with initial status", () => {
 			const id = createJobApplicationId(mockUuidGenerator);
 			const application = createJobApplication(validJobApplicationData, id);
 
-			expect(hasStatus(application)).toBe(false);
+			expect(hasStatus(application)).toBe(true);
 		});
 
 		it("should return true when status entries exist", () => {
@@ -329,11 +338,11 @@ describe("JobApplication Domain Entity", () => {
 	});
 
 	describe("isActive", () => {
-		it("should return false when no status exists", () => {
+		it("should return true for freshly created application with initial applied status", () => {
 			const id = createJobApplicationId(mockUuidGenerator);
 			const application = createJobApplication(validJobApplicationData, id);
 
-			expect(isActive(application)).toBe(false);
+			expect(isActive(application)).toBe(true);
 		});
 
 		it("should return true when application has active status", () => {
@@ -364,7 +373,7 @@ describe("JobApplication Domain Entity", () => {
 	});
 
 	describe("isInactive", () => {
-		it("should return false when no status exists", () => {
+		it("should return false for freshly created application with initial active status", () => {
 			const id = createJobApplicationId(mockUuidGenerator);
 			const application = createJobApplication(validJobApplicationData, id);
 

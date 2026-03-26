@@ -117,13 +117,8 @@ export function createJobApplicationWithInitialStatus(
 	generateUUID: () => string,
 ): JobApplication {
 	const id = createJobApplicationId(generateUUID);
-	const baseApp = createJobApplication(data, id);
-	// Add initial "applied" status
-	const initialStatus: ApplicationStatus = {
-		category: "active",
-		label: "applied",
-	};
-	return updateJobApplicationStatus(baseApp, initialStatus);
+	// createJobApplication already seeds statusLog with the initial "applied" entry
+	return createJobApplication(data, id);
 }
 export function createJobApplicationWithIdGen(
 	data: JobApplicationForCreate,
@@ -157,12 +152,17 @@ export function createJobApplication(
 	id: JobApplicationId,
 ): JobApplication {
 	const now = new Date().toISOString();
+	// Seed statusLog with the initial "applied" entry to satisfy the >0 schema constraint
+	const initialStatusEntry: AppStatusEntry = [
+		now,
+		{ category: "active", label: "applied" },
+	];
 	return {
 		...data,
 		id,
 		createdAt: now,
 		updatedAt: now,
-		statusLog: [],
+		statusLog: [initialStatusEntry],
 		notes: [],
 	};
 }
