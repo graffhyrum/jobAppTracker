@@ -1,5 +1,5 @@
 import { type } from "arktype";
-import { Effect, Either } from "effect";
+import { Either } from "effect";
 import { Elysia, NotFoundError } from "elysia";
 
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
@@ -30,6 +30,7 @@ import {
 	createApplicationBodySchema,
 	searchQuerySchema,
 } from "#src/presentation/schemas/application-routes.schemas.ts";
+import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 
 /**
  * Factory function to create applications plugin with injected dependencies.
@@ -310,7 +311,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 					return formAndPipelineContent(
 						currentApps,
 						jobBoards,
-						`Unexpected error: ${error instanceof Error ? error.message : String(error)}`,
+						`Unexpected error: ${escapeHtml(error instanceof Error ? error.message : String(error))}`,
 					);
 				}
 			},
@@ -437,7 +438,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 							console.error("=== End Import Error ===");
 						</script>
 						<div class="error-message">
-							Error executing an import script: ${error instanceof Error ? error.message : String(error)}. Check browser console for details.
+							Error executing an import script: ${escapeHtml(error instanceof Error ? error.message : String(error))}. Check browser console for details.
 						</div>
 					`;
 			}
@@ -463,7 +464,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 					// Generate and create applications
 					for (let i = 0; i < count; i++) {
 						const data = generateRandomJobApplicationData(jobBoards);
-						await Effect.runPromise(
+						await runEffect(
 							jobApplicationManager.createJobApplication(data),
 						);
 					}
@@ -496,7 +497,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 					return formAndPipelineContent(
 						applications,
 						jobBoards,
-						`Error generating applications: ${error instanceof Error ? error.message : String(error)}`,
+						`Error generating applications: ${escapeHtml(error instanceof Error ? error.message : String(error))}`,
 					);
 				}
 			},

@@ -120,13 +120,6 @@ export function createJobApplicationWithInitialStatus(
 	// createJobApplication already seeds statusLog with the initial "applied" entry
 	return createJobApplication(data, id);
 }
-export function createJobApplicationWithIdGen(
-	data: JobApplicationForCreate,
-	generateUUID: () => string,
-): JobApplication {
-	const id = createJobApplicationId(generateUUID);
-	return createJobApplication(data, id);
-}
 export function createJobApplicationId(
 	generateUUID: () => string,
 ): JobApplicationId {

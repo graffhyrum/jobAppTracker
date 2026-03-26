@@ -7,7 +7,6 @@ import { assertDefined } from "#helpers/assertDefined.ts";
 import {
 	createJobApplication,
 	createJobApplicationId,
-	createJobApplicationWithIdGen,
 	createJobApplicationWithInitialStatus,
 	getCurrentStatus,
 	getStatusCategory,
@@ -95,21 +94,6 @@ describe("JobApplication Domain Entity", () => {
 			expect(application.createdAt <= afterCreate).toBe(true);
 			expect(application.updatedAt >= beforeCreate).toBe(true);
 			expect(application.updatedAt <= afterCreate).toBe(true);
-		});
-	});
-
-	describe("createJobApplicationWithIdGen", () => {
-		it("should create job application with generated ID", () => {
-			const application = createJobApplicationWithIdGen(
-				validJobApplicationData,
-				mockUuidGenerator,
-			);
-
-			expect(application.id).toBe("123e4567-e89b-12d3-a456-426614174000");
-			expect(application.company).toBe(validJobApplicationData.company);
-			expect(application.positionTitle).toBe(
-				validJobApplicationData.positionTitle,
-			);
 		});
 	});
 
