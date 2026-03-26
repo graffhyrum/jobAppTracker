@@ -68,7 +68,7 @@ const createTestExtensionApiPlugin = new Elysia({ prefix: "/api" })
 								: new Date().toISOString(),
 							sourceType: "job_board" as const,
 							isRemote: false,
-							...(body.interestRating && {
+							...(body.interestRating != null && {
 								interestRating: body.interestRating,
 							}),
 							...(body.jobPostingUrl && { jobPostingUrl: body.jobPostingUrl }),
@@ -363,6 +363,39 @@ describe("Extension API Plugin", () => {
 				const currentStatus = statusLog[statusLog.length - 1]?.[1];
 				expect(currentStatus?.label).toBe("applied");
 				expect(currentStatus?.category).toBe("active");
+			}
+		});
+
+		it("should preserve interestRating of 0 when submitted from extension", async () => {
+			// Regression: `body.interestRating && { interestRating }` treated 0 as falsy,
+			// silently dropping a valid "no interest" rating. Fix uses `!= null`.
+			const dataWithZeroRating = {
+				company: "Zero Interest Company",
+				position: "Software Engineer",
+				interestRating: 0,
+			};
+
+			const response = await app.handle(
+				new Request("http://localhost/api/applications/from-extension", {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						"X-API-Key": "test-api-key",
+					},
+					body: JSON.stringify(dataWithZeroRating),
+				}),
+			);
+
+			const data = await response.json();
+			expect(response.status).toBe(201);
+			expect(data.success).toBe(true);
+
+			const getResult = await runEffect(
+				jobApplicationManager.getJobApplication(data.id),
+			);
+			expect(Either.isRight(getResult)).toBe(true);
+			if (Either.isRight(getResult)) {
+				expect(getResult.right.interestRating).toBe(0);
 			}
 		});
 

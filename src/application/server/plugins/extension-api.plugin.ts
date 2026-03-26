@@ -209,7 +209,7 @@ const createApplicationModule = () => {
 		...createOptionalFields(body),
 	});
 	const createOptionalFields = (body: ExtensionRequestBody) => ({
-		...(body.interestRating && { interestRating: body.interestRating }),
+		...(body.interestRating != null && { interestRating: body.interestRating }),
 		...(body.jobPostingUrl && { jobPostingUrl: body.jobPostingUrl }),
 		...(body.jobDescription && { jobDescription: body.jobDescription }),
 	});

@@ -67,7 +67,7 @@ export const processApplicationData = (
 			positionTitle: app.positionTitle,
 			applicationDate: app.applicationDate,
 			updatedAt: app.updatedAt,
-			interestRating: app.interestRating || 0,
+			interestRating: app.interestRating ?? 0,
 			nextEventDate: app.nextEventDate || null,
 			status: statusInfo.label,
 			statusCategory: statusInfo.category,
