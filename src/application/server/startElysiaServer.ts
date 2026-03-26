@@ -114,12 +114,6 @@ export function startElysiaServer() {
 				prefix: "/assets",
 			}),
 		)
-		.use(
-			staticPlugin({
-				assets: "src/presentation/utils",
-				prefix: "/utils",
-			}),
-		)
 		// Chrome DevTools workspace auto-detection endpoint
 		.get(
 			"/.well-known/appspecific/com.chrome.devtools.json",
