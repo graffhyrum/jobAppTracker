@@ -189,12 +189,8 @@ const createApplicationModule = () => {
 	 */
 	const validateApplicationData = (
 		applicationData: JobApplicationForCreate,
-	): JobApplicationForCreate | type.errors => {
-		const validationResult = jobApplicationModule.forCreate(applicationData);
-		return validationResult instanceof type.errors
-			? validationResult
-			: validationResult;
-	};
+	): JobApplicationForCreate | type.errors =>
+		jobApplicationModule.forCreate(applicationData);
 	/**
 	 * Transforms extension request body to application data
 	 */

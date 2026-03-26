@@ -11,7 +11,6 @@ import {
 	createJobApplicationWithInitialStatus,
 	getCurrentStatus,
 	getStatusCategory,
-	hasStatus,
 	isActive,
 	isInactive,
 	isJobAppOverdue,
@@ -144,7 +143,6 @@ describe("JobApplication Domain Entity", () => {
 
 			expect(isActive(application)).toBe(true);
 			expect(isInactive(application)).toBe(false);
-			expect(hasStatus(application)).toBe(true);
 		});
 	});
 
@@ -314,26 +312,6 @@ describe("JobApplication Domain Entity", () => {
 			);
 			expect(updatedApplication.updatedAt >= originalUpdatedAt).toBe(true);
 			expect(updatedApplication.id).toBe(application.id);
-		});
-	});
-
-	describe("hasStatus", () => {
-		it("should return true for freshly created application with initial status", () => {
-			const id = createJobApplicationId(mockUuidGenerator);
-			const application = createJobApplication(validJobApplicationData, id);
-
-			expect(hasStatus(application)).toBe(true);
-		});
-
-		it("should return true when status entries exist", () => {
-			const id = createJobApplicationId(mockUuidGenerator);
-			const application = createJobApplication(validJobApplicationData, id);
-			const updatedApp = updateJobApplicationStatus(
-				application,
-				validApplicationStatus,
-			);
-
-			expect(hasStatus(updatedApp)).toBe(true);
 		});
 	});
 

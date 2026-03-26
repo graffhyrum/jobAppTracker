@@ -192,9 +192,6 @@ export function updateJobApplicationData(
 		updatedAt: new Date().toISOString(),
 	};
 }
-export function hasStatus(app: JobApplication): boolean {
-	return app.statusLog.length > 0;
-}
 /**
  * Derives the ApplicationStatus (category + label) from a status label.
  * Category is determined by whether the label appears in the domain's ActiveLabels set.

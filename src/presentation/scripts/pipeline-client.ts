@@ -1,4 +1,5 @@
 import type { HtmxBeforeRequestDetail } from "../types/htmx.d.ts";
+import { escapeHtml } from "../utils/html-escape";
 import type { ProcessedApplication } from "../utils/pipeline-utils";
 type PipelineConfig = {
 	enableClientSidePagination: boolean;
@@ -192,13 +193,16 @@ const updateDisplay = (state: PipelineState): void => {
 			'<tr><td colspan="8" class="empty-state">No applications found</td></tr>';
 	} else {
 		tbody.innerHTML = pageData
-			.map(
-				(app) => `
+			.map((app) => {
+				const safeCompany = escapeHtml(app.company);
+				const safePositionTitle = escapeHtml(app.positionTitle);
+				const safeStatus = escapeHtml(app.status);
+				return `
 			<tr class="application-row ${app.statusCategory} ${app.isOverdue ? "overdue" : ""}" data-testid="application-row-${app.id}">
-				<td class="company-cell" data-testid="company-cell-${app.id}">${app.company}</td>
-				<td class="position-cell" data-testid="position-cell-${app.id}">${app.positionTitle}</td>
+				<td class="company-cell" data-testid="company-cell-${app.id}">${safeCompany}</td>
+				<td class="position-cell" data-testid="position-cell-${app.id}">${safePositionTitle}</td>
 				<td class="status-cell" data-testid="status-cell-${app.id}">
-					<span class="status-badge ${app.statusCategory}" data-testid="status-badge-${app.id}">${app.status}</span>
+					<span class="status-badge ${app.statusCategory}" data-testid="status-badge-${app.id}">${safeStatus}</span>
 				</td>
 				<td class="application-date-cell" data-testid="application-date-cell-${app.id}">${formatDate(app.applicationDate)}</td>
 				<td class="updated-date-cell" data-testid="updated-date-cell-${app.id}">${formatDate(app.updatedAt)}</td>
@@ -221,8 +225,8 @@ const updateDisplay = (state: PipelineState): void => {
 					<button class="action-btn view" data-testid="view-btn-${app.id}" title="View Details">👁️</button>
 				</td>
 			</tr>
-		`,
-			)
+		`;
+			})
 			.join("");
 		// Re-process HTMX attributes for dynamically generated content
 		if (typeof window.htmx !== "undefined" && window.htmx) {

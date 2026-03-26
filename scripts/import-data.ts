@@ -112,7 +112,9 @@ async function buildExistingApplicationsMap(
 ): Promise<Map<string, string>> {
 	const allAppsResult = await runEffect(jobAppManager.getAllJobApplications());
 	if (Either.isLeft(allAppsResult)) {
-		return new Map();
+		throw new Error(
+			`Failed to load existing applications for duplicate detection: ${String(allAppsResult.left)}`,
+		);
 	}
 
 	const map = new Map<string, string>();

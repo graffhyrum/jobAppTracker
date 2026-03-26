@@ -3,6 +3,7 @@ import { Either } from "effect";
 
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import type {
+	ApplicationStatusLabel,
 	JobApplication,
 	JobApplicationForCreate,
 } from "#src/domain/entities/job-application.ts";
@@ -15,8 +16,6 @@ import {
 	type createApplicationBodySchema,
 	updateApplicationBodySchema,
 } from "#src/presentation/schemas/application-routes.schemas.ts";
-type ApplicationStatusLabel =
-	typeof jobApplicationModule.ApplicationStatusLabel.infer;
 // Create schema once at module initialization to avoid race conditions under concurrent load
 const objectJsonSchema = type("object.json").to(updateApplicationBodySchema);
 // Create schema once at module initialization to avoid race conditions under concurrent load
@@ -168,6 +167,6 @@ export const fetchAllApplicationsOrEmpty = async (
 	return Either.isRight(result) ? result.right : [];
 };
 // Normalize date-only strings to UTC ISO (midnight Z)
-const normalize = (s: string | undefined) => {
+const normalize = (s: string): string => {
 	return dateNormalizeSchema.assert(s);
 };
