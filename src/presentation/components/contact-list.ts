@@ -1,5 +1,6 @@
 import type { Contact } from "../../domain/entities/contact.ts";
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
+import { escapeHtml, safeHref } from "../utils/html-escape.ts";
 import { formatDate } from "../utils/pipeline-utils.ts";
 
 const roleLabels: Record<string, string> = {
@@ -45,10 +46,10 @@ export function renderContactsList(
 		<div class="contact-card" data-testid="contact-${contact.id}">
 			<div class="contact-header">
 				<div class="contact-info-section">
-					<div class="contact-name">${contact.contactName}</div>
+					<div class="contact-name">${escapeHtml(contact.contactName)}</div>
 					<div class="contact-badges">
-						${contact.role ? `<span class="role-badge">${roleLabels[contact.role] || contact.role}</span>` : ""}
-						<span class="channel-badge">${channelLabels[contact.channel] || contact.channel}</span>
+						${contact.role ? `<span class="role-badge">${escapeHtml(roleLabels[contact.role] ?? contact.role)}</span>` : ""}
+						<span class="channel-badge">${escapeHtml(channelLabels[contact.channel] ?? contact.channel)}</span>
 						<span class="response-badge ${contact.responseReceived ? "received" : "no-response"}">
 							${contact.responseReceived ? "✓ Response Received" : "⏳ No Response"}
 						</span>
@@ -77,13 +78,13 @@ export function renderContactsList(
 			<div class="contact-details">
 				<div class="contact-info">
 					<label>Outreach Date:</label>
-					<span data-utc="${contact.outreachDate}">${formatDate(contact.outreachDate)}</span>
+					<span data-utc="${escapeHtml(contact.outreachDate)}">${formatDate(contact.outreachDate)}</span>
 				</div>
 				${
 					contact.contactEmail
 						? `<div class="contact-info">
 					<label>Email:</label>
-					<a href="mailto:${contact.contactEmail}">${contact.contactEmail}</a>
+					<a href="mailto:${escapeHtml(contact.contactEmail)}">${escapeHtml(contact.contactEmail)}</a>
 				</div>`
 						: ""
 				}
@@ -91,7 +92,7 @@ export function renderContactsList(
 					contact.linkedInUrl
 						? `<div class="contact-info">
 					<label>LinkedIn:</label>
-					<a href="${contact.linkedInUrl}" target="_blank" rel="noopener noreferrer">View Profile</a>
+					<a href="${safeHref(contact.linkedInUrl)}" target="_blank" rel="noopener noreferrer">View Profile</a>
 				</div>`
 						: ""
 				}
@@ -100,7 +101,7 @@ export function renderContactsList(
 				contact.notes
 					? `<div class="contact-notes">
 				<label>Notes:</label>
-				<p>${contact.notes}</p>
+				<p>${escapeHtml(contact.notes)}</p>
 			</div>`
 					: ""
 			}
@@ -140,9 +141,10 @@ export function renderContactForm(
 		: `/applications/${jobApplicationId}/contacts`;
 	const method = isEdit ? "put" : "post";
 
-	const outreachValue = contact?.outreachDate
-		? contact.outreachDate.split("T")[0]
-		: new Date().toISOString().split("T")[0];
+	const outreachValue =
+		(contact?.outreachDate
+			? contact.outreachDate.split("T")[0]
+			: new Date().toISOString().split("T")[0]) ?? "";
 
 	return `
 		<div class="contact-form" id="contact-${contact?.id || "new"}" data-testid="contact-form-${formId}">
@@ -154,7 +156,7 @@ export function renderContactForm(
 							id="${formId}-name"
 							type="text"
 							name="contactName"
-							value="${contact?.contactName || ""}"
+							value="${escapeHtml(contact?.contactName ?? "")}"
 							class="form-input"
 							data-testid="input-contactName"
 							required
@@ -166,7 +168,7 @@ export function renderContactForm(
 							id="${formId}-email"
 							type="email"
 							name="contactEmail"
-							value="${contact?.contactEmail || ""}"
+							value="${escapeHtml(contact?.contactEmail ?? "")}"
 							class="form-input"
 							data-testid="input-contactEmail"
 							placeholder="contact@example.com" />
@@ -180,7 +182,7 @@ export function renderContactForm(
 							id="${formId}-linkedin"
 							type="url"
 							name="linkedInUrl"
-							value="${contact?.linkedInUrl || ""}"
+							value="${escapeHtml(contact?.linkedInUrl ?? "")}"
 							class="form-input"
 							data-testid="input-linkedInUrl"
 							placeholder="https://linkedin.com/in/..." />
@@ -225,7 +227,7 @@ export function renderContactForm(
 							id="${formId}-outreach"
 							type="date"
 							name="outreachDate"
-							value="${outreachValue}"
+							value="${escapeHtml(outreachValue)}"
 							class="form-input"
 							data-testid="input-outreachDate"
 							required />
@@ -252,7 +254,7 @@ export function renderContactForm(
 						rows="4"
 						class="form-textarea"
 						data-testid="textarea-notes"
-						placeholder="Additional notes about this contact...">${contact?.notes || ""}</textarea>
+						placeholder="Additional notes about this contact...">${escapeHtml(contact?.notes ?? "")}</textarea>
 				</div>
 
 				<div class="form-actions">
