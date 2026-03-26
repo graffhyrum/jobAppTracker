@@ -52,11 +52,7 @@ export const healthcheckPage = (
 					<summary>Click to toggle</summary>
 					<div class="env-vars-section">
 						<h4>Application Variables</h4>
-						${recordToHtml(filterApplicationVars(exposedProcessVariables))}
-					</div>
-					<div class="env-vars-section">
-						<h4>Other Variables</h4>
-						${recordToHtml(filterOtherVars(exposedProcessVariables))}
+						${recordToHtml(filterAllowlistedVars(exposedProcessVariables))}
 					</div>
 				</details>
 
@@ -78,31 +74,14 @@ function recordToHtml(record: Record<string, unknown>): string {
 		.join("");
 }
 
-const applicationVars = [
-	"BASE_URL",
-	"PORT",
-	"JOB_APP_MANAGER_TYPE",
-	"BROWSER_EXTENSION_API_KEY",
-	"NODE_ENV",
-] as const;
-const appVarsSet = new Set(applicationVars);
+/** Only non-secret env vars that are safe to render in HTML. */
+const allowlistedVars = ["BASE_URL", "PORT", "JOB_APP_MANAGER_TYPE"] as const;
+const allowlistSet = new Set<string>(allowlistedVars);
 
-function filterApplicationVars(
+function filterAllowlistedVars(
 	record: Record<string, unknown>,
 ): Record<string, unknown> {
 	return Object.fromEntries(
-		getEntries(record).filter(([key]) =>
-			appVarsSet.has(key as (typeof applicationVars)[number]),
-		),
-	);
-}
-
-function filterOtherVars(
-	record: Record<string, unknown>,
-): Record<string, unknown> {
-	return Object.fromEntries(
-		getEntries(record).filter(
-			([key]) => !appVarsSet.has(key as (typeof applicationVars)[number]),
-		),
+		getEntries(record).filter(([key]) => allowlistSet.has(key)),
 	);
 }
