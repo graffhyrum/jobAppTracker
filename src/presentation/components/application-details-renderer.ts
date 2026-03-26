@@ -4,6 +4,7 @@ import {
 	getJobAppCurrentStatusEntry,
 	type JobApplication,
 } from "../../domain/entities/job-application";
+import { escapeHtml, safeHref } from "../utils/html-escape";
 import {
 	activeStatuses,
 	formatDate,
@@ -32,8 +33,8 @@ export const renderApplicationDetailsView = (app: JobApplication): string => {
 					: "active";
 			return `
 				<div class="status-log-entry" data-testid="status-log-entry">
-					<span class="status-log-date" data-utc="${datetime}">${date}</span>
-					<span class="status-badge ${category}">${label}</span>
+					<span class="status-log-date" data-utc="${escapeHtml(datetime)}">${date}</span>
+					<span class="status-badge ${escapeHtml(category)}">${escapeHtml(label)}</span>
 				</div>
 			`;
 		})
@@ -93,7 +94,7 @@ export const renderApplicationDetailsView = (app: JobApplication): string => {
 						<div class="details-field" data-testid="field-status">
 							<label>Status</label>
 							<div class="field-value">
-								<span class="status-badge ${status.category}">${status.label}</span>
+								<span class="status-badge ${escapeHtml(status.category)}">${escapeHtml(status.label)}</span>
 							</div>
 						</div>
 
@@ -142,12 +143,12 @@ export const renderApplicationDetailsView = (app: JobApplication): string => {
 					<div class="metadata-grid">
 						<div class="details-field" data-testid="field-created-at">
 							<label>Created</label>
-							<div class="field-value" data-utc="${app.createdAt}">${formatDate(app.createdAt)}</div>
+							<div class="field-value" data-utc="${escapeHtml(app.createdAt)}">${formatDate(app.createdAt)}</div>
 						</div>
 
 						<div class="details-field" data-testid="field-updated-at">
 							<label>Last Updated</label>
-							<div class="field-value" data-utc="${app.updatedAt}">${formatDate(app.updatedAt)}</div>
+							<div class="field-value" data-utc="${escapeHtml(app.updatedAt)}">${formatDate(app.updatedAt)}</div>
 						</div>
 					</div>
 				</div>
@@ -200,10 +201,10 @@ export const renderApplicationDetailsEdit = (app: JobApplication): string => {
 	const allStatuses = [...activeStatuses, ...inactiveStatuses];
 
 	const applicationDateValue = app.applicationDate
-		? app.applicationDate.split("T")[0]
+		? (app.applicationDate.split("T")[0] ?? "")
 		: "";
 	const nextEventValue = app.nextEventDate
-		? app.nextEventDate.split("T")[0]
+		? (app.nextEventDate.split("T")[0] ?? "")
 		: "";
 
 	return `
@@ -291,7 +292,7 @@ export const renderApplicationDetailsEdit = (app: JobApplication): string => {
 								${allStatuses
 									.map(
 										(status) =>
-											`<option value="${status}" ${currentStatus?.label === status ? "selected" : ""}>${status}</option>`,
+											`<option value="${escapeHtml(status)}" ${currentStatus?.label === status ? "selected" : ""}>${escapeHtml(status)}</option>`,
 									)
 									.join("")}
 							</select>
@@ -356,12 +357,12 @@ export const renderApplicationDetailsEdit = (app: JobApplication): string => {
 					<div class="metadata-grid">
 						<div class="details-field" data-testid="field-created-at">
 							<label>Created</label>
-							<div class="field-value" data-utc="${app.createdAt}">${formatDate(app.createdAt)}</div>
+							<div class="field-value" data-utc="${escapeHtml(app.createdAt)}">${formatDate(app.createdAt)}</div>
 						</div>
 
 						<div class="details-field" data-testid="field-updated-at">
 							<label>Last Updated</label>
-							<div class="field-value" data-utc="${app.updatedAt}">${formatDate(app.updatedAt)}</div>
+							<div class="field-value" data-utc="${escapeHtml(app.updatedAt)}">${formatDate(app.updatedAt)}</div>
 						</div>
 					</div>
 				</div>

@@ -1,6 +1,7 @@
 import type { JobApplication } from "../../domain/entities/job-application";
 import { renderApplicationDetailsView } from "../components/application-details-renderer";
 import { type LayoutOptions, layout } from "../components/layout";
+import { escapeHtml } from "../utils/html-escape";
 
 export const applicationDetailsPage = (
 	app: JobApplication,
@@ -13,7 +14,7 @@ export const applicationDetailsPage = (
 	`;
 
 	return layout(
-		`${app.company} - ${app.positionTitle} | Job App Tracker`,
+		`${escapeHtml(app.company)} - ${escapeHtml(app.positionTitle)} | Job App Tracker`,
 		content,
 		layoutOptions,
 	);

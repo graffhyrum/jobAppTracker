@@ -3,6 +3,7 @@ import type {
 	DateRange,
 } from "../../domain/use-cases/analytics.ts";
 import { type LayoutOptions, layout } from "../components/layout.ts";
+import { escapeHtml, escapeScriptContent } from "../utils/html-escape.ts";
 
 export const analyticsPage = (
 	analytics: ApplicationsAnalytics,
@@ -11,6 +12,8 @@ export const analyticsPage = (
 ): string => {
 	const { summary, responseRate } = analytics;
 	const { startDate = "", endDate = "" } = dateRange;
+	const safeStartDate = escapeHtml(startDate);
+	const safeEndDate = escapeHtml(endDate);
 
 	const content = `
 		<div class="analytics-page">
@@ -31,7 +34,7 @@ export const analyticsPage = (
 								type="date"
 								id="startDate"
 								name="startDate"
-								value="${startDate}"
+								value="${safeStartDate}"
 								placeholder="Start date"
 							/>
 						</div>
@@ -41,7 +44,7 @@ export const analyticsPage = (
 								type="date"
 								id="endDate"
 								name="endDate"
-								value="${endDate}"
+								value="${safeEndDate}"
 								placeholder="End date"
 							/>
 						</div>
@@ -133,7 +136,7 @@ export const analyticsPage = (
 
 		<!-- Analytics Data -->
 		<script>
-			const analyticsData = ${JSON.stringify(analytics)};
+			const analyticsData = ${escapeScriptContent(JSON.stringify(analytics))};
 		</script>
 
 		<!-- Initialize Charts -->
