@@ -1,4 +1,5 @@
 import type { JobBoard } from "../../domain/entities/job-board.ts";
+import { escapeHtml } from "../utils/html-escape.ts";
 
 export function addApplicationForm(
 	jobBoards: JobBoard[] = [],
@@ -6,7 +7,7 @@ export function addApplicationForm(
 ): string {
 	return `
 		<div class="add-application-container">
-			${errorMessage ? `<div class="error-alert">${errorMessage}</div>` : ""}
+			${errorMessage ? `<div class="error-alert">${escapeHtml(errorMessage)}</div>` : ""}
 			<form
 				hx-post="/applications"
 				hx-trigger="submit"
