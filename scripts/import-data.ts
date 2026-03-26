@@ -101,24 +101,35 @@ function isNonEmptyString(value: string | undefined | null): value is string {
 }
 
 // Duplicate detection functions
-async function findDuplicateApplication(
-	company: string,
-	positionTitle: string,
+
+/**
+ * Builds a lookup map of existing applications keyed by "company|positionTitle"
+ * (both lowercased and trimmed) so duplicate checks during import are O(1) per
+ * entry rather than fetching all rows on every iteration.
+ */
+async function buildExistingApplicationsMap(
 	jobAppManager: JobApplicationManager,
-): Promise<string | null> {
+): Promise<Map<string, string>> {
 	const allAppsResult = await runEffect(jobAppManager.getAllJobApplications());
 	if (Either.isLeft(allAppsResult)) {
-		return null;
+		return new Map();
 	}
 
-	const existingApp = allAppsResult.right.find(
-		(app) =>
-			app.company.toLowerCase().trim() === company.toLowerCase().trim() &&
-			app.positionTitle.toLowerCase().trim() ===
-				positionTitle.toLowerCase().trim(),
-	);
+	const map = new Map<string, string>();
+	for (const app of allAppsResult.right) {
+		const key = `${app.company.toLowerCase().trim()}|${app.positionTitle.toLowerCase().trim()}`;
+		map.set(key, app.id);
+	}
+	return map;
+}
 
-	return existingApp?.id ?? null;
+function findDuplicateInMap(
+	company: string,
+	positionTitle: string,
+	existingAppsMap: Map<string, string>,
+): string | null {
+	const key = `${company.toLowerCase().trim()}|${positionTitle.toLowerCase().trim()}`;
+	return existingAppsMap.get(key) ?? null;
 }
 
 function trimIfPresent(value: string | undefined | null): string | undefined {
@@ -514,16 +525,17 @@ async function processApplication(
 	baseDataApp: BaseDataJobApplication,
 	jobAppManager: JobApplicationManager,
 	repos: RepositoryContainer,
+	existingAppsMap: Map<string, string>,
 ): Promise<string | null> {
 	console.log(
 		`\n📝 Processing: ${baseDataApp.company_name} - ${baseDataApp.job_title} (ID: ${baseDataApp.id})`,
 	);
 
-	// Check for duplicates
-	const duplicateId = await findDuplicateApplication(
+	// Check for duplicates using the pre-built map (O(1) per entry)
+	const duplicateId = findDuplicateInMap(
 		baseDataApp.company_name,
 		baseDataApp.job_title,
-		jobAppManager,
+		existingAppsMap,
 	);
 
 	if (duplicateId) {
@@ -596,6 +608,13 @@ async function importData(): Promise<void> {
 
 	const skippedEntries = new Set<number>(validationErrors.map((e) => e.index));
 
+	// Fetch all existing applications once and build a lookup map so that
+	// duplicate detection during the import loop is O(1) per entry rather
+	// than O(m) (a full getAll call) on every iteration.
+	console.log("🔍 Building duplicate-detection index from existing applications...");
+	const existingAppsMap = await buildExistingApplicationsMap(jobAppManager);
+	console.log(`  Found ${existingAppsMap.size} existing application(s) in database.\n`);
+
 	for (let i = 0; i < baseDataData.length; i++) {
 		if (skippedEntries.has(i)) {
 			statistics.skippedCount++;
@@ -613,6 +632,7 @@ async function importData(): Promise<void> {
 				baseDataApp,
 				jobAppManager,
 				repos,
+				existingAppsMap,
 			);
 			if (duplicateId) {
 				statistics.duplicateCount++;
