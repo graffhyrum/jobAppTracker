@@ -91,7 +91,7 @@ export function formatDate(isoDateString: string): string {
 	return parsedIso;
 }
 export const formatInterestRating = (rating?: number): string => {
-	if (!rating) return "";
+	if (rating == null) return "";
 	return `${"★".repeat(rating)}${"☆".repeat(3 - rating)}`;
 };
 export const getStatusInfo = (app: JobApplication): StatusInfo => {

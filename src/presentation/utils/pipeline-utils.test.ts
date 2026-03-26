@@ -14,7 +14,10 @@ describe("Pipeline Utils", () => {
 	describe("formatInterestRating", () => {
 		it("should return empty string for no rating", () => {
 			expect(formatInterestRating()).toBe("");
-			expect(formatInterestRating(0)).toBe("");
+		});
+
+		it("should format rating 0 as three empty stars", () => {
+			expect(formatInterestRating(0)).toBe("☆☆☆");
 		});
 
 		it("should format rating 1 correctly", () => {
