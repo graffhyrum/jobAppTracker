@@ -58,11 +58,10 @@ describe("transformUpdateData", () => {
 		});
 	});
 
-	test("removes status field even without currentApp", () => {
-		const result = transformUpdateData({ status: "interview" }, null);
-		expect(result).not.toHaveProperty("status");
-		// No statusLog should be added without currentApp
-		expect(result.statusLog).toBeUndefined();
+	test("throws when status is provided but currentApp is null", () => {
+		expect(() => transformUpdateData({ status: "interview" }, null)).toThrow(
+			"Cannot update status: current application could not be loaded",
+		);
 	});
 
 	test("normalizes applicationDate to ISO datetime", () => {
