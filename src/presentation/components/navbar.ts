@@ -42,16 +42,16 @@ export function navbar(options: NavbarOptions = {}): string {
 		</div>
 		<ul class="navbar-nav">
 			<li class="nav-item">
-				<a href=${home.href} class="nav-link" data-testid=${home.testId}>${home.text}</a>
+				<a href="${home.href}" class="nav-link" data-testid="${home.testId}">${home.text}</a>
 			</li>
 			<li class="nav-item">
-				<a href=${analytics.href} class="nav-link" data-testid=${analytics.testId}>${analytics.text}</a>
+				<a href="${analytics.href}" class="nav-link" data-testid="${analytics.testId}">${analytics.text}</a>
 			</li>
 			<li class="nav-item">
-				<a href=${health.href} class="nav-link" data-testid=${health.testId}>${health.text}</a>
+				<a href="${health.href}" class="nav-link" data-testid="${health.testId}">${health.text}</a>
 			</li>
 			<li class="nav-item">
-				<a href=${api.href} class="nav-link" data-testid=${api.testId}>${api.text}</a>
+				<a href="${api.href}" class="nav-link" data-testid="${api.testId}">${api.text}</a>
 			</li>
 			<li class="nav-item">
 				<button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" data-testid="theme-toggle">
