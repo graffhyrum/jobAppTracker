@@ -2,6 +2,7 @@ import { ArkErrors } from "arktype";
 import { Either } from "effect";
 
 import { getEntries } from "../../../types/entries.ts";
+import { NonEmptyString } from "./non-empty-string.ts";
 import {
 	type Note,
 	type NoteCollection,
@@ -26,15 +27,10 @@ export function createNotesCollectionManager(
 				return Either.left(new Error(`No Note with Id: ${id}`));
 			},
 			getAll(): Either.Either<Note[], Error> {
-				const maybeNotes = Array.from(getEntries(collection));
-				if (maybeNotes.length > 0) {
-					return Either.right(
-						maybeNotes.map(([id, data]) => {
-							return { id, ...data };
-						}),
-					);
-				}
-				return Either.left(new Error("No notes in collection"));
+				const entries = Array.from(getEntries(collection));
+				return Either.right(
+					entries.map(([id, data]) => ({ id, ...data })),
+				);
 			},
 			add({ content }) {
 				const noteResult = createNote({ content });
@@ -50,9 +46,21 @@ export function createNotesCollectionManager(
 				const maybeNote = collection[id];
 				if (!maybeNote)
 					return Either.left(new Error(`No note to update with id ${id}`));
-				const newContent = {
+				if (data.content !== undefined) {
+					const validated = NonEmptyString(data.content);
+					if (validated instanceof ArkErrors) {
+						return Either.left(
+							new Error("Note content validation failed", {
+								cause: validated,
+							}),
+						);
+					}
+				}
+				const { updatedAt: _ignored, ...rest } = data;
+				const newContent: NoteProps = {
 					...maybeNote,
-					...data,
+					...rest,
+					updatedAt: new Date().toISOString(),
 				};
 				collection[id] = newContent;
 				return Either.right({ id, ...newContent });
