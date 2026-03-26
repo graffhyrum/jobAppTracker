@@ -105,10 +105,7 @@ export const extractApplicationData = (
 	// Handle isRemote which might come as string from forms or boolean from direct API calls
 	// If checkbox is unchecked, the field won't be in formData at all
 	const isRemoteValue = formData.isRemote;
-	const isRemote =
-		isRemoteValue === true ||
-		isRemoteValue === "true" ||
-		(isRemoteValue as unknown) === "true";
+	const isRemote = isRemoteValue === true || isRemoteValue === "true";
 	const data: JobApplicationForCreate = {
 		company,
 		positionTitle,
