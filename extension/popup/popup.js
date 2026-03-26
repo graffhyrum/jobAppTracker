@@ -100,7 +100,6 @@ async function submitJobApplication(e) {
 	const data = {
 		company: formData.get("company"),
 		position: formData.get("position"),
-		status: formData.get("status") || "applied",
 		applicationDate: new Date().toISOString(),
 	};
 
