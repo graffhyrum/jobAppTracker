@@ -200,3 +200,16 @@ export function updateJobApplicationData(
 export function hasStatus(app: JobApplication): boolean {
 	return app.statusLog.length > 0;
 }
+/**
+ * Derives the ApplicationStatus (category + label) from a status label.
+ * Category is determined by whether the label appears in the domain's ActiveLabels set.
+ */
+export function createApplicationStatus(
+	label: ApplicationStatusLabel,
+): ApplicationStatus {
+	// Validate through the domain schema to get a typed, narrowed value
+	const activeResult = jobApplicationModule.ActiveLabels(label);
+	const category =
+		activeResult instanceof ArkErrors ? "inactive" : "active";
+	return { category, label } as ApplicationStatus;
+}
