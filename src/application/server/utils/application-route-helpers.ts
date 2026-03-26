@@ -3,11 +3,13 @@ import { Either } from "effect";
 
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import type {
-	ApplicationStatus,
 	JobApplication,
 	JobApplicationForCreate,
 } from "#src/domain/entities/job-application.ts";
-import { jobApplicationModule } from "#src/domain/entities/job-application.ts";
+import {
+	createApplicationStatus,
+	jobApplicationModule,
+} from "#src/domain/entities/job-application.ts";
 import type { JobApplicationManager } from "#src/domain/ports/job-application-manager.ts";
 import {
 	type createApplicationBodySchema,
@@ -143,24 +145,6 @@ export const extractApplicationData = (
 		data.sourceNotes = formData.sourceNotes;
 	}
 	return data;
-};
-/**
- * Converts status label to ApplicationStatus with proper category
- */
-export const createApplicationStatus = (
-	label: ApplicationStatusLabel,
-): ApplicationStatus => {
-	const activeLabels: ApplicationStatusLabel[] = [
-		"applied",
-		"screening interview",
-		"interview",
-		"onsite",
-		"online test",
-		"take-home assignment",
-		"offer",
-	];
-	const category = activeLabels.includes(label) ? "active" : "inactive";
-	return { category, label } as ApplicationStatus;
 };
 /**
  * Safely extracts string from unknown type

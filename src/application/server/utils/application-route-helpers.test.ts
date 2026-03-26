@@ -1,9 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import { ArkErrors } from "arktype";
 
+import { createApplicationStatus } from "#src/domain/entities/job-application.ts";
 import type { JobApplication } from "#src/domain/entities/job-application.ts";
 import {
-	createApplicationStatus,
 	extractStringField,
 	transformUpdateData,
 } from "./application-route-helpers.ts";
