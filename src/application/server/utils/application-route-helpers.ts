@@ -35,15 +35,19 @@ export const transformUpdateData = (
 	const formData = parseResult;
 	// Handle status field transformation
 	if ("status" in formData && typeof formData.status === "string") {
-		if (currentApp) {
-			const statusLabel =
-				formData.status as typeof jobApplicationModule.ApplicationStatusLabel.infer;
-			const newStatus = createApplicationStatus(statusLabel);
-			const timestamp = new Date().toISOString();
-			// Append new status to statusLog
-			formData.statusLog = [...currentApp.statusLog, [timestamp, newStatus]];
+		if (!currentApp) {
+			// Cannot append to statusLog without the existing application — throw rather than silently drop
+			throw new Error(
+				"Cannot update status: current application could not be loaded",
+			);
 		}
-		// Remove the status field as it's not part of the schema
+		const statusLabel =
+			formData.status as typeof jobApplicationModule.ApplicationStatusLabel.infer;
+		const newStatus = createApplicationStatus(statusLabel);
+		const timestamp = new Date().toISOString();
+		// Append new status to statusLog
+		formData.statusLog = [...currentApp.statusLog, [timestamp, newStatus]];
+		// Remove the status field as it's not part of the update schema
 		delete formData.status;
 	}
 	// Handle date field normalization (convert YYYY-MM-DD to ISO datetime)
