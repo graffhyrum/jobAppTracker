@@ -48,7 +48,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				);
 
 				if (Either.isLeft(result)) {
-					throw new NotFoundError(`Error: ${result.left.detail}`);
+					throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
@@ -68,7 +68,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				);
 
 				if (Either.isLeft(result)) {
-					throw new NotFoundError(`Error: ${result.left.detail}`);
+					throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
@@ -94,7 +94,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				);
 
 				if (Either.isLeft(result)) {
-					throw new NotFoundError(`Error: ${result.left.detail}`);
+					throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
@@ -135,7 +135,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				);
 
 				if (Either.isLeft(result)) {
-					throw new NotFoundError(`Error: ${result.left.detail}`);
+					throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 				}
 
 				set.headers["Content-Type"] = "text/html";
@@ -157,7 +157,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 
 				if (Either.isLeft(updateResult)) {
 					set.status = 500;
-					return `Error: ${updateResult.left.detail}`;
+					return `Error: ${escapeHtml(updateResult.left.detail)}`;
 				}
 
 				// Return updated details view
@@ -192,7 +192,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 
 				if (Either.isLeft(updateResult)) {
 					set.status = 500;
-					return `Error: ${updateResult.left.detail}`;
+					return `Error: ${escapeHtml(updateResult.left.detail)}`;
 				}
 
 				// Return the updated display row
@@ -225,7 +225,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				);
 				if (Either.isLeft(result)) {
 					set.status = 500;
-					return `Error: ${result.left.detail}`;
+					return `Error: ${escapeHtml(result.left.detail)}`;
 				}
 				// If called from the details page (check referer), redirect to the homepage
 				const referer = request.headers.get("referer") || "";
@@ -270,7 +270,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						return formAndPipelineContent(
 							currentApps,
 							jobBoards,
-							`Error: ${result.left.detail}`,
+							`Error: ${escapeHtml(result.left.detail)}`,
 						);
 					}
 
@@ -283,7 +283,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 					if (Either.isLeft(applicationsResult)) {
 						console.error(
 							"Failed to fetch applications:",
-							applicationsResult.left.detail,
+							escapeHtml(applicationsResult.left.detail),
 						);
 						const jobBoards = await getJobBoards();
 						set.status = 500;
@@ -291,7 +291,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						return formAndPipelineContent(
 							[],
 							jobBoards,
-							`Error fetching applications: ${applicationsResult.left.detail}`,
+							`Error fetching applications: ${escapeHtml(applicationsResult.left.detail)}`,
 						);
 					}
 
@@ -357,7 +357,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				if (Either.isLeft(result)) {
 					set.status = 500;
 					set.headers["Content-Type"] = "text/html";
-					return `<div class="error-message">Error: ${result.left.detail}</div>`;
+					return `<div class="error-message">Error: ${escapeHtml(result.left.detail)}</div>`;
 				}
 
 				// Get job boards to refresh the form

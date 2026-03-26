@@ -5,6 +5,7 @@ import { Elysia, NotFoundError } from "elysia";
 import { contactRepositoryPlugin } from "#src/application/server/plugins/contactRepository.plugin.ts";
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
+import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 import {
 	renderContactForm,
 	renderContactsList,
@@ -42,7 +43,7 @@ export const createContactsPlugin = new Elysia({ prefix: "/applications" })
 
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			set.headers["Content-Type"] = "text/html";
@@ -86,7 +87,7 @@ export const createContactsPlugin = new Elysia({ prefix: "/applications" })
 
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			// Return the updated list
@@ -96,7 +97,7 @@ export const createContactsPlugin = new Elysia({ prefix: "/applications" })
 			);
 			return Either.isRight(contacts)
 				? renderContactsList(contacts.right, appId)
-				: `Error: ${contacts.left.detail}`;
+				: `Error: ${escapeHtml(contacts.left.detail)}`;
 		},
 		{
 			params: idParamSchema,
@@ -114,7 +115,7 @@ export const createContactOperationsPlugin = new Elysia()
 			const result = await runEffect(contactRepository.getById(id));
 
 			if (Either.isLeft(result)) {
-				throw new NotFoundError(`Error: ${result.left.detail}`);
+				throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 			}
 
 			const contact = result.right;
@@ -125,7 +126,7 @@ export const createContactOperationsPlugin = new Elysia()
 			);
 			return Either.isRight(contactsResult)
 				? renderContactsList(contactsResult.right, contact.jobApplicationId)
-				: `Error: ${contactsResult.left.detail}`;
+				: `Error: ${escapeHtml(contactsResult.left.detail)}`;
 		},
 		{
 			params: idParamSchema,
@@ -139,7 +140,7 @@ export const createContactOperationsPlugin = new Elysia()
 			const result = await runEffect(contactRepository.getById(id));
 
 			if (Either.isLeft(result)) {
-				throw new NotFoundError(`Error: ${result.left.detail}`);
+				throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 			}
 
 			set.headers["Content-Type"] = "text/html";
@@ -170,7 +171,7 @@ export const createContactOperationsPlugin = new Elysia()
 
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			// Return updated list
@@ -183,7 +184,7 @@ export const createContactOperationsPlugin = new Elysia()
 						contactsResult.right,
 						result.right.jobApplicationId,
 					)
-				: `Error: ${contactsResult.left.detail}`;
+				: `Error: ${escapeHtml(contactsResult.left.detail)}`;
 		},
 		{
 			params: idParamSchema,
@@ -198,7 +199,7 @@ export const createContactOperationsPlugin = new Elysia()
 			const contactResult = await runEffect(contactRepository.getById(id));
 			if (Either.isLeft(contactResult)) {
 				set.status = 404;
-				return `Error: ${contactResult.left.detail}`;
+				return `Error: ${escapeHtml(contactResult.left.detail)}`;
 			}
 
 			const jobAppId = contactResult.right.jobApplicationId;
@@ -206,7 +207,7 @@ export const createContactOperationsPlugin = new Elysia()
 			const result = await runEffect(contactRepository.delete(id));
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			// Return updated list
@@ -216,7 +217,7 @@ export const createContactOperationsPlugin = new Elysia()
 			);
 			return Either.isRight(contactsResult)
 				? renderContactsList(contactsResult.right, jobAppId)
-				: `Error: ${contactsResult.left.detail}`;
+				: `Error: ${escapeHtml(contactsResult.left.detail)}`;
 		},
 		{
 			params: idParamSchema,

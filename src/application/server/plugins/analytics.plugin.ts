@@ -8,6 +8,7 @@ import { jobApplicationManagerPlugin } from "#src/application/server/plugins/job
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { createAnalyticsAggregator } from "#src/domain/use-cases/analytics-aggregator.ts";
 import { analyticsPage } from "#src/presentation/pages/analytics.ts";
+import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 
 /**
  * Analytics plugin - provides analytics dashboard and visualizations
@@ -45,10 +46,10 @@ export const createAnalyticsPlugin = new Elysia()
 		if (Either.isLeft(result)) {
 			console.error(
 				"[Analytics] Failed to compute analytics:",
-				result.left.detail,
+				escapeHtml(result.left.detail),
 			);
 			set.status = 500;
-			return `<div class="error-message">Failed to load analytics: ${result.left.detail}</div>`;
+			return `<div class="error-message">Failed to load analytics: ${escapeHtml(result.left.detail)}</div>`;
 		}
 
 		const { analytics, dateRange } = result.right;

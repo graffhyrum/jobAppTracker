@@ -6,6 +6,7 @@ import { interviewStageRepositoryPlugin } from "#src/application/server/plugins/
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
 import { uuidProvider } from "#src/infrastructure/di/uuid-provider.ts";
+import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 import {
 	renderInterviewStageForm,
 	renderInterviewStagesList,
@@ -49,7 +50,7 @@ export const createInterviewStagesPlugin = new Elysia({
 
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			set.headers["Content-Type"] = "text/html";
@@ -99,7 +100,7 @@ export const createInterviewStagesPlugin = new Elysia({
 
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			// Return the new stage card
@@ -109,7 +110,7 @@ export const createInterviewStagesPlugin = new Elysia({
 			);
 			return Either.isRight(stages)
 				? renderInterviewStagesList(stages.right, appId)
-				: `Error: ${stages.left.detail}`;
+				: `Error: ${escapeHtml(stages.left.detail)}`;
 		},
 		{
 			params: idParamSchema,
@@ -127,7 +128,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 			const result = await runEffect(interviewStageRepository.getById(id));
 
 			if (Either.isLeft(result)) {
-				throw new NotFoundError(`Error: ${result.left.detail}`);
+				throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 			}
 
 			const stage = result.right;
@@ -138,7 +139,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 			);
 			return Either.isRight(stagesResult)
 				? renderInterviewStagesList(stagesResult.right, stage.jobApplicationId)
-				: `Error: ${stagesResult.left.detail}`;
+				: `Error: ${escapeHtml(stagesResult.left.detail)}`;
 		},
 		{
 			params: idParamSchema,
@@ -152,7 +153,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 			const result = await runEffect(interviewStageRepository.getById(id));
 
 			if (Either.isLeft(result)) {
-				throw new NotFoundError(`Error: ${result.left.detail}`);
+				throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 			}
 
 			set.headers["Content-Type"] = "text/html";
@@ -192,7 +193,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			// Return updated list
@@ -207,7 +208,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 						stagesResult.right,
 						result.right.jobApplicationId,
 					)
-				: `Error: ${stagesResult.left.detail}`;
+				: `Error: ${escapeHtml(stagesResult.left.detail)}`;
 		},
 		{
 			params: idParamSchema,
@@ -222,7 +223,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 			const stageResult = await runEffect(interviewStageRepository.getById(id));
 			if (Either.isLeft(stageResult)) {
 				set.status = 404;
-				return `Error: ${stageResult.left.detail}`;
+				return `Error: ${escapeHtml(stageResult.left.detail)}`;
 			}
 
 			const jobAppId = stageResult.right.jobApplicationId;
@@ -230,7 +231,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 			const result = await runEffect(interviewStageRepository.delete(id));
 			if (Either.isLeft(result)) {
 				set.status = 500;
-				return `Error: ${result.left.detail}`;
+				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
 			// Return updated list
@@ -240,7 +241,7 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 			);
 			return Either.isRight(stagesListResult)
 				? renderInterviewStagesList(stagesListResult.right, jobAppId)
-				: `Error: ${stagesListResult.left.detail}`;
+				: `Error: ${escapeHtml(stagesListResult.left.detail)}`;
 		},
 		{
 			params: idParamSchema,
