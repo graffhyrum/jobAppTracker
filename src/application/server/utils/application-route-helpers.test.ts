@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { ArkErrors } from "arktype";
 
 import type { JobApplication } from "#src/domain/entities/job-application.ts";
 import {
@@ -90,8 +91,22 @@ describe("transformUpdateData", () => {
 		expect(result).not.toHaveProperty("jobDescription");
 	});
 
-	test("throws on non-object body", () => {
+	test("throws ArkErrors on non-object body", () => {
 		expect(() => transformUpdateData("not an object", null)).toThrow();
+		try {
+			transformUpdateData("not an object", null);
+		} catch (e) {
+			expect(e).toBeInstanceOf(ArkErrors);
+		}
+	});
+
+	test("throws ArkErrors on numeric body", () => {
+		expect(() => transformUpdateData(12345, null)).toThrow();
+		try {
+			transformUpdateData(12345, null);
+		} catch (e) {
+			expect(e).toBeInstanceOf(ArkErrors);
+		}
 	});
 });
 
