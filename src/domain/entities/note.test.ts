@@ -35,7 +35,7 @@ describe("createNote", () => {
 		expect(Either.isLeft(result)).toBe(true);
 	});
 
-	it("should create notes with different timestamps", () => {
+	it("should create notes with timestamps", () => {
 		const result1 = createNote({ content: "First note" });
 		const result2 = createNote({ content: "Second note" });
 
@@ -43,7 +43,10 @@ describe("createNote", () => {
 		expect(Either.isRight(result2)).toBe(true);
 
 		if (Either.isRight(result1) && Either.isRight(result2)) {
-			expect(result1.right.content).not.toBe(result2.right.content);
+			expect(result1.right.createdAt).toBe(result1.right.updatedAt);
+			expect(result2.right.createdAt).toBe(result2.right.updatedAt);
+			expect(typeof result1.right.createdAt).toBe("string");
+			expect(typeof result2.right.createdAt).toBe("string");
 		}
 	});
 });
@@ -126,7 +129,9 @@ describe("createNotesCollection", () => {
 
 		it("should fail to retrieve non-existent note", () => {
 			const collection = createNotesCollectionManager(makeMockIdGenerator());
-			const fakeId = "123e4567-e89b-12d3-a456-426614174000";
+			const fakeId = noteModule.NoteId.assert(
+				"123e4567-e89b-42d3-a456-426614174000",
+			);
 			const result = collection.operations.get(fakeId);
 
 			expect(Either.isLeft(result)).toBe(true);
@@ -134,11 +139,14 @@ describe("createNotesCollection", () => {
 	});
 
 	describe("operations.getAll", () => {
-		it("should return empty array error when no notes exist", () => {
+		it("should return ok([]) when no notes exist", () => {
 			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const result = collection.operations.getAll();
 
-			expect(Either.isLeft(result)).toBe(true);
+			expect(Either.isRight(result)).toBe(true);
+			if (Either.isRight(result)) {
+				expect(result.right).toEqual([]);
+			}
 		});
 
 		it("should return all notes when collection has notes", () => {
@@ -183,14 +191,16 @@ describe("createNotesCollection", () => {
 					expect(updatedNote.id).toBe(noteId);
 					expect(updatedNote.content).toBe("Updated content");
 					expect(updatedNote.createdAt).toBe(originalCreatedAt);
-					assertDefined(updatedNote.updatedAt);
+					expect(updatedNote.updatedAt >= originalCreatedAt).toBe(true);
 				}
 			}
 		});
 
 		it("should fail to update non-existent note", () => {
 			const collection = createNotesCollectionManager(makeMockIdGenerator());
-			const fakeId = "123e4567-e89b-12d3-a456-426614174000";
+			const fakeId = noteModule.NoteId.assert(
+				"123e4567-e89b-42d3-a456-426614174000",
+			);
 			const result = collection.operations.update(fakeId, {
 				content: "New content",
 			});
@@ -198,7 +208,7 @@ describe("createNotesCollection", () => {
 			expect(Either.isLeft(result)).toBe(true);
 		});
 
-		it("should partially update note properties", () => {
+		it("should reject empty content on update", () => {
 			const collection = createNotesCollectionManager(makeMockIdGenerator());
 			const addResult = collection.operations.add({
 				content: "Original content",
@@ -207,19 +217,62 @@ describe("createNotesCollection", () => {
 			expect(Either.isRight(addResult)).toBe(true);
 			if (Either.isRight(addResult)) {
 				const noteId = addResult.right.id;
-				const originalContent = addResult.right.content;
-				const originalCreatedAt = addResult.right.createdAt;
+				const updateResult = collection.operations.update(noteId, {
+					content: "",
+				});
+
+				expect(Either.isLeft(updateResult)).toBe(true);
+				// Original note must remain unmutated
+				const getResult = collection.operations.get(noteId);
+				expect(Either.isRight(getResult)).toBe(true);
+				if (Either.isRight(getResult)) {
+					expect(getResult.right.content).toBe("Original content");
+				}
+			}
+		});
+
+		it("should auto-set updatedAt to a newer timestamp", () => {
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
+			const addResult = collection.operations.add({
+				content: "Original content",
+			});
+
+			expect(Either.isRight(addResult)).toBe(true);
+			if (Either.isRight(addResult)) {
+				const noteId = addResult.right.id;
+				const originalUpdatedAt = addResult.right.updatedAt;
 
 				const updateResult = collection.operations.update(noteId, {
-					updatedAt: "2024-01-01T00:00:00.000Z",
+					content: "Updated content",
 				});
 
 				expect(Either.isRight(updateResult)).toBe(true);
 				if (Either.isRight(updateResult)) {
 					const updatedNote = updateResult.right;
-					expect(updatedNote.content).toBe(originalContent);
-					expect(updatedNote.createdAt).toBe(originalCreatedAt);
-					expect(updatedNote.updatedAt).toBe("2024-01-01T00:00:00.000Z");
+					expect(updatedNote.updatedAt >= originalUpdatedAt).toBe(true);
+				}
+			}
+		});
+
+		it("should ignore caller-supplied updatedAt", () => {
+			const collection = createNotesCollectionManager(makeMockIdGenerator());
+			const addResult = collection.operations.add({
+				content: "Original content",
+			});
+
+			expect(Either.isRight(addResult)).toBe(true);
+			if (Either.isRight(addResult)) {
+				const noteId = addResult.right.id;
+				const updateResult = collection.operations.update(noteId, {
+					updatedAt: "2020-01-01T00:00:00.000Z",
+				});
+
+				expect(Either.isRight(updateResult)).toBe(true);
+				if (Either.isRight(updateResult)) {
+					// Entity owns the timestamp -- caller value must be ignored
+					expect(updateResult.right.updatedAt).not.toBe(
+						"2020-01-01T00:00:00.000Z",
+					);
 				}
 			}
 		});
@@ -245,7 +298,9 @@ describe("createNotesCollection", () => {
 
 		it("should fail to remove non-existent note", () => {
 			const collection = createNotesCollectionManager(makeMockIdGenerator());
-			const fakeId = "123e4567-e89b-12d3-a456-426614174000";
+			const fakeId = noteModule.NoteId.assert(
+				"123e4567-e89b-42d3-a456-426614174000",
+			);
 			const result = collection.operations.remove(fakeId);
 
 			expect(Either.isLeft(result)).toBe(true);
