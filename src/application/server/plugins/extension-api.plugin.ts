@@ -104,6 +104,10 @@ const createAuthModule = () => {
 		app.derive({ as: "scoped" }, ({ request, set }) => {
 			const apiKey = extractApiKey(request);
 			const validApiKey = getValidApiKey();
+			if (validApiKey === undefined) {
+				set.status = 503;
+				throw new Error("Extension API disabled");
+			}
 			if (!validateApiKey(apiKey, validApiKey)) {
 				set.status = 401;
 				throw new Error("Unauthorized: Invalid or missing API key");
@@ -114,8 +118,8 @@ const createAuthModule = () => {
 		apiKey: string | null,
 		validApiKey: string,
 	): boolean => Boolean(apiKey && apiKey === validApiKey);
-	const getValidApiKey = (): string =>
-		process.env.BROWSER_EXTENSION_API_KEY ?? "dev-api-key";
+	const getValidApiKey = (): string | undefined =>
+		process.env.BROWSER_EXTENSION_API_KEY;
 	const extractApiKey = (request: Request): string | null =>
 		request.headers.get("X-API-Key");
 	return { apiKeyAuth };

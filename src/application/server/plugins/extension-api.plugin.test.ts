@@ -41,8 +41,12 @@ const createTestExtensionApiPlugin = new Elysia({ prefix: "/api" })
 			// Simple API key authentication middleware
 			.derive({ as: "scoped" }, ({ request, set }) => {
 				const apiKey = request.headers.get("X-API-Key");
-				const validApiKey =
-					process.env.BROWSER_EXTENSION_API_KEY || "dev-api-key";
+				const validApiKey = process.env.BROWSER_EXTENSION_API_KEY;
+
+				if (validApiKey === undefined) {
+					set.status = 503;
+					throw new Error("Extension API disabled");
+				}
 
 				if (!apiKey || apiKey !== validApiKey) {
 					set.status = 401;
@@ -592,32 +596,34 @@ describe("Extension API Plugin", () => {
 	});
 
 	describe("API Key Environment Variable", () => {
-		it("should use default dev-api-key when environment variable not set", async () => {
+		it("should return 503 when BROWSER_EXTENSION_API_KEY is not set", async () => {
 			const originalKey = process.env.BROWSER_EXTENSION_API_KEY;
 			delete process.env.BROWSER_EXTENSION_API_KEY;
 
-			// Recreate app without API key in env
-			const testApp = new Elysia().use(createTestExtensionApiPlugin);
+			try {
+				// Recreate app without API key in env
+				const testApp = new Elysia().use(createTestExtensionApiPlugin);
 
-			const response = await testApp.handle(
-				new Request("http://localhost/api/applications/from-extension", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						"X-API-Key": "dev-api-key", // Default key
-					},
-					body: JSON.stringify({
-						company: "Test",
-						position: "Dev",
+				const response = await testApp.handle(
+					new Request("http://localhost/api/applications/from-extension", {
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+							"X-API-Key": "any-key",
+						},
+						body: JSON.stringify({
+							company: "Test",
+							position: "Dev",
+						}),
 					}),
-				}),
-			);
+				);
 
-			expect(response.status).toBe(201);
-
-			// Restore original
-			if (originalKey) {
-				process.env.BROWSER_EXTENSION_API_KEY = originalKey;
+				expect(response.status).toBe(503);
+			} finally {
+				// Restore original
+				if (originalKey) {
+					process.env.BROWSER_EXTENSION_API_KEY = originalKey;
+				}
 			}
 		});
 	});
