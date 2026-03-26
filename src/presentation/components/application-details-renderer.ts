@@ -13,7 +13,6 @@ import {
 	inactiveStatuses,
 	isApplicationOverdue,
 } from "../utils/pipeline-utils";
-import { escapeHtml, safeHref } from "../utils/html-escape";
 
 export const renderApplicationDetailsView = (app: JobApplication): string => {
 	const status = getStatusInfo(app);
@@ -196,8 +195,6 @@ export const renderApplicationDetailsEdit = (app: JobApplication): string => {
 	const currentStatus = Either.isRight(currentStatusResult)
 		? currentStatusResult.right[1]
 		: null;
-	const _isOverdue = isApplicationOverdue(app);
-
 	const allStatuses = [...activeStatuses, ...inactiveStatuses];
 
 	const applicationDateValue = app.applicationDate

@@ -127,11 +127,6 @@ export function createJobApplicationWithIdGen(
 	const id = createJobApplicationId(generateUUID);
 	return createJobApplication(data, id);
 }
-function _assertIsJobApplicationForCreate(
-	x: unknown,
-): asserts x is JobApplicationForCreate {
-	jobApplicationModule.forCreate.assert(x);
-}
 export function createJobApplicationId(
 	generateUUID: () => string,
 ): JobApplicationId {

@@ -1,5 +1,4 @@
 import { type } from "arktype";
-import "dotenv/config";
 
 const schemaConfig = {
 	BASE_URL: "string.url",
