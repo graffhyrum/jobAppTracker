@@ -124,8 +124,8 @@ export const extractApplicationData = (
 		isRemote,
 	};
 	// Add optional fields only if they have values
-	if (interestRating != null && ["1", "2", "3"].includes(interestRating)) {
-		data.interestRating = Number(interestRating) as 1 | 2 | 3;
+	if (interestRating != null && ["0", "1", "2", "3"].includes(interestRating)) {
+		data.interestRating = Number(interestRating) as 0 | 1 | 2 | 3;
 	}
 	if (nextEventDate) {
 		data.nextEventDate = nextEventDate;
