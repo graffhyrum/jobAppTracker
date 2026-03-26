@@ -70,7 +70,7 @@ The following environment variables are available:
 | `BASE_URL`                  | string | Base URL for the application                 | `http://localhost` |
 | `PORT`                      | number | Port number for the server                   | `3000`             |
 | `JOB_APP_MANAGER_TYPE`      | string | Database mode (`prod` or `test`)             | `prod`             |
-| `BROWSER_EXTENSION_API_KEY` | string | API key for browser extension authentication | `dev-api-key`      |
+| `BROWSER_EXTENSION_API_KEY` | string | API key for browser extension authentication (optional — API disabled when unset) | _(none)_ |
 
 ### Development
 
