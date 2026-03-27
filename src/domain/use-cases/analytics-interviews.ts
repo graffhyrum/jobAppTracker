@@ -1,16 +1,14 @@
-import { Either } from "effect";
-
 import type {
 	InterviewStage,
 	InterviewType,
 } from "../entities/interview-stage.ts";
 import type { JobApplication } from "../entities/job-application.ts";
-import { getCurrentStatus } from "../entities/job-application.ts";
 import {
 	computeAverage,
 	computeMedian,
 	computeSuccessRate,
 } from "./analytics-math.ts";
+import { getResolvedStatus } from "./analytics-utils.ts";
 /**
  * Interview analytics data structures
  */
@@ -166,8 +164,8 @@ function computeRoundsToOffer(
 ): number[] {
 	const roundsToOffer: number[] = [];
 	for (const app of applications) {
-		const statusResult = getCurrentStatus(app);
-		if (Either.isRight(statusResult) && statusResult.right.label === "offer") {
+		const status = getResolvedStatus(app);
+		if (status !== null && status.label === "offer") {
 			const interviews = interviewsByApp.get(app.id) ?? [];
 			if (interviews.length > 0) {
 				roundsToOffer.push(interviews.length);
@@ -186,11 +184,8 @@ function computeInterviewConversionRate(
 		const interviews = interviewsByApp.get(app.id) ?? [];
 		if (interviews.length > 0) {
 			appsWithInterviews++;
-			const statusResult = getCurrentStatus(app);
-			if (
-				Either.isRight(statusResult) &&
-				statusResult.right.label === "offer"
-			) {
+			const status = getResolvedStatus(app);
+			if (status !== null && status.label === "offer") {
 				offersWithInterviews++;
 			}
 		}
@@ -231,9 +226,8 @@ function computeInterviewTypeEffectiveness(
 		for (const appId of appIds) {
 			const app = applications.find((a) => a.id === appId);
 			if (!app) continue;
-			const statusResult = getCurrentStatus(app);
-			if (Either.isRight(statusResult)) {
-				const status = statusResult.right;
+			const status = getResolvedStatus(app);
+			if (status !== null) {
 				if (status.label === "offer") {
 					stats.offers++;
 				} else if (status.label === "rejected") {
@@ -291,9 +285,8 @@ function computeRoundAnalysis(
 		for (const appId of appIds) {
 			const app = applications.find((a) => a.id === appId);
 			if (!app) continue;
-			const statusResult = getCurrentStatus(app);
-			if (Either.isRight(statusResult)) {
-				const status = statusResult.right;
+			const status = getResolvedStatus(app);
+			if (status !== null) {
 				if (status.label === "offer") {
 					stats.offers++;
 				} else if (status.label === "rejected") {
@@ -329,9 +322,8 @@ function computeFinalRoundSuccess(
 	for (const appId of appIdsWithFinalRound) {
 		const app = applications.find((a) => a.id === appId);
 		if (!app) continue;
-		const statusResult = getCurrentStatus(app);
-		if (Either.isRight(statusResult)) {
-			const status = statusResult.right;
+		const status = getResolvedStatus(app);
+		if (status !== null) {
 			if (status.label === "offer") {
 				offers++;
 			} else if (status.label === "rejected") {

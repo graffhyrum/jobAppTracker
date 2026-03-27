@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
 
+import type { JobApplication } from "../entities/job-application.ts";
 import { createMockApplication } from "../../../tests/helpers/analytics-fixtures.ts";
 import {
 	filterByAppIds,
+	getResolvedStatus,
 	resolveEffectiveDateRange,
 } from "./analytics-utils.ts";
 
@@ -63,5 +65,34 @@ describe("resolveEffectiveDateRange", () => {
 	test("computes default range when empty range provided", () => {
 		const result = resolveEffectiveDateRange(apps, {});
 		expect(result).toBeDefined();
+	});
+});
+
+describe("getResolvedStatus", () => {
+	test("returns ApplicationStatus when statusLog is valid", () => {
+		const app = createMockApplication("2026-01-01", 1);
+		const result = getResolvedStatus(app);
+		expect(result).not.toBeNull();
+		expect(result!.category).toBe("active");
+		expect(result!.label).toBe("applied");
+	});
+
+	test("returns null when statusLog entry is unparseable", () => {
+		const app = createMockApplication("2026-01-01", 1);
+		// Provide a structurally-valid tuple with an invalid status object
+		// to trigger the ArkType parse failure (Left path)
+		const corrupted: JobApplication = {
+			...app,
+			statusLog: [
+				[
+					"2026-01-01T00:00:00.000Z",
+					{ category: "bogus", label: "bogus" },
+				],
+			] satisfies Array<
+				[string, { category: string; label: string }]
+			> as JobApplication["statusLog"],
+		};
+		const result = getResolvedStatus(corrupted);
+		expect(result).toBeNull();
 	});
 });

@@ -1,13 +1,11 @@
-import { Either } from "effect";
-
 import type {
 	Contact,
 	ContactChannel,
 	ContactRole,
 } from "../entities/contact.ts";
 import type { JobApplication } from "../entities/job-application.ts";
-import { getCurrentStatus } from "../entities/job-application.ts";
 import { computeAverage, computeMedian } from "./analytics-math.ts";
+import { getResolvedStatus } from "./analytics-utils.ts";
 
 /**
  * Contact analytics data structures
@@ -234,9 +232,8 @@ function computeContactCountCorrelation(
 
 		bucket.applications++;
 
-		const statusResult = getCurrentStatus(app);
-		if (Either.isRight(statusResult)) {
-			const status = statusResult.right;
+		const status = getResolvedStatus(app);
+		if (status !== null) {
 			if (status.category === "active") {
 				if (status.label === "offer") {
 					bucket.offerRate++;
