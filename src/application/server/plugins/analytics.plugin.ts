@@ -39,12 +39,7 @@ export const createAnalyticsPlugin = new Elysia()
 		},
 	)
 	.get("/analytics", async ({ analyticsAggregator, set, cookie, query }) => {
-		const parsed = analyticsQuerySchema(query);
-		if (parsed instanceof type.errors) {
-			set.status = 400;
-			return `<div class="error-message">Invalid date format: ${escapeHtml(parsed.summary)}</div>`;
-		}
-		const { startDate, endDate } = parsed;
+		const { startDate, endDate } = query;
 
 		const result = await runEffect(
 			analyticsAggregator.computeApplicationAnalytics({
