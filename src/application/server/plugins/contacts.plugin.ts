@@ -5,11 +5,11 @@ import { Elysia, NotFoundError } from "elysia";
 import { contactRepositoryPlugin } from "#src/application/server/plugins/contactRepository.plugin.ts";
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
-import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 import {
 	renderContactForm,
 	renderContactsList,
 } from "#src/presentation/components/contact-list.ts";
+import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 
 // Schemas for route params and body
 const idParamSchema = type({

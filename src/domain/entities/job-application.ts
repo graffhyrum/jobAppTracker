@@ -194,7 +194,6 @@ export function createApplicationStatus(
 ): ApplicationStatus {
 	// Validate through the domain schema to get a typed, narrowed value
 	const activeResult = jobApplicationModule.ActiveLabels(label);
-	const category =
-		activeResult instanceof ArkErrors ? "inactive" : "active";
+	const category = activeResult instanceof ArkErrors ? "inactive" : "active";
 	return { category, label } as ApplicationStatus;
 }

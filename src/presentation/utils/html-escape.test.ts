@@ -1,9 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import {
-	escapeHtml,
-	escapeScriptContent,
-	safeHref,
-} from "./html-escape";
+
+import { escapeHtml, escapeScriptContent, safeHref } from "./html-escape";
 
 describe("escapeHtml", () => {
 	test("escapes ampersand", () => {
@@ -83,9 +80,7 @@ describe("safeHref", () => {
 	});
 
 	test("HTML-escapes relative paths", () => {
-		expect(safeHref("/search?q=<script>")).toBe(
-			"/search?q=&lt;script&gt;",
-		);
+		expect(safeHref("/search?q=<script>")).toBe("/search?q=&lt;script&gt;");
 	});
 
 	test("rejects javascript: scheme", () => {
@@ -171,20 +166,16 @@ describe("escapeScriptContent", () => {
 	});
 
 	test("replaces U+2028 with \\u2028", () => {
-		expect(escapeScriptContent("before\u2028after")).toBe(
-			"before\\u2028after",
-		);
+		expect(escapeScriptContent("before\u2028after")).toBe("before\\u2028after");
 	});
 
 	test("replaces U+2029 with \\u2029", () => {
-		expect(escapeScriptContent("before\u2029after")).toBe(
-			"before\\u2029after",
-		);
+		expect(escapeScriptContent("before\u2029after")).toBe("before\\u2029after");
 	});
 
 	test("handles all four patterns in one string", () => {
-		const input = '</script><!--\u2028\u2029';
-		const expected = '<\\/script><\\!--\\u2028\\u2029';
+		const input = "</script><!--\u2028\u2029";
+		const expected = "<\\/script><\\!--\\u2028\\u2029";
 		expect(escapeScriptContent(input)).toBe(expected);
 	});
 
@@ -198,9 +189,9 @@ describe("escapeScriptContent", () => {
 	});
 
 	test("handles multiple occurrences of </script>", () => {
-		expect(
-			escapeScriptContent("</script></script>"),
-		).toBe("<\\/script><\\/script>");
+		expect(escapeScriptContent("</script></script>")).toBe(
+			"<\\/script><\\/script>",
+		);
 	});
 
 	test("case-sensitive — does not alter </SCRIPT>", () => {

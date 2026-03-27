@@ -20,40 +20,42 @@ The analytics module cluster spans four domain files (`analytics.ts`, `analytics
 The median computation algorithm is copy-pasted verbatim in two separate files with identical logic and identical safe-access guard patterns:
 
 **`src/domain/use-cases/analytics-interviews.ts` lines 179–195:**
+
 ```ts
 function computeMedian(numbers: number[]): number {
-  if (numbers.length === 0) return 0;
-  const sorted = [...numbers].sort((a, b) => a - b);
-  if (sorted.length % 2 === 0) {
-    const mid1 = sorted[sorted.length / 2 - 1];
-    const mid2 = sorted[sorted.length / 2];
-    if (mid1 !== undefined && mid2 !== undefined) {
-      return (mid1 + mid2) / 2;
-    }
-  } else {
-    const mid = sorted[Math.floor(sorted.length / 2)];
-    if (mid !== undefined) return mid;
-  }
-  return 0;
+	if (numbers.length === 0) return 0;
+	const sorted = [...numbers].sort((a, b) => a - b);
+	if (sorted.length % 2 === 0) {
+		const mid1 = sorted[sorted.length / 2 - 1];
+		const mid2 = sorted[sorted.length / 2];
+		if (mid1 !== undefined && mid2 !== undefined) {
+			return (mid1 + mid2) / 2;
+		}
+	} else {
+		const mid = sorted[Math.floor(sorted.length / 2)];
+		if (mid !== undefined) return mid;
+	}
+	return 0;
 }
 ```
 
 **`src/domain/use-cases/analytics.ts` lines 340–354 (inside `computeTimeInStatus`):**
+
 ```ts
 let median = 0;
 if (sorted.length > 0) {
-  if (sorted.length % 2 === 0) {
-    const mid1 = sorted[sorted.length / 2 - 1];
-    const mid2 = sorted[sorted.length / 2];
-    if (mid1 !== undefined && mid2 !== undefined) {
-      median = (mid1 + mid2) / 2;
-    }
-  } else {
-    const mid = sorted[Math.floor(sorted.length / 2)];
-    if (mid !== undefined) {
-      median = mid;
-    }
-  }
+	if (sorted.length % 2 === 0) {
+		const mid1 = sorted[sorted.length / 2 - 1];
+		const mid2 = sorted[sorted.length / 2];
+		if (mid1 !== undefined && mid2 !== undefined) {
+			median = (mid1 + mid2) / 2;
+		}
+	} else {
+		const mid = sorted[Math.floor(sorted.length / 2)];
+		if (mid !== undefined) {
+			median = mid;
+		}
+	}
 }
 ```
 
@@ -69,14 +71,15 @@ if (sorted.length > 0) {
 
 The formula `offers / (offers + rejected)` guarded by `> 0` appears in three functions across two files:
 
-| File | Function | Lines |
-|---|---|---|
-| `analytics.ts` | `computeSourceEffectiveness` | 296–303 |
-| `analytics.ts` | `computeInterestRatingStats` | 404–411 |
+| File                      | Function                            | Lines   |
+| ------------------------- | ----------------------------------- | ------- |
+| `analytics.ts`            | `computeSourceEffectiveness`        | 296–303 |
+| `analytics.ts`            | `computeInterestRatingStats`        | 404–411 |
 | `analytics-interviews.ts` | `computeInterviewTypeEffectiveness` | 262–271 |
-| `analytics-interviews.ts` | `computeRoundAnalysis` | 327–339 |
+| `analytics-interviews.ts` | `computeRoundAnalysis`              | 327–339 |
 
 All four sites use the identical expression:
+
 ```ts
 successRate: data.offers + data.rejected > 0
   ? data.offers / (data.offers + data.rejected)
@@ -92,29 +95,32 @@ successRate: data.offers + data.rejected > 0
 The pattern of building a `Set<string>` from filtered application IDs and then filtering a related collection appears three times:
 
 **`analytics-aggregator.ts` lines 70–75 (for both contacts and interviews):**
+
 ```ts
 const appIds = new Set(filteredApplications.map((app) => app.id));
 const filteredContacts = allContacts.filter((contact) =>
-  appIds.has(contact.jobApplicationId),
+	appIds.has(contact.jobApplicationId),
 );
 const filteredInterviews = allInterviews.filter((interview) =>
-  appIds.has(interview.jobApplicationId),
+	appIds.has(interview.jobApplicationId),
 );
 ```
 
 **`analytics-aggregator.ts` lines 130–133 (`computeContactAnalyticsOnly`):**
+
 ```ts
 const appIds = new Set(applications.map((app) => app.id));
 const filteredContacts = allContacts.filter((contact) =>
-  appIds.has(contact.jobApplicationId),
+	appIds.has(contact.jobApplicationId),
 );
 ```
 
 **`analytics-aggregator.ts` lines 145–148 (`computeInterviewAnalyticsOnly`):**
+
 ```ts
 const appIds = new Set(applications.map((app) => app.id));
 const filteredInterviews = allInterviews.filter((interview) =>
-  appIds.has(interview.jobApplicationId),
+	appIds.has(interview.jobApplicationId),
 );
 ```
 
@@ -127,11 +133,12 @@ const filteredInterviews = allInterviews.filter((interview) =>
 The logic for resolving `effectiveDateRange` (use provided range if non-empty, else compute default) appears twice in `analytics-aggregator.ts` with identical code:
 
 **`computeAllAnalytics` (lines 55–58) and `computeApplicationAnalytics` (lines 104–108):**
+
 ```ts
 const effectiveDateRange =
-  dateRange && (dateRange.startDate || dateRange.endDate)
-    ? dateRange
-    : computeDefaultDateRange(applications);
+	dateRange && (dateRange.startDate || dateRange.endDate)
+		? dateRange
+		: computeDefaultDateRange(applications);
 ```
 
 **Extraction target:** A helper `resolveEffectiveDateRange(applications: JobApplication[], requested?: DateRange): DateRange` would name this intent and remove the duplication.
@@ -152,6 +159,7 @@ if (Either.isRight(statusResult)) {
 ```
 
 This appears in:
+
 - `computeSummary` (analytics.ts:181)
 - `computeStatusDistribution` (analytics.ts:222)
 - `computeSourceEffectiveness` (analytics.ts:280)
@@ -172,12 +180,12 @@ Each call site re-unwraps `Either.isRight` and repeats the status dispatch. This
 
 The `createMockApplication` and `createMockApplicationWithStatus` factory functions are copy-pasted across four test files:
 
-| File | Functions present |
-|---|---|
-| `analytics.test.ts` | `createMockApplication`, `createMockApplicationWithStatus` |
+| File                        | Functions present                                                                 |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `analytics.test.ts`         | `createMockApplication`, `createMockApplicationWithStatus`                        |
 | `analytics-summary.test.ts` | `_createMockApplication` (prefixed underscore), `createMockApplicationWithStatus` |
-| `analytics-status.test.ts` | `createMockApplicationWithStatus` |
-| `analytics-date.test.ts` | `createMockApplication`, `createMockApplicationWithStatus` |
+| `analytics-status.test.ts`  | `createMockApplicationWithStatus`                                                 |
+| `analytics-date.test.ts`    | `createMockApplication`, `createMockApplicationWithStatus`                        |
 
 The function bodies are identical across all files. Minor variation: `analytics-summary.test.ts` names the no-status builder `_createMockApplication` (unused, suppressed by underscore prefix).
 
@@ -187,14 +195,14 @@ The function bodies are identical across all files. Minor variation: `analytics-
 
 ## Priority Ranking for Refactor Beads
 
-| Priority | Pattern | Files affected | Lines saved (est.) |
-|---|---|---|---|
-| 1 | `computeMedian` duplication | analytics.ts, analytics-contacts.ts, analytics-interviews.ts | ~40 |
-| 2 | `computeSuccessRate` duplication | analytics.ts, analytics-interviews.ts | ~20 |
-| 3 | `filterByAppIds` duplication | analytics-aggregator.ts | ~12 |
-| 4 | `resolveEffectiveDateRange` duplication | analytics-aggregator.ts | ~8 |
-| 5 | `getResolvedStatus` unwrap pattern | analytics.ts, analytics-contacts.ts, analytics-interviews.ts | ~22 |
-| 6 | Test fixture builders | 4 test files | ~60 |
+| Priority | Pattern                                 | Files affected                                               | Lines saved (est.) |
+| -------- | --------------------------------------- | ------------------------------------------------------------ | ------------------ |
+| 1        | `computeMedian` duplication             | analytics.ts, analytics-contacts.ts, analytics-interviews.ts | ~40                |
+| 2        | `computeSuccessRate` duplication        | analytics.ts, analytics-interviews.ts                        | ~20                |
+| 3        | `filterByAppIds` duplication            | analytics-aggregator.ts                                      | ~12                |
+| 4        | `resolveEffectiveDateRange` duplication | analytics-aggregator.ts                                      | ~8                 |
+| 5        | `getResolvedStatus` unwrap pattern      | analytics.ts, analytics-contacts.ts, analytics-interviews.ts | ~22                |
+| 6        | Test fixture builders                   | 4 test files                                                 | ~60                |
 
 ---
 

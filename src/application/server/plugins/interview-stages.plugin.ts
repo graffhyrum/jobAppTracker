@@ -6,11 +6,11 @@ import { interviewStageRepositoryPlugin } from "#src/application/server/plugins/
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
 import { uuidProvider } from "#src/infrastructure/di/uuid-provider.ts";
-import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 import {
 	renderInterviewStageForm,
 	renderInterviewStagesList,
 } from "#src/presentation/components/interview-stage-list.ts";
+import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
 
 // Schemas for route params and body
 const idParamSchema = type({

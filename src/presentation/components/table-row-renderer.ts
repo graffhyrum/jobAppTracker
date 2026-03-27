@@ -5,13 +5,13 @@ import {
 	isJobAppOverdue,
 	type JobApplication,
 } from "../../domain/entities/job-application";
+import { escapeHtml } from "../utils/html-escape";
 import {
 	formatDate,
 	formatInterestRating,
 	getStatusInfo,
 	isApplicationOverdue,
 } from "../utils/pipeline-utils";
-import { escapeHtml } from "../utils/html-escape";
 
 export const renderApplicationTableRow = (app: JobApplication): string => {
 	const isOverdue = isApplicationOverdue(app);

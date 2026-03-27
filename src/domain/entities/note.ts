@@ -28,9 +28,7 @@ export function createNotesCollectionManager(
 			},
 			getAll(): Either.Either<Note[], Error> {
 				const entries = Array.from(getEntries(collection));
-				return Either.right(
-					entries.map(([id, data]) => ({ id, ...data })),
-				);
+				return Either.right(entries.map(([id, data]) => ({ id, ...data })));
 			},
 			add({ content }) {
 				const noteResult = createNote({ content });

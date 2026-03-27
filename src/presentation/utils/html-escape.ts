@@ -1,15 +1,4 @@
-/** OWASP HTML entity encoding for the five dangerous characters. NOT idempotent. */
-export function escapeHtml(s: string): string {
-	return s
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;")
-		.replaceAll("'", "&#x27;");
-}
-
 const ALLOWED_SCHEME_RE = /^https?:/i;
-
 /**
  * Validates and escapes a URL for use in href attributes.
  *
@@ -20,26 +9,29 @@ const ALLOWED_SCHEME_RE = /^https?:/i;
  */
 export function safeHref(url: string): string {
 	if (!url) return "";
-
 	const trimmed = url.trim();
 	if (!trimmed) return "";
-
 	// Reject protocol-relative URLs
 	if (trimmed.startsWith("//")) return "";
-
 	// Absolute URLs: only http(s) allowed
 	if (trimmed.includes(":")) {
 		if (ALLOWED_SCHEME_RE.test(trimmed)) return escapeHtml(trimmed);
 		// Any other scheme (javascript:, data:, vbscript:, mailto:, tel:, etc.)
 		return "";
 	}
-
 	// Relative paths must start with /
 	if (!trimmed.startsWith("/")) return "";
-
 	return escapeHtml(trimmed);
 }
-
+/** OWASP HTML entity encoding for the five dangerous characters. NOT idempotent. */
+export function escapeHtml(s: string): string {
+	return s
+		.replaceAll("&", "&amp;")
+		.replaceAll("<", "&lt;")
+		.replaceAll(">", "&gt;")
+		.replaceAll('"', "&quot;")
+		.replaceAll("'", "&#x27;");
+}
 /**
  * Escapes a pre-stringified JSON string for safe embedding inside a <script> tag.
  *

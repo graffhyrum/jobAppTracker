@@ -70,7 +70,10 @@ export const healthcheckPage = (
 
 function recordToHtml(record: Record<string, unknown>): string {
 	return Object.entries(record)
-		.map(([key, value]) => `<p><strong>${escapeHtml(String(key))}:</strong> ${escapeHtml(String(value))}</p>`)
+		.map(
+			([key, value]) =>
+				`<p><strong>${escapeHtml(String(key))}:</strong> ${escapeHtml(String(value))}</p>`,
+		)
 		.join("");
 }
 

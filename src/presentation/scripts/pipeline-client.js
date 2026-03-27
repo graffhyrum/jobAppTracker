@@ -1,3 +1,8 @@
+// src/presentation/utils/html-escape.ts
+function escapeHtml(s) {
+  return s.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#x27;");
+}
+
 // src/presentation/scripts/pipeline-client.ts
 window.initializePipelineClient = initializePipelineClient;
 function initializePipelineClient(applicationData, config) {
@@ -121,12 +126,16 @@ var updateDisplay = (state) => {
   if (pageData.length === 0) {
     tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No applications found</td></tr>';
   } else {
-    tbody.innerHTML = pageData.map((app) => `
+    tbody.innerHTML = pageData.map((app) => {
+      const safeCompany = escapeHtml(app.company);
+      const safePositionTitle = escapeHtml(app.positionTitle);
+      const safeStatus = escapeHtml(app.status);
+      return `
 			<tr class="application-row ${app.statusCategory} ${app.isOverdue ? "overdue" : ""}" data-testid="application-row-${app.id}">
-				<td class="company-cell" data-testid="company-cell-${app.id}">${app.company}</td>
-				<td class="position-cell" data-testid="position-cell-${app.id}">${app.positionTitle}</td>
+				<td class="company-cell" data-testid="company-cell-${app.id}">${safeCompany}</td>
+				<td class="position-cell" data-testid="position-cell-${app.id}">${safePositionTitle}</td>
 				<td class="status-cell" data-testid="status-cell-${app.id}">
-					<span class="status-badge ${app.statusCategory}" data-testid="status-badge-${app.id}">${app.status}</span>
+					<span class="status-badge ${app.statusCategory}" data-testid="status-badge-${app.id}">${safeStatus}</span>
 				</td>
 				<td class="application-date-cell" data-testid="application-date-cell-${app.id}">${formatDate(app.applicationDate)}</td>
 				<td class="updated-date-cell" data-testid="updated-date-cell-${app.id}">${formatDate(app.updatedAt)}</td>
@@ -145,7 +154,8 @@ var updateDisplay = (state) => {
 					<button class="action-btn view" data-testid="view-btn-${app.id}" title="View Details">\uD83D\uDC41️</button>
 				</td>
 			</tr>
-		`).join("");
+		`;
+    }).join("");
     if (typeof window.htmx !== "undefined" && window.htmx) {
       window.htmx.process(tbody);
     }
@@ -193,8 +203,8 @@ var sortData = (data, column, direction) => {
       bVal = bVal && typeof bVal === "string" ? new Date(bVal).getTime() : 0;
     }
     if (column === "interestRating") {
-      aVal = a.interestRating || 0;
-      bVal = b.interestRating || 0;
+      aVal = a.interestRating ?? 0;
+      bVal = b.interestRating ?? 0;
     }
     if (typeof aVal === "string" && typeof bVal === "string") {
       aVal = aVal.toLowerCase();

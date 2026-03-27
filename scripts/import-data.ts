@@ -613,9 +613,13 @@ async function importData(): Promise<void> {
 	// Fetch all existing applications once and build a lookup map so that
 	// duplicate detection during the import loop is O(1) per entry rather
 	// than O(m) (a full getAll call) on every iteration.
-	console.log("🔍 Building duplicate-detection index from existing applications...");
+	console.log(
+		"🔍 Building duplicate-detection index from existing applications...",
+	);
 	const existingAppsMap = await buildExistingApplicationsMap(jobAppManager);
-	console.log(`  Found ${existingAppsMap.size} existing application(s) in database.\n`);
+	console.log(
+		`  Found ${existingAppsMap.size} existing application(s) in database.\n`,
+	);
 
 	for (let i = 0; i < baseDataData.length; i++) {
 		if (skippedEntries.has(i)) {

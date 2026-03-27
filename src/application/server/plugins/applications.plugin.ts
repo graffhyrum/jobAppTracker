@@ -168,7 +168,10 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				params: applicationIdParamSchema,
 				body: jobApplicationModule.forUpdate,
 				async transform(ctx) {
-					const { jobApplicationManager, params: { id } } = ctx;
+					const {
+						jobApplicationManager,
+						params: { id },
+					} = ctx;
 					// Get current application to preserve existing statusLog
 					const currentAppResult = await runEffect(
 						jobApplicationManager.getJobApplication(id),
@@ -203,7 +206,10 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				params: applicationIdParamSchema,
 				body: jobApplicationModule.forUpdate,
 				async transform(ctx) {
-					const { jobApplicationManager, params: { id } } = ctx;
+					const {
+						jobApplicationManager,
+						params: { id },
+					} = ctx;
 					// Get current application to preserve existing statusLog
 					const currentAppResult = await runEffect(
 						jobApplicationManager.getJobApplication(id),
@@ -464,9 +470,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 					// Generate and create applications
 					for (let i = 0; i < count; i++) {
 						const data = generateRandomJobApplicationData(jobBoards);
-						await runEffect(
-							jobApplicationManager.createJobApplication(data),
-						);
+						await runEffect(jobApplicationManager.createJobApplication(data));
 					}
 
 					// Get all applications to refresh the pipeline view
