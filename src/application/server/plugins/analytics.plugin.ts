@@ -1,5 +1,6 @@
 import { Either } from "effect";
 import { Elysia } from "elysia";
+import { type } from "arktype";
 
 import { contactRepositoryPlugin } from "#src/application/server/plugins/contactRepository.plugin.ts";
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
@@ -9,6 +10,11 @@ import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { createAnalyticsAggregator } from "#src/domain/use-cases/analytics-aggregator.ts";
 import { analyticsPage } from "#src/presentation/pages/analytics.ts";
 import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
+
+const analyticsQuerySchema = type({
+	"startDate?": "string.date.iso",
+	"endDate?": "string.date.iso",
+});
 
 /**
  * Analytics plugin - provides analytics dashboard and visualizations
@@ -33,8 +39,12 @@ export const createAnalyticsPlugin = new Elysia()
 		},
 	)
 	.get("/analytics", async ({ analyticsAggregator, set, cookie, query }) => {
-		const startDate = query.startDate as string | undefined;
-		const endDate = query.endDate as string | undefined;
+		const parsed = analyticsQuerySchema(query);
+		if (parsed instanceof type.errors) {
+			set.status = 400;
+			return `<div class="error-message">Invalid date format: ${escapeHtml(parsed.summary)}</div>`;
+		}
+		const { startDate, endDate } = parsed;
 
 		const result = await runEffect(
 			analyticsAggregator.computeApplicationAnalytics({
@@ -64,4 +74,6 @@ export const createAnalyticsPlugin = new Elysia()
 			},
 			dateRange,
 		);
+	}, {
+		query: analyticsQuerySchema,
 	});
