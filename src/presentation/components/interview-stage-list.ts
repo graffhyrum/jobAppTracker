@@ -14,7 +14,7 @@ const interviewTypeLabels: Record<string, string> = {
 
 export function renderInterviewStageCard(stage: InterviewStage): string {
 	return `
-		<div class="interview-stage-card" data-testid="interview-stage-${stage.id}">
+		<div class="interview-stage-card" id="interview-stage-${stage.id}" data-testid="interview-stage-${stage.id}">
 			<div class="stage-header">
 				<div class="stage-title">
 					<span class="stage-round">Round ${stage.round}</span>

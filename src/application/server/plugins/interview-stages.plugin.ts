@@ -190,19 +190,9 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
-			// Return updated list
+			// Return the updated single card
 			set.headers["Content-Type"] = "text/html";
-			const stagesResult = await runEffect(
-				interviewStageRepository.getByJobApplicationId(
-					result.right.jobApplicationId,
-				),
-			);
-			return Either.isRight(stagesResult)
-				? renderInterviewStagesList(
-						stagesResult.right,
-						result.right.jobApplicationId,
-					)
-				: `Error: ${escapeHtml(stagesResult.left.detail)}`;
+			return renderInterviewStageCard(result.right);
 		},
 		{
 			params: idParamSchema,
@@ -213,29 +203,16 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 	.delete(
 		"/interview-stages/:id",
 		async ({ interviewStageRepository, params: { id }, set }) => {
-			// Get the stage first to know the job application ID
-			const stageResult = await runEffect(interviewStageRepository.getById(id));
-			if (Either.isLeft(stageResult)) {
-				set.status = 404;
-				return `Error: ${escapeHtml(stageResult.left.detail)}`;
-			}
-
-			const jobAppId = stageResult.right.jobApplicationId;
-
 			const result = await runEffect(interviewStageRepository.delete(id));
 			if (Either.isLeft(result)) {
 				set.status = 500;
 				return `Error: ${escapeHtml(result.left.detail)}`;
 			}
 
-			// Return updated list
+			// Tell HTMX to delete the target element
 			set.headers["Content-Type"] = "text/html";
-			const stagesListResult = await runEffect(
-				interviewStageRepository.getByJobApplicationId(jobAppId),
-			);
-			return Either.isRight(stagesListResult)
-				? renderInterviewStagesList(stagesListResult.right, jobAppId)
-				: `Error: ${escapeHtml(stagesListResult.left.detail)}`;
+			set.headers["HX-Reswap"] = "delete";
+			return "";
 		},
 		{
 			params: idParamSchema,
