@@ -20,6 +20,7 @@ const objectJsonSchema = type("object.json").to(updateApplicationBodySchema);
 const dateNormalizeSchema = type("string.date.iso").pipe((md) =>
 	new Date(md).toISOString(),
 );
+const jobBoardIdSchema = type("string.uuid");
 /**
  * Transforms form data for PUT request, handling status field conversion
  */
@@ -65,6 +66,18 @@ export const transformUpdateData = (
 	return maybeParsed;
 };
 /**
+ * Resolves the sourceType field, defaulting to "other" if invalid or empty
+ */
+const resolveSourceType = (
+	raw: unknown,
+): JobApplicationForCreate["sourceType"] => {
+	if (typeof raw === "string" && raw.trim() !== "") {
+		const result = jobApplicationModule.SourceType(raw);
+		if (!(result instanceof ArkErrors)) return result;
+	}
+	return "other" as const;
+};
+/**
  * Parses form-formatted JA Creation data to JobApplicationForCreate
  */
 export const extractApplicationData = (
@@ -92,13 +105,7 @@ export const extractApplicationData = (
 		company,
 		positionTitle,
 		applicationDate,
-		sourceType: (() => {
-			if (typeof formData.sourceType === "string" && formData.sourceType.trim() !== "") {
-				const result = jobApplicationModule.SourceType(formData.sourceType);
-				if (!(result instanceof ArkErrors)) return result;
-			}
-			return "other" as const;
-		})(),
+		sourceType: resolveSourceType(formData.sourceType),
 		isRemote,
 	};
 	if (
@@ -117,9 +124,9 @@ export const extractApplicationData = (
 		data.jobDescription = jobDescription;
 	}
 	if (formData.jobBoardId && typeof formData.jobBoardId === "string") {
-		const uuidResult = type("string.uuid")(formData.jobBoardId);
+		const uuidResult = jobBoardIdSchema(formData.jobBoardId);
 		if (!(uuidResult instanceof ArkErrors)) {
-			data.jobBoardId = uuidResult as JobApplicationForCreate["jobBoardId"];
+			data.jobBoardId = uuidResult;
 		}
 	}
 	if (formData.sourceNotes && typeof formData.sourceNotes === "string") {
