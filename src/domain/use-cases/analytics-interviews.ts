@@ -6,6 +6,11 @@ import type {
 } from "../entities/interview-stage.ts";
 import type { JobApplication } from "../entities/job-application.ts";
 import { getCurrentStatus } from "../entities/job-application.ts";
+import {
+	computeAverage,
+	computeMedian,
+	computeSuccessRate,
+} from "./analytics-math.ts";
 /**
  * Interview analytics data structures
  */
@@ -171,28 +176,6 @@ function computeRoundsToOffer(
 	}
 	return roundsToOffer;
 }
-function computeAverage(numbers: number[]): number {
-	if (numbers.length === 0) return 0;
-	const sum = numbers.reduce((acc, val) => acc + val, 0);
-	return sum / numbers.length;
-}
-function computeMedian(numbers: number[]): number {
-	if (numbers.length === 0) return 0;
-	const sorted = [...numbers].sort((a, b) => a - b);
-	if (sorted.length % 2 === 0) {
-		const mid1 = sorted[sorted.length / 2 - 1];
-		const mid2 = sorted[sorted.length / 2];
-		if (mid1 !== undefined && mid2 !== undefined) {
-			return (mid1 + mid2) / 2;
-		}
-	} else {
-		const mid = sorted[Math.floor(sorted.length / 2)];
-		if (mid !== undefined) {
-			return mid;
-		}
-	}
-	return 0;
-}
 function computeInterviewConversionRate(
 	applications: JobApplication[],
 	interviewsByApp: Map<string, InterviewStage[]>,
@@ -264,10 +247,7 @@ function computeInterviewTypeEffectiveness(
 		total: data.total,
 		offers: data.offers,
 		rejected: data.rejected,
-		successRate:
-			data.offers + data.rejected > 0
-				? data.offers / (data.offers + data.rejected)
-				: 0,
+		successRate: computeSuccessRate(data.offers, data.rejected),
 	}));
 }
 function computeRoundAnalysis(
@@ -331,10 +311,7 @@ function computeRoundAnalysis(
 			offers: data.offers,
 			rejected: data.rejected,
 			stillActive: data.stillActive,
-			successRate:
-				data.offers + data.rejected > 0
-					? data.offers / (data.offers + data.rejected)
-					: 0,
+			successRate: computeSuccessRate(data.offers, data.rejected),
 		}))
 		.sort((a, b) => a.round - b.round);
 }

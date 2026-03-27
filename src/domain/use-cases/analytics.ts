@@ -6,6 +6,7 @@ import type {
 	SourceType,
 } from "../entities/job-application.ts";
 import { getCurrentStatus } from "../entities/job-application.ts";
+import { computeMedian, computeSuccessRate } from "./analytics-math.ts";
 
 /**
  * Analytics data structures
@@ -296,10 +297,7 @@ function computeSourceEffectiveness(
 	return Array.from(sourceMap.entries()).map(([sourceType, data]) => ({
 		sourceType,
 		...data,
-		successRate:
-			data.offers + data.rejected > 0
-				? data.offers / (data.offers + data.rejected)
-				: 0,
+		successRate: computeSuccessRate(data.offers, data.rejected),
 	}));
 }
 
@@ -337,21 +335,7 @@ function computeTimeInStatus(applications: JobApplication[]): TimeInStatus[] {
 		const sorted = [...durations].sort((a, b) => a - b);
 		const sum = sorted.reduce((acc, val) => acc + val, 0);
 
-		let median = 0;
-		if (sorted.length > 0) {
-			if (sorted.length % 2 === 0) {
-				const mid1 = sorted[sorted.length / 2 - 1];
-				const mid2 = sorted[sorted.length / 2];
-				if (mid1 !== undefined && mid2 !== undefined) {
-					median = (mid1 + mid2) / 2;
-				}
-			} else {
-				const mid = sorted[Math.floor(sorted.length / 2)];
-				if (mid !== undefined) {
-					median = mid;
-				}
-			}
-		}
+		const median = computeMedian(sorted);
 
 		return {
 			label,
@@ -404,10 +388,7 @@ function computeInterestRatingStats(
 		.map(([rating, data]) => ({
 			rating,
 			...data,
-			successRate:
-				data.offers + data.rejected > 0
-					? data.offers / (data.offers + data.rejected)
-					: 0,
+			successRate: computeSuccessRate(data.offers, data.rejected),
 		}))
 		.sort((a, b) => a.rating - b.rating);
 }

@@ -7,6 +7,7 @@ import type {
 } from "../entities/contact.ts";
 import type { JobApplication } from "../entities/job-application.ts";
 import { getCurrentStatus } from "../entities/job-application.ts";
+import { computeMedian } from "./analytics-math.ts";
 
 /**
  * Contact analytics data structures
@@ -127,24 +128,7 @@ function computeMedianDaysToResponse(contacts: Contact[]): number {
 		}
 	}
 
-	if (responsesWithDays.length === 0) return 0;
-
-	const sorted = [...responsesWithDays].sort((a, b) => a - b);
-
-	if (sorted.length % 2 === 0) {
-		const mid1 = sorted[sorted.length / 2 - 1];
-		const mid2 = sorted[sorted.length / 2];
-		if (mid1 !== undefined && mid2 !== undefined) {
-			return (mid1 + mid2) / 2;
-		}
-	} else {
-		const mid = sorted[Math.floor(sorted.length / 2)];
-		if (mid !== undefined) {
-			return mid;
-		}
-	}
-
-	return 0;
+	return computeMedian(responsesWithDays);
 }
 
 function computeResponseRateByChannel(
