@@ -1,4 +1,4 @@
-import { timingSafeEqual } from "node:crypto";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { type } from "arktype";
 import { Either } from "effect";
 import { Elysia } from "elysia";
@@ -120,10 +120,9 @@ const createAuthModule = () => {
 		validApiKey: string,
 	): boolean => {
 		if (!apiKey) return false;
-		const a = Buffer.from(apiKey);
-		const b = Buffer.from(validApiKey);
-		if (a.byteLength !== b.byteLength) return false;
-		return timingSafeEqual(a, b);
+		const hmac = (key: string, data: string) =>
+			createHmac("sha256", key).update(data).digest();
+		return timingSafeEqual(hmac(validApiKey, apiKey), hmac(apiKey, validApiKey));
 	};
 	const getValidApiKey = (): string | undefined =>
 		process.env.BROWSER_EXTENSION_API_KEY;
