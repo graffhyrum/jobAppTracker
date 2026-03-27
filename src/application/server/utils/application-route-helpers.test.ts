@@ -1,8 +1,10 @@
 import { describe, expect, test } from "bun:test";
+
 import { ArkErrors } from "arktype";
 
 import { createApplicationStatus } from "#src/domain/entities/job-application.ts";
 import type { JobApplication } from "#src/domain/entities/job-application.ts";
+
 import {
 	extractStringField,
 	transformUpdateData,
@@ -20,10 +22,7 @@ const makeApp = (overrides: Partial<JobApplication> = {}): JobApplication => ({
 	updatedAt: "2026-01-15T00:00:00.000Z",
 	notes: [],
 	statusLog: [
-		[
-			"2026-01-15T00:00:00.000Z",
-			{ category: "active", label: "applied" },
-		],
+		["2026-01-15T00:00:00.000Z", { category: "active", label: "applied" }],
 	],
 	...overrides,
 });
@@ -128,8 +127,8 @@ describe("extractStringField", () => {
 		expect(extractStringField("hello")).toBe("hello");
 	});
 
-	test("returns empty string default for non-string", () => {
-		expect(extractStringField(42)).toBe("");
+	test("returns undefined default for non-string", () => {
+		expect(extractStringField(42)).toBeUndefined();
 	});
 
 	test("returns explicit default for non-string when provided", () => {

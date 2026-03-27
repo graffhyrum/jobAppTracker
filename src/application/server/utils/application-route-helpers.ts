@@ -3,7 +3,6 @@ import { Either } from "effect";
 
 import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import type {
-	ApplicationStatusLabel,
 	JobApplication,
 	JobApplicationForCreate,
 } from "#src/domain/entities/job-application.ts";
@@ -18,7 +17,6 @@ import {
 } from "#src/presentation/schemas/application-routes.schemas.ts";
 // Create schema once at module initialization to avoid race conditions under concurrent load
 const objectJsonSchema = type("object.json").to(updateApplicationBodySchema);
-// Create schema once at module initialization to avoid race conditions under concurrent load
 const dateNormalizeSchema = type("string.date.iso").pipe((md) =>
 	new Date(md).toISOString(),
 );
@@ -34,7 +32,6 @@ export const transformUpdateData = (
 		throw parseResult;
 	}
 	const formData = parseResult;
-	// Handle status field transformation
 	if ("status" in formData && typeof formData.status === "string") {
 		if (!currentApp) {
 			// Cannot append to statusLog without the existing application — throw rather than silently drop
@@ -46,41 +43,18 @@ export const transformUpdateData = (
 			formData.status as typeof jobApplicationModule.ApplicationStatusLabel.infer;
 		const newStatus = createApplicationStatus(statusLabel);
 		const timestamp = new Date().toISOString();
-		// Append new status to statusLog
 		formData.statusLog = [...currentApp.statusLog, [timestamp, newStatus]];
-		// Remove the status field as it's not part of the update schema
+		// statusLog is the canonical field; status is a shorthand accepted only at this boundary
 		delete formData.status;
 	}
-	// Handle date field normalization (convert YYYY-MM-DD to ISO datetime)
 	if ("applicationDate" in formData && formData.applicationDate) {
 		formData.applicationDate = normalize(formData.applicationDate as string);
 	}
 	if ("nextEventDate" in formData && formData.nextEventDate) {
 		formData.nextEventDate = normalize(formData.nextEventDate as string);
 	}
-	// Handle optional string fields - trim and delete if empty
-	if (
-		"jobPostingUrl" in formData &&
-		typeof formData.jobPostingUrl === "string"
-	) {
-		const trimmed = formData.jobPostingUrl.trim();
-		if (trimmed) {
-			formData.jobPostingUrl = trimmed;
-		} else {
-			delete formData.jobPostingUrl;
-		}
-	}
-	if (
-		"jobDescription" in formData &&
-		typeof formData.jobDescription === "string"
-	) {
-		const trimmed = formData.jobDescription.trim();
-		if (trimmed) {
-			formData.jobDescription = trimmed;
-		} else {
-			delete formData.jobDescription;
-		}
-	}
+	trimOrDelete(formData as Record<string, unknown>, "jobPostingUrl");
+	trimOrDelete(formData as Record<string, unknown>, "jobDescription");
 	const maybeParsed = jobApplicationModule.forUpdate(formData);
 	if (maybeParsed instanceof ArkErrors) {
 		throw maybeParsed;
@@ -98,24 +72,23 @@ export const extractApplicationData = (
 	const jobPostingUrl = extractStringField(formData.jobPostingUrl)?.trim();
 	const jobDescription = extractStringField(formData.jobDescription)?.trim();
 	const { company, positionTitle } = formData;
-	const applicationDate = normalize(formData.applicationDate);
-	const nextEventDate = nextEventDateRaw
-		? normalize(nextEventDateRaw)
-		: undefined;
-	if (!company || !positionTitle || !applicationDate) {
+	if (!company || !positionTitle || !formData.applicationDate) {
 		throw new Error(
 			"Company, position title, and application date are required",
 		);
 	}
-	// Handle isRemote which might come as string from forms or boolean from direct API calls
-	// If checkbox is unchecked, the field won't be in formData at all
+	const applicationDate = normalize(formData.applicationDate);
+	const nextEventDate = nextEventDateRaw
+		? normalize(nextEventDateRaw)
+		: undefined;
+	// isRemote may arrive as a string from HTML forms (checkbox absent = unchecked = field omitted)
+	// or as a boolean from direct API calls
 	const isRemoteValue = formData.isRemote;
 	const isRemote = isRemoteValue === true || isRemoteValue === "true";
 	const data: JobApplicationForCreate = {
 		company,
 		positionTitle,
 		applicationDate,
-		// New required fields with defaults
 		sourceType:
 			typeof formData.sourceType === "string" &&
 			formData.sourceType.trim() !== ""
@@ -123,8 +96,10 @@ export const extractApplicationData = (
 				: "other",
 		isRemote,
 	};
-	// Add optional fields only if they have values
-	if (interestRating != null && ["0", "1", "2", "3"].includes(interestRating)) {
+	if (
+		interestRating != null &&
+		VALID_INTEREST_RATINGS.includes(interestRating)
+	) {
 		data.interestRating = Number(interestRating) as 0 | 1 | 2 | 3;
 	}
 	if (nextEventDate) {
@@ -150,7 +125,7 @@ export const extractApplicationData = (
  */
 export const extractStringField = (
 	value: unknown,
-	defaultValue: string | undefined = "",
+	defaultValue: string | undefined = undefined,
 ): string | undefined => {
 	if (typeof value === "string") {
 		return value;
@@ -170,3 +145,15 @@ export const fetchAllApplicationsOrEmpty = async (
 const normalize = (s: string): string => {
 	return dateNormalizeSchema.assert(s);
 };
+// Trims a string field in-place; deletes the key if blank after trim.
+const trimOrDelete = (obj: Record<string, unknown>, key: string): void => {
+	if (key in obj && typeof obj[key] === "string") {
+		const trimmed = (obj[key] as string).trim();
+		if (trimmed) {
+			obj[key] = trimmed;
+		} else {
+			delete obj[key];
+		}
+	}
+};
+const VALID_INTEREST_RATINGS: string[] = ["0", "1", "2", "3"];
