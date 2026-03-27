@@ -240,7 +240,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				}
 				// Return empty HTML so hx-swap="outerHTML" on the <tr> removes the row
 				set.headers["Content-Type"] = "text/html";
-				return "";
+				return "<!-- deleted -->";
 			},
 			{
 				params: applicationIdParamSchema,
@@ -355,7 +355,14 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		// POST /applications/delete-all - Deletes all applications
 		.post(
 			"/delete-all",
-			async ({ jobApplicationManager, jobBoardRepository, set }) => {
+			async ({ jobApplicationManager, jobBoardRepository, set, request }) => {
+				// Guard: only allow requests from the HTMX frontend
+				const isHtmxRequest = request.headers.get("HX-Request") === "true";
+				if (!isHtmxRequest) {
+					set.status = 403;
+					return "Forbidden: This action requires the web interface";
+				}
+
 				const result = await runEffect(
 					jobApplicationManager.clearAllJobApplications(),
 				);
@@ -378,7 +385,14 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 			},
 		)
 		// POST /applications/import-data - Executes data import script
-		.post("/import-data", async ({ set }) => {
+		.post("/import-data", async ({ set, request }) => {
+			// Guard: only allow requests from the HTMX frontend
+			const isHtmxRequest = request.headers.get("HX-Request") === "true";
+			if (!isHtmxRequest) {
+				set.status = 403;
+				return "Forbidden: This action requires the web interface";
+			}
+
 			try {
 				// Execute the import script in a child process
 				const { spawn } = await import("node:child_process");
