@@ -7,6 +7,7 @@ import { runEffect } from "#src/application/server/utils/run-effect.ts";
 import { uuidSchema } from "#src/domain/entities/uuid.ts";
 import { uuidProvider } from "#src/infrastructure/di/uuid-provider.ts";
 import {
+	renderInterviewStageCard,
 	renderInterviewStageForm,
 	renderInterviewStagesList,
 } from "#src/presentation/components/interview-stage-list.ts";
@@ -131,15 +132,8 @@ export const createInterviewStageOperationsPlugin = new Elysia()
 				throw new NotFoundError(`Error: ${escapeHtml(result.left.detail)}`);
 			}
 
-			const stage = result.right;
-			// Return just the stage card
 			set.headers["Content-Type"] = "text/html";
-			const stagesResult = await runEffect(
-				interviewStageRepository.getByJobApplicationId(stage.jobApplicationId),
-			);
-			return Either.isRight(stagesResult)
-				? renderInterviewStagesList(stagesResult.right, stage.jobApplicationId)
-				: `Error: ${escapeHtml(stagesResult.left.detail)}`;
+			return renderInterviewStageCard(result.right);
 		},
 		{
 			params: idParamSchema,

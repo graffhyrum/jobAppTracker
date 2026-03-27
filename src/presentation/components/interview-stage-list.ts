@@ -12,30 +12,8 @@ const interviewTypeLabels: Record<string, string> = {
 	other: "📋 Other",
 };
 
-export function renderInterviewStagesList(
-	stages: InterviewStage[],
-	jobApplicationId: JobApplicationId,
-): string {
-	if (stages.length === 0) {
-		return `
-			<div class="interview-stages-section" data-testid="interview-stages-section">
-				<h2>Interview Stages</h2>
-				<p class="empty-state">No interview stages recorded yet.</p>
-				<button
-					type="button"
-					class="action-btn add"
-					data-testid="add-interview-stage-btn"
-					hx-get="/applications/${jobApplicationId}/interview-stages/new"
-					hx-target="#interview-stages-list"
-					hx-swap="afterbegin"
-					title="Add Interview Stage">+ Add Interview Stage</button>
-			</div>
-		`;
-	}
-
-	const stagesHtml = stages
-		.map(
-			(stage) => `
+export function renderInterviewStageCard(stage: InterviewStage): string {
+	return `
 		<div class="interview-stage-card" data-testid="interview-stage-${stage.id}">
 			<div class="stage-header">
 				<div class="stage-title">
@@ -113,9 +91,31 @@ export function renderInterviewStagesList(
 				}
 			</div>
 		</div>
-	`,
-		)
-		.join("");
+	`;
+}
+
+export function renderInterviewStagesList(
+	stages: InterviewStage[],
+	jobApplicationId: JobApplicationId,
+): string {
+	if (stages.length === 0) {
+		return `
+			<div class="interview-stages-section" data-testid="interview-stages-section">
+				<h2>Interview Stages</h2>
+				<p class="empty-state">No interview stages recorded yet.</p>
+				<button
+					type="button"
+					class="action-btn add"
+					data-testid="add-interview-stage-btn"
+					hx-get="/applications/${jobApplicationId}/interview-stages/new"
+					hx-target="#interview-stages-list"
+					hx-swap="afterbegin"
+					title="Add Interview Stage">+ Add Interview Stage</button>
+			</div>
+		`;
+	}
+
+	const stagesHtml = stages.map((stage) => renderInterviewStageCard(stage)).join("");
 
 	return `
 		<div class="interview-stages-section" data-testid="interview-stages-section">
