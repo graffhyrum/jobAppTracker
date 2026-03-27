@@ -1,6 +1,6 @@
+import { type } from "arktype";
 import { Either } from "effect";
 import { Elysia } from "elysia";
-import { type } from "arktype";
 
 import { contactRepositoryPlugin } from "#src/application/server/plugins/contactRepository.plugin.ts";
 import { getCurrentDbFromCookie } from "#src/application/server/plugins/db-selector-utils.ts";
@@ -38,37 +38,41 @@ export const createAnalyticsPlugin = new Elysia()
 			};
 		},
 	)
-	.get("/analytics", async ({ analyticsAggregator, set, cookie, query }) => {
-		const { startDate, endDate } = query;
+	.get(
+		"/analytics",
+		async ({ analyticsAggregator, set, cookie, query }) => {
+			const { startDate, endDate } = query;
 
-		const result = await runEffect(
-			analyticsAggregator.computeApplicationAnalytics({
-				startDate,
-				endDate,
-			}),
-		);
-
-		if (Either.isLeft(result)) {
-			console.error(
-				"[Analytics] Failed to compute analytics:",
-				escapeHtml(result.left.detail),
+			const result = await runEffect(
+				analyticsAggregator.computeApplicationAnalytics({
+					startDate,
+					endDate,
+				}),
 			);
-			set.status = 500;
-			return `<div class="error-message">Failed to load analytics: ${escapeHtml(result.left.detail)}</div>`;
-		}
 
-		const { analytics, dateRange } = result.right;
+			if (Either.isLeft(result)) {
+				console.error(
+					"[Analytics] Failed to compute analytics:",
+					escapeHtml(result.left.detail),
+				);
+				set.status = 500;
+				return `<div class="error-message">Failed to load analytics: ${escapeHtml(result.left.detail)}</div>`;
+			}
 
-		set.headers["Content-Type"] = "text/html";
-		return analyticsPage(
-			analytics,
-			{
-				navbar: {
-					currentDb: getCurrentDbFromCookie(cookie),
+			const { analytics, dateRange } = result.right;
+
+			set.headers["Content-Type"] = "text/html";
+			return analyticsPage(
+				analytics,
+				{
+					navbar: {
+						currentDb: getCurrentDbFromCookie(cookie),
+					},
 				},
-			},
-			dateRange,
-		);
-	}, {
-		query: analyticsQuerySchema,
-	});
+				dateRange,
+			);
+		},
+		{
+			query: analyticsQuerySchema,
+		},
+	);

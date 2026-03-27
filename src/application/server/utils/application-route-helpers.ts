@@ -21,62 +21,7 @@ const dateNormalizeSchema = type("string.date.iso").pipe((md) =>
 	new Date(md).toISOString(),
 );
 const jobBoardIdSchema = type("string.uuid");
-/**
- * Transforms form data for PUT request, handling status field conversion
- */
-export const transformUpdateData = (
-	body: unknown,
-	currentApp: JobApplication | null,
-) => {
-	const parseResult = objectJsonSchema(body);
-	if (parseResult instanceof ArkErrors) {
-		throw parseResult;
-	}
-	const formData = parseResult;
-	if ("status" in formData && typeof formData.status === "string") {
-		if (!currentApp) {
-			// Cannot append to statusLog without the existing application — throw rather than silently drop
-			throw new Error(
-				"Cannot update status: current application could not be loaded",
-			);
-		}
-		const statusResult = jobApplicationModule.ApplicationStatusLabel(formData.status);
-		if (statusResult instanceof ArkErrors) {
-			throw new Error(`Invalid status: ${statusResult.summary}`);
-		}
-		const statusLabel = statusResult;
-		const newStatus = createApplicationStatus(statusLabel);
-		const timestamp = new Date().toISOString();
-		formData.statusLog = [...currentApp.statusLog, [timestamp, newStatus]];
-		// statusLog is the canonical field; status is a shorthand accepted only at this boundary
-		delete formData.status;
-	}
-	if ("applicationDate" in formData && formData.applicationDate) {
-		formData.applicationDate = normalize(formData.applicationDate as string);
-	}
-	if ("nextEventDate" in formData && formData.nextEventDate) {
-		formData.nextEventDate = normalize(formData.nextEventDate as string);
-	}
-	trimOrDelete(formData as Record<string, unknown>, "jobPostingUrl");
-	trimOrDelete(formData as Record<string, unknown>, "jobDescription");
-	const maybeParsed = jobApplicationModule.forUpdate(formData);
-	if (maybeParsed instanceof ArkErrors) {
-		throw maybeParsed;
-	}
-	return maybeParsed;
-};
-/**
- * Resolves the sourceType field, defaulting to "other" if invalid or empty
- */
-const resolveSourceType = (
-	raw: unknown,
-): JobApplicationForCreate["sourceType"] => {
-	if (typeof raw === "string" && raw.trim() !== "") {
-		const result = jobApplicationModule.SourceType(raw);
-		if (!(result instanceof ArkErrors)) return result;
-	}
-	return "other" as const;
-};
+const VALID_INTEREST_RATINGS: string[] = ["0", "1", "2", "3"];
 /**
  * Parses form-formatted JA Creation data to JobApplicationForCreate
  */
@@ -135,6 +80,64 @@ export const extractApplicationData = (
 	return data;
 };
 /**
+ * Transforms form data for PUT request, handling status field conversion
+ */
+export const transformUpdateData = (
+	body: unknown,
+	currentApp: JobApplication | null,
+) => {
+	const parseResult = objectJsonSchema(body);
+	if (parseResult instanceof ArkErrors) {
+		throw parseResult;
+	}
+	const formData = parseResult;
+	if ("status" in formData && typeof formData.status === "string") {
+		if (!currentApp) {
+			// Cannot append to statusLog without the existing application — throw rather than silently drop
+			throw new Error(
+				"Cannot update status: current application could not be loaded",
+			);
+		}
+		const statusResult = jobApplicationModule.ApplicationStatusLabel(
+			formData.status,
+		);
+		if (statusResult instanceof ArkErrors) {
+			throw new Error(`Invalid status: ${statusResult.summary}`);
+		}
+		const statusLabel = statusResult;
+		const newStatus = createApplicationStatus(statusLabel);
+		const timestamp = new Date().toISOString();
+		formData.statusLog = [...currentApp.statusLog, [timestamp, newStatus]];
+		// statusLog is the canonical field; status is a shorthand accepted only at this boundary
+		delete formData.status;
+	}
+	if ("applicationDate" in formData && formData.applicationDate) {
+		formData.applicationDate = normalize(formData.applicationDate as string);
+	}
+	if ("nextEventDate" in formData && formData.nextEventDate) {
+		formData.nextEventDate = normalize(formData.nextEventDate as string);
+	}
+	trimOrDelete(formData as Record<string, unknown>, "jobPostingUrl");
+	trimOrDelete(formData as Record<string, unknown>, "jobDescription");
+	const maybeParsed = jobApplicationModule.forUpdate(formData);
+	if (maybeParsed instanceof ArkErrors) {
+		throw maybeParsed;
+	}
+	return maybeParsed;
+};
+/**
+ * Resolves the sourceType field, defaulting to "other" if invalid or empty
+ */
+const resolveSourceType = (
+	raw: unknown,
+): JobApplicationForCreate["sourceType"] => {
+	if (typeof raw === "string" && raw.trim() !== "") {
+		const result = jobApplicationModule.SourceType(raw);
+		if (!(result instanceof ArkErrors)) return result;
+	}
+	return "other" as const;
+};
+/**
  * Safely extracts string from unknown type
  */
 export const extractStringField = (
@@ -154,7 +157,10 @@ export const fetchAllApplicationsOrEmpty = async (
 ): Promise<JobApplication[]> => {
 	const result = await runEffect(manager.getAllJobApplications());
 	if (Either.isRight(result)) return result.right;
-	console.error("[fetchAllApplicationsOrEmpty] DB error silently returning empty array:", result.left.detail);
+	console.error(
+		"[fetchAllApplicationsOrEmpty] DB error silently returning empty array:",
+		result.left.detail,
+	);
 	return [];
 };
 // Normalize date-only strings to UTC ISO (midnight Z)
@@ -172,4 +178,3 @@ const trimOrDelete = (obj: Record<string, unknown>, key: string): void => {
 		}
 	}
 };
-const VALID_INTEREST_RATINGS: string[] = ["0", "1", "2", "3"];

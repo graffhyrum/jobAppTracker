@@ -2,7 +2,6 @@ import type { InterviewStage } from "../../domain/entities/interview-stage.ts";
 import type { JobApplicationId } from "../../domain/entities/job-application.ts";
 import { escapeHtml } from "../utils/html-escape.ts";
 import { formatDate } from "../utils/pipeline-utils.ts";
-
 const interviewTypeLabels: Record<string, string> = {
 	"phone screening": "📞 Phone Screening",
 	technical: "💻 Technical",
@@ -11,7 +10,48 @@ const interviewTypeLabels: Record<string, string> = {
 	panel: "👥 Panel",
 	other: "📋 Other",
 };
-
+export function renderInterviewStagesList(
+	stages: InterviewStage[],
+	jobApplicationId: JobApplicationId,
+): string {
+	if (stages.length === 0) {
+		return `
+			<div class="interview-stages-section" data-testid="interview-stages-section">
+				<h2>Interview Stages</h2>
+				<p class="empty-state">No interview stages recorded yet.</p>
+				<button
+					type="button"
+					class="action-btn add"
+					data-testid="add-interview-stage-btn"
+					hx-get="/applications/${jobApplicationId}/interview-stages/new"
+					hx-target="#interview-stages-list"
+					hx-swap="afterbegin"
+					title="Add Interview Stage">+ Add Interview Stage</button>
+			</div>
+		`;
+	}
+	const stagesHtml = stages
+		.map((stage) => renderInterviewStageCard(stage))
+		.join("");
+	return `
+		<div class="interview-stages-section" data-testid="interview-stages-section">
+			<div class="section-header">
+				<h2>Interview Stages (${stages.length})</h2>
+				<button
+					type="button"
+					class="action-btn add"
+					data-testid="add-interview-stage-btn"
+					hx-get="/applications/${jobApplicationId}/interview-stages/new"
+					hx-target="#interview-stages-list"
+					hx-swap="afterbegin"
+					title="Add Interview Stage">+ Add Interview Stage</button>
+			</div>
+			<div id="interview-stages-list" class="interview-stages-list">
+				${stagesHtml}
+			</div>
+		</div>
+	`;
+}
 export function renderInterviewStageCard(stage: InterviewStage): string {
 	return `
 		<div class="interview-stage-card" id="interview-stage-${stage.id}" data-testid="interview-stage-${stage.id}">
@@ -93,50 +133,6 @@ export function renderInterviewStageCard(stage: InterviewStage): string {
 		</div>
 	`;
 }
-
-export function renderInterviewStagesList(
-	stages: InterviewStage[],
-	jobApplicationId: JobApplicationId,
-): string {
-	if (stages.length === 0) {
-		return `
-			<div class="interview-stages-section" data-testid="interview-stages-section">
-				<h2>Interview Stages</h2>
-				<p class="empty-state">No interview stages recorded yet.</p>
-				<button
-					type="button"
-					class="action-btn add"
-					data-testid="add-interview-stage-btn"
-					hx-get="/applications/${jobApplicationId}/interview-stages/new"
-					hx-target="#interview-stages-list"
-					hx-swap="afterbegin"
-					title="Add Interview Stage">+ Add Interview Stage</button>
-			</div>
-		`;
-	}
-
-	const stagesHtml = stages.map((stage) => renderInterviewStageCard(stage)).join("");
-
-	return `
-		<div class="interview-stages-section" data-testid="interview-stages-section">
-			<div class="section-header">
-				<h2>Interview Stages (${stages.length})</h2>
-				<button
-					type="button"
-					class="action-btn add"
-					data-testid="add-interview-stage-btn"
-					hx-get="/applications/${jobApplicationId}/interview-stages/new"
-					hx-target="#interview-stages-list"
-					hx-swap="afterbegin"
-					title="Add Interview Stage">+ Add Interview Stage</button>
-			</div>
-			<div id="interview-stages-list" class="interview-stages-list">
-				${stagesHtml}
-			</div>
-		</div>
-	`;
-}
-
 export function renderInterviewStageForm(
 	jobApplicationId: JobApplicationId,
 	stage?: InterviewStage,
@@ -147,17 +143,14 @@ export function renderInterviewStageForm(
 		? `/interview-stages/${stage.id}`
 		: `/applications/${jobApplicationId}/interview-stages`;
 	const method = isEdit ? "put" : "post";
-
 	const scheduledValue = stage?.scheduledDate
 		? stage.scheduledDate.split("T")[0]
 		: "";
 	const completedValue = stage?.completedDate
 		? stage.completedDate.split("T")[0]
 		: "";
-
 	const questionsList =
 		stage?.questions?.map((q, idx) => ({ ...q, tempId: idx })) || [];
-
 	return `
 		<div class="interview-stage-form" id="interview-stage-${stage?.id || "new"}" data-testid="interview-stage-form-${formId}">
 			<form id="${formId}">

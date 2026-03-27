@@ -30,7 +30,10 @@ import {
 	createApplicationBodySchema,
 	searchQuerySchema,
 } from "#src/presentation/schemas/application-routes.schemas.ts";
-import { escapeHtml, escapeScriptContent } from "#src/presentation/utils/html-escape.ts";
+import {
+	escapeHtml,
+	escapeScriptContent,
+} from "#src/presentation/utils/html-escape.ts";
 
 /**
  * Factory function to create applications plugin with injected dependencies.
