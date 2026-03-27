@@ -57,3 +57,4 @@ playwright-report
 
 /.playwright-mcp/
 /.claude/ralph-loop.local.md
+.claude/settings.local.json
