@@ -66,6 +66,13 @@ export function startElysiaServer() {
 			set.status = 500;
 			return `Internal Server Error: ${errorMessage}`;
 		})
+		// Security response headers
+		.onBeforeHandle(({ set }) => {
+			set.headers["X-Content-Type-Options"] = "nosniff";
+			set.headers["X-Frame-Options"] = "DENY";
+			set.headers["Content-Security-Policy"] =
+				"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'";
+		})
 		// Add the HTML plugin for automatic HTML content-type handling
 		.use(html()) // https://github.com/elysiajs/elysia/issues/1363
 		// Add Swagger for OpenAPI documentation
