@@ -39,8 +39,11 @@ export const transformUpdateData = (
 				"Cannot update status: current application could not be loaded",
 			);
 		}
-		const statusLabel =
-			formData.status as typeof jobApplicationModule.ApplicationStatusLabel.infer;
+		const statusResult = jobApplicationModule.ApplicationStatusLabel(formData.status);
+		if (statusResult instanceof ArkErrors) {
+			throw new Error(`Invalid status: ${statusResult.summary}`);
+		}
+		const statusLabel = statusResult;
 		const newStatus = createApplicationStatus(statusLabel);
 		const timestamp = new Date().toISOString();
 		formData.statusLog = [...currentApp.statusLog, [timestamp, newStatus]];
@@ -89,11 +92,13 @@ export const extractApplicationData = (
 		company,
 		positionTitle,
 		applicationDate,
-		sourceType:
-			typeof formData.sourceType === "string" &&
-			formData.sourceType.trim() !== ""
-				? (formData.sourceType as JobApplicationForCreate["sourceType"])
-				: "other",
+		sourceType: (() => {
+			if (typeof formData.sourceType === "string" && formData.sourceType.trim() !== "") {
+				const result = jobApplicationModule.SourceType(formData.sourceType);
+				if (!(result instanceof ArkErrors)) return result;
+			}
+			return "other" as const;
+		})(),
 		isRemote,
 	};
 	if (
@@ -112,8 +117,10 @@ export const extractApplicationData = (
 		data.jobDescription = jobDescription;
 	}
 	if (formData.jobBoardId && typeof formData.jobBoardId === "string") {
-		data.jobBoardId =
-			formData.jobBoardId as JobApplicationForCreate["jobBoardId"];
+		const uuidResult = type("string.uuid")(formData.jobBoardId);
+		if (!(uuidResult instanceof ArkErrors)) {
+			data.jobBoardId = uuidResult as JobApplicationForCreate["jobBoardId"];
+		}
 	}
 	if (formData.sourceNotes && typeof formData.sourceNotes === "string") {
 		data.sourceNotes = formData.sourceNotes;
@@ -139,7 +146,9 @@ export const fetchAllApplicationsOrEmpty = async (
 	manager: JobApplicationManager,
 ): Promise<JobApplication[]> => {
 	const result = await runEffect(manager.getAllJobApplications());
-	return Either.isRight(result) ? result.right : [];
+	if (Either.isRight(result)) return result.right;
+	console.error("[fetchAllApplicationsOrEmpty] DB error silently returning empty array:", result.left.detail);
+	return [];
 };
 // Normalize date-only strings to UTC ISO (midnight Z)
 const normalize = (s: string): string => {

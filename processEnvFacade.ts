@@ -6,7 +6,7 @@ const schemaConfig = {
 		.pipe((s) => Number(s))
 		.to("number"),
 	JOB_APP_MANAGER_TYPE: ' "test" | "prod"',
-	"BROWSER_EXTENSION_API_KEY?": "string > 0",
+	"BROWSER_EXTENSION_API_KEY?": "string >= 32",
 } as const satisfies Parameters<typeof type>[0];
 
 const processEnvSchema = type(schemaConfig);

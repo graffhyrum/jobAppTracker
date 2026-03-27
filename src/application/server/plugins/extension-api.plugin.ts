@@ -1,3 +1,4 @@
+import { timingSafeEqual } from "node:crypto";
 import { type } from "arktype";
 import { Either } from "effect";
 import { Elysia } from "elysia";
@@ -117,7 +118,13 @@ const createAuthModule = () => {
 	const validateApiKey = (
 		apiKey: string | null,
 		validApiKey: string,
-	): boolean => Boolean(apiKey && apiKey === validApiKey);
+	): boolean => {
+		if (!apiKey) return false;
+		const a = Buffer.from(apiKey);
+		const b = Buffer.from(validApiKey);
+		if (a.byteLength !== b.byteLength) return false;
+		return timingSafeEqual(a, b);
+	};
 	const getValidApiKey = (): string | undefined =>
 		process.env.BROWSER_EXTENSION_API_KEY;
 	const extractApiKey = (request: Request): string | null =>
