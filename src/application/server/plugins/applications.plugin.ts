@@ -30,7 +30,7 @@ import {
 	createApplicationBodySchema,
 	searchQuerySchema,
 } from "#src/presentation/schemas/application-routes.schemas.ts";
-import { escapeHtml } from "#src/presentation/utils/html-escape.ts";
+import { escapeHtml, escapeScriptContent } from "#src/presentation/utils/html-escape.ts";
 
 /**
  * Factory function to create applications plugin with injected dependencies.
@@ -356,11 +356,11 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		.post(
 			"/delete-all",
 			async ({ jobApplicationManager, jobBoardRepository, set, request }) => {
-				// Guard: only allow requests from the HTMX frontend
-				const isHtmxRequest = request.headers.get("HX-Request") === "true";
-				if (!isHtmxRequest) {
+				// Guard: reject cross-origin requests
+				const origin = request.headers.get("Origin");
+				if (origin && !origin.startsWith("http://localhost")) {
 					set.status = 403;
-					return "Forbidden: This action requires the web interface";
+					return "Forbidden: cross-origin requests not allowed";
 				}
 
 				const result = await runEffect(
@@ -386,11 +386,11 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 		)
 		// POST /applications/import-data - Executes data import script
 		.post("/import-data", async ({ set, request }) => {
-			// Guard: only allow requests from the HTMX frontend
-			const isHtmxRequest = request.headers.get("HX-Request") === "true";
-			if (!isHtmxRequest) {
+			// Guard: reject cross-origin requests
+			const origin = request.headers.get("Origin");
+			if (origin && !origin.startsWith("http://localhost")) {
 				set.status = 403;
-				return "Forbidden: This action requires the web interface";
+				return "Forbidden: cross-origin requests not allowed";
 			}
 
 			try {
@@ -432,10 +432,10 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 						<script>
 							console.log("=== BaseData Import Script Output ===");
 							console.log("STDOUT:");
-							console.log(${JSON.stringify(stdout)});
-							if (${JSON.stringify(stderr)}) {
+							console.log(${escapeScriptContent(JSON.stringify(stdout))});
+							if (${escapeScriptContent(JSON.stringify(stderr))}) {
 								console.log("STDERR:");
-								console.log(${JSON.stringify(stderr)});
+								console.log(${escapeScriptContent(JSON.stringify(stderr))});
 							}
 							console.log("=== End Import Output ===");
 							// Refresh the page after a short delay to show updated data
@@ -454,7 +454,7 @@ export const createApplicationsPlugin = (jobBoardRepo: JobBoardRepository) =>
 				return `
 						<script>
 							console.error("=== BaseData Import Script Error ===");
-							console.error(${JSON.stringify(error instanceof Error ? error.message : String(error))});
+							console.error(${escapeScriptContent(JSON.stringify(error instanceof Error ? error.message : String(error)))});
 							console.error("=== End Import Error ===");
 						</script>
 						<div class="error-message">
