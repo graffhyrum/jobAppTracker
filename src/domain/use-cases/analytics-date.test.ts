@@ -1,35 +1,15 @@
 import { describe, expect, it } from "bun:test";
 
 import {
-	type ApplicationStatus,
-	createJobApplication,
-	createJobApplicationId,
-	createJobApplicationWithInitialStatus,
-	updateJobApplicationStatus,
-} from "../entities/job-application.ts";
+	createMockApplication,
+	createMockApplicationWithStatus,
+} from "../../../tests/helpers/analytics-fixtures.ts";
 import {
 	computeDefaultDateRange,
 	filterApplicationsByDateRange,
 } from "./analytics.ts";
 
 describe("Analytics Use Cases - Date Filtering", () => {
-	const mockUuidGenerator = (seed: number) => () =>
-		`123e4567-e89b-12d3-a456-42661417${String(seed).padStart(4, "0")}`;
-
-	const createMockApplication = (applicationDate: string, seed = 1000) => {
-		return createJobApplication(
-			{
-				company: "Test Company",
-				positionTitle: "Software Engineer",
-				applicationDate,
-				interestRating: 3,
-				sourceType: "job_board" as const,
-				isRemote: false,
-			},
-			createJobApplicationId(mockUuidGenerator(seed)),
-		);
-	};
-
 	describe("filterApplicationsByDateRange", () => {
 		it("should return all applications when no date range is specified", () => {
 			const applications = [
@@ -146,25 +126,6 @@ describe("Analytics Use Cases - Date Filtering", () => {
 	});
 
 	describe("computeDefaultDateRange", () => {
-		const createMockApplicationWithStatus = (
-			applicationDate: string,
-			status: ApplicationStatus,
-			seed = 1000,
-		) => {
-			const app = createJobApplicationWithInitialStatus(
-				{
-					company: "Test Company",
-					positionTitle: "Software Engineer",
-					applicationDate,
-					interestRating: 3,
-					sourceType: "job_board" as const,
-					isRemote: false,
-				},
-				mockUuidGenerator(seed),
-			);
-			return updateJobApplicationStatus(app, status);
-		};
-
 		it("should return date range from oldest active application to today", () => {
 			const applications = [
 				createMockApplicationWithStatus(

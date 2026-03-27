@@ -2,36 +2,10 @@ import { describe, expect, it } from "bun:test";
 
 import { assertDefined } from "#helpers/assertDefined.ts";
 
-import {
-	type ApplicationStatus,
-	createJobApplicationWithInitialStatus,
-	updateJobApplicationStatus,
-} from "../entities/job-application.ts";
+import { createMockApplicationWithStatus } from "../../../tests/helpers/analytics-fixtures.ts";
 import { computeAnalytics } from "./analytics.ts";
 
 describe("Analytics Use Cases - Status Distribution", () => {
-	const mockUuidGenerator = (seed: number) => () =>
-		`123e4567-e89b-12d3-a456-42661417${String(seed).padStart(4, "0")}`;
-
-	const createMockApplicationWithStatus = (
-		applicationDate: string,
-		status: ApplicationStatus,
-		seed = 1000,
-	) => {
-		const app = createJobApplicationWithInitialStatus(
-			{
-				company: "Test Company",
-				positionTitle: "Software Engineer",
-				applicationDate,
-				interestRating: 3,
-				sourceType: "job_board" as const,
-				isRemote: false,
-			},
-			mockUuidGenerator(seed),
-		);
-		return updateJobApplicationStatus(app, status);
-	};
-
 	it("should group applications by status label", () => {
 		const applications = [
 			createMockApplicationWithStatus(

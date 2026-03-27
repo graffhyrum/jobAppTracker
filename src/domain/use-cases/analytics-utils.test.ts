@@ -1,33 +1,13 @@
 import { describe, expect, test } from "bun:test";
 
-import {
-	createJobApplication,
-	createJobApplicationId,
-	type JobApplication,
-} from "../entities/job-application.ts";
+import { createMockApplication } from "../../../tests/helpers/analytics-fixtures.ts";
 import {
 	filterByAppIds,
 	resolveEffectiveDateRange,
 } from "./analytics-utils.ts";
 
-const mockUuidGenerator = (seed: number) => () =>
-	`123e4567-e89b-12d3-a456-42661417${String(seed).padStart(4, "0")}`;
-
-function makeApp(seed: number, date: string): JobApplication {
-	return createJobApplication(
-		{
-			company: "Test Co",
-			positionTitle: "Engineer",
-			applicationDate: date,
-			sourceType: "company_website",
-			isRemote: false,
-		},
-		createJobApplicationId(mockUuidGenerator(seed)),
-	);
-}
-
 describe("filterByAppIds", () => {
-	const apps = [makeApp(1, "2026-01-01"), makeApp(2, "2026-01-02")];
+	const apps = [createMockApplication("2026-01-01", 1), createMockApplication("2026-01-02", 2)];
 	const [app1, app2] = apps;
 
 	test("filters items to only those matching application IDs", () => {
@@ -57,7 +37,7 @@ describe("filterByAppIds", () => {
 });
 
 describe("resolveEffectiveDateRange", () => {
-	const apps = [makeApp(1, "2026-01-15"), makeApp(2, "2026-02-20")];
+	const apps = [createMockApplication("2026-01-15", 1), createMockApplication("2026-02-20", 2)];
 
 	test("returns provided range when startDate is set", () => {
 		const range = { startDate: "2026-01-01" };
