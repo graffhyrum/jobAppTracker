@@ -7,7 +7,7 @@ import type {
 } from "../entities/contact.ts";
 import type { JobApplication } from "../entities/job-application.ts";
 import { getCurrentStatus } from "../entities/job-application.ts";
-import { computeMedian } from "./analytics-math.ts";
+import { computeAverage, computeMedian } from "./analytics-math.ts";
 
 /**
  * Contact analytics data structures
@@ -101,8 +101,6 @@ function computeAverageDaysToResponse(contacts: Contact[]): number {
 
 	for (const contact of contacts) {
 		if (contact.responseReceived) {
-			// For simplicity, we'll use the time from outreach to "now" as proxy
-			// In a real implementation, you might want to track actual response date
 			const outreachTime = new Date(contact.outreachDate).getTime();
 			const responseTime = new Date(contact.updatedAt).getTime();
 			const days = (responseTime - outreachTime) / (1000 * 60 * 60 * 24);
@@ -110,10 +108,7 @@ function computeAverageDaysToResponse(contacts: Contact[]): number {
 		}
 	}
 
-	if (responsesWithDays.length === 0) return 0;
-
-	const sum = responsesWithDays.reduce((acc, val) => acc + val, 0);
-	return sum / responsesWithDays.length;
+	return computeAverage(responsesWithDays);
 }
 
 function computeMedianDaysToResponse(contacts: Contact[]): number {

@@ -7,7 +7,10 @@ import {
 } from "./analytics-utils.ts";
 
 describe("filterByAppIds", () => {
-	const apps = [createMockApplication("2026-01-01", 1), createMockApplication("2026-01-02", 2)];
+	const apps = [
+		createMockApplication("2026-01-01", 1),
+		createMockApplication("2026-01-02", 2),
+	];
 	const [app1, app2] = apps;
 
 	test("filters items to only those matching application IDs", () => {
@@ -37,7 +40,10 @@ describe("filterByAppIds", () => {
 });
 
 describe("resolveEffectiveDateRange", () => {
-	const apps = [createMockApplication("2026-01-15", 1), createMockApplication("2026-02-20", 2)];
+	const apps = [
+		createMockApplication("2026-01-15", 1),
+		createMockApplication("2026-02-20", 2),
+	];
 
 	test("returns provided range when startDate is set", () => {
 		const range = { startDate: "2026-01-01" };
