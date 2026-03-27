@@ -71,7 +71,7 @@ export function startElysiaServer() {
 			set.headers["X-Content-Type-Options"] = "nosniff";
 			set.headers["X-Frame-Options"] = "DENY";
 			set.headers["Content-Security-Policy"] =
-				"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'";
+				"default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'";
 		})
 		// Add the HTML plugin for automatic HTML content-type handling
 		.use(html()) // https://github.com/elysiajs/elysia/issues/1363
