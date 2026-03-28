@@ -3,8 +3,13 @@ import type {
 	JobApplication,
 	SourceType,
 } from "../entities/job-application.ts";
+import type { DateRange } from "./analytics-date-range.ts";
 import { computeMedian, computeSuccessRate } from "./analytics-math.ts";
 import { getResolvedStatus } from "./analytics-utils.ts";
+
+// Re-export DateRange and computeDefaultDateRange for backwards compatibility
+export type { DateRange } from "./analytics-date-range.ts";
+export { computeDefaultDateRange } from "./analytics-utils.ts";
 
 /**
  * Analytics data structures
@@ -75,14 +80,6 @@ export type ApplicationsAnalytics = {
 };
 
 /**
- * Date range for filtering analytics
- */
-export type DateRange = {
-	startDate?: string; // ISO date string (YYYY-MM-DD)
-	endDate?: string; // ISO date string (YYYY-MM-DD)
-};
-
-/**
  * Filter applications by date range based on applicationDate
  */
 export function filterApplicationsByDateRange(
@@ -109,43 +106,6 @@ export function filterApplicationsByDateRange(
 
 		return true;
 	});
-}
-
-/**
- * Compute default date range from oldest active application to today
- * Returns empty DateRange if no active applications exist
- */
-export function computeDefaultDateRange(
-	applications: JobApplication[],
-): DateRange {
-	// Filter to only active applications
-	const activeApplications = applications.filter((app) => {
-		const status = getResolvedStatus(app);
-		return status !== null && status.category === "active";
-	});
-
-	// If no active applications, return empty range
-	if (activeApplications.length === 0) {
-		return {};
-	}
-
-	// Find the oldest application date among active applications
-	let oldestDate: string | null = null;
-
-	for (const app of activeApplications) {
-		const appDate = String(app.applicationDate).split("T")[0] ?? "";
-		if (!oldestDate || appDate < oldestDate) {
-			oldestDate = appDate;
-		}
-	}
-
-	// Get today's date in YYYY-MM-DD format
-	const today = new Date().toISOString().split("T")[0] ?? "";
-
-	return {
-		startDate: oldestDate ?? undefined,
-		endDate: today,
-	};
 }
 
 /**
