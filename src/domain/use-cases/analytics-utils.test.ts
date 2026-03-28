@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
-import type { JobApplication } from "../entities/job-application.ts";
 import { createMockApplication } from "../../../tests/helpers/analytics-fixtures.ts";
+import type { JobApplication } from "../entities/job-application.ts";
 import {
 	filterByAppIds,
 	getResolvedStatus,
@@ -84,10 +84,7 @@ describe("getResolvedStatus", () => {
 		const corrupted: JobApplication = {
 			...app,
 			statusLog: [
-				[
-					"2026-01-01T00:00:00.000Z",
-					{ category: "bogus", label: "bogus" },
-				],
+				["2026-01-01T00:00:00.000Z", { category: "bogus", label: "bogus" }],
 			] satisfies Array<
 				[string, { category: string; label: string }]
 			> as JobApplication["statusLog"],
