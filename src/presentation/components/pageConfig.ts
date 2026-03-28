@@ -9,6 +9,11 @@ export const PAGE_CONFIG = {
 			text: "Home",
 			testId: "nav-link-home",
 		},
+		dashboard: {
+			href: "/dashboard",
+			text: "Dashboard",
+			testId: "nav-link-dashboard",
+		},
 		analytics: {
 			href: "/analytics",
 			text: "Analytics",
