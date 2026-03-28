@@ -13,6 +13,7 @@ import {
 	createContactOperationsPlugin,
 	createContactsPlugin,
 } from "./plugins/contacts.plugin.ts";
+import { createDashboardPlugin } from "./plugins/dashboard.plugin.ts";
 import { createDevToolsPlugin } from "./plugins/dev-tools.plugin.ts";
 import { createExtensionApiPlugin } from "./plugins/extension-api.plugin.ts";
 import {
@@ -135,6 +136,7 @@ export function startElysiaServer() {
 		)
 		// Add custom route plugins with dependency injection
 		.use(createPagesPlugin(jobBoardRepository))
+		.use(createDashboardPlugin)
 		.use(createPipelinePlugin)
 		.use(createApplicationsPlugin(jobBoardRepository))
 		.use(createInterviewStagesPlugin)
